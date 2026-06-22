@@ -1,0 +1,65 @@
+from django.db.models import Sum
+from apps.inventory.models import InventoryMovement
+from apps.common.enums import MovementType
+
+
+def create_inventory_movement(*,product,movement_type,quantity,reference_type,reference_id,):
+    if product is None:
+        raise ValueError("Product cannot be None")
+
+    return InventoryMovement.objects.create(
+        product=product,
+        movement_type=movement_type,
+        quantity=quantity,
+        reference_type=reference_type,
+        reference_id=reference_id,
+    )
+
+
+def add_purchase_stock(*,product,quantity,purchase_item,):
+    if product is None:
+        raise ValueError("Product cannot be None")
+    
+    return create_inventory_movement(
+        product=product,
+        movement_type=MovementType.PURCHASE,
+        quantity=quantity,
+        reference_type="PURCHASE",
+        reference_id=purchase_item.id,
+    )
+
+
+def remove_sale_stock(*,product,quantity,sale_item,):
+    if product is None:
+        raise ValueError("Product cannot be None")
+    
+    return create_inventory_movement(
+        product=product,
+        movement_type=MovementType.SALE,
+        quantity=-quantity,
+        reference_type="SALE",
+        reference_id=sale_item.id,
+    )
+
+
+def get_stock(product):
+    if product is None:
+        raise ValueError("Product cannot be None")
+    result = (
+        InventoryMovement.objects
+        .filter(product=product)
+        .aggregate(total=Sum("quantity"))
+    )
+    return result["total"] or 0
+
+
+def validate_stock(product, quantity):
+    if quantity <= 0:
+        raise ValueError("Quantity must be greater than zero")
+    stock = get_stock(product)
+    if stock < quantity:
+        raise ValueError(
+            f"Not enough stock for {product.name}. "
+            f"Available={stock}, Requested={quantity}"
+        )
+    return True
