@@ -45,7 +45,14 @@ INSTALLED_APPS = [
     "apps.accounting",
     "apps.accounts",
     "apps.reports",
+    "rest_framework",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": [
+        "rest_framework.filters.SearchFilter",
+    ]
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
