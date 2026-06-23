@@ -4,6 +4,11 @@ from apps.common.enums import PaymentMethod
 
 class Sale(models.Model):
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["sale_date"]),
+        ]
+
     invoice_number = models.CharField(
         max_length=100,
         unique=True
@@ -39,6 +44,11 @@ class Sale(models.Model):
 
 class SaleItem(models.Model):
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["product"]),
+        ]
+
     sale = models.ForeignKey(
         Sale,
         on_delete=models.CASCADE,
@@ -67,4 +77,4 @@ class SaleItem(models.Model):
         return self.quantity * self.unit_price
     
     def __str__(self):
-        return self.invoice_number
+        return f"{self.sale.invoice_number} - {self.product.name}"

@@ -19,4 +19,14 @@ urlpatterns = [
         "api/products/",
         include("apps.products.urls"),
     ),
+
+    path(
+        "api/inventory/",
+        include("apps.inventory.urls"),
+    ),
+
+    path(
+        "api/",
+        include("apps.reports.urls"),
+    ),
 ]
