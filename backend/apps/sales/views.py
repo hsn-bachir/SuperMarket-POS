@@ -12,9 +12,7 @@ from .serializers import (
 )
 
 
-class SaleListCreateView(
-    generics.ListCreateAPIView
-):
+class SaleListCreateView(generics.ListCreateAPIView):
     queryset = Sale.objects.all().order_by(
         "-sale_date"
     )
@@ -44,8 +42,6 @@ class SaleListCreateView(
         )
 
 
-class SaleDetailView(
-    generics.RetrieveAPIView
-):
+class SaleDetailView(generics.RetrieveAPIView):
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer

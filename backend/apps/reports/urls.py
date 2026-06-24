@@ -5,7 +5,12 @@ from .views import (
     SlowMovingView,
     FastMovingView,
     TopProfitProductsView,
-    ReorderSuggestionsView
+    ReorderSuggestionsView,
+    InventoryValuationView,
+    InventorySummaryView,
+    COGSReportView,
+    ProfitLossReportView,
+    StockAgingView
 )
 
 urlpatterns = [
@@ -43,5 +48,35 @@ urlpatterns = [
         "reorder-suggestions/",
         ReorderSuggestionsView.as_view(),
         name="reorder-suggestions",
-),
+    ),
+
+    path(
+        "inventory-valuation/",
+        InventoryValuationView.as_view(),
+        name="inventory-valuation",
+    ),
+
+    path(
+        "inventory-summary/",
+        InventorySummaryView.as_view(),
+        name="inventory-summary",
+    ),
+
+    path(
+        "cogs/",
+        COGSReportView.as_view(),
+        name="cogs-report",
+    ),
+
+    path(
+        "profit-loss/",
+        ProfitLossReportView.as_view(),
+        name="profit-loss-report",
+    ),
+
+    path(
+        "stock-aging/",
+        StockAgingView.as_view(),
+        name="stock-aging",
+    ),
 ]

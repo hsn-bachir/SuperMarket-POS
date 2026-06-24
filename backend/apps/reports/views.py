@@ -11,12 +11,21 @@ from apps.sales.models import Sale
 from apps.sales.models import SaleItem
 from apps.purchases.models import Purchase
 
-from apps.reports.services import get_sales_aggregation,get_stock_map
+from apps.reports.services import (
+    get_sales_aggregation, get_stock_map, get_cogs_report,
+    get_inventory_valuation, get_inventory_summary,get_profit_loss_report,
+    get_stock_aging_report
+    )
 from apps.inventory.services import get_stock
 
 from .serializers import (
     SlowMovingSerializer,
-    TopProfitProductSerializer
+    TopProfitProductSerializer,
+    InventoryValuationSerializer,
+    InventorySummarySerializer,
+    COGSReportSerializer,
+    ProfitLossSerializer,
+    StockAgingSerializer
 )
 
 class DashboardView(APIView):
@@ -229,3 +238,111 @@ class ReorderSuggestionsView(APIView):
         results.sort(key=lambda x: x["current_stock"])
 
         return Response(results)
+
+
+class InventoryValuationView(APIView):
+    def get(self, request):
+
+        data = (
+            get_inventory_valuation()
+        )
+
+        serializer = (
+            InventoryValuationSerializer(
+                data,
+                many=True
+            )
+        )
+
+        return Response(
+            serializer.data
+        )
+    
+class InventorySummaryView(APIView):
+
+    def get(self, request):
+
+        data = get_inventory_summary()
+
+        serializer = (
+            InventorySummarySerializer(
+                data
+            )
+        )
+
+        return Response(
+            serializer.data
+        )
+    
+class COGSReportView(APIView):
+
+    def get(self, request):
+
+        start_date = request.GET.get(
+            "start_date"
+        )
+
+        end_date = request.GET.get(
+            "end_date"
+        )
+
+        data = get_cogs_report(
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        serializer = (
+            COGSReportSerializer(
+                data
+            )
+        )
+
+        return Response(
+            serializer.data
+        )
+    
+class ProfitLossReportView(APIView):
+
+    def get(self, request):
+
+        start_date = request.GET.get(
+            "start_date"
+        )
+
+        end_date = request.GET.get(
+            "end_date"
+        )
+
+        data = get_profit_loss_report(
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        serializer = (
+            ProfitLossSerializer(
+                data
+            )
+        )
+
+        return Response(
+            serializer.data
+        )
+    
+class StockAgingView(APIView):
+
+    def get(self, request):
+
+        data = (
+            get_stock_aging_report()
+        )
+
+        serializer = (
+            StockAgingSerializer(
+                data,
+                many=True
+            )
+        )
+
+        return Response(
+            serializer.data
+        )

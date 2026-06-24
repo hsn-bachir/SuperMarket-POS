@@ -1,8 +1,11 @@
 from django.db import transaction
 from apps.purchases.models import Purchase
 from apps.purchases.models import PurchaseItem
-from apps.inventory.services import add_purchase_stock
-
+from decimal import Decimal
+from apps.inventory.services import (
+    add_purchase_stock,
+    get_stock,
+)
 
 @transaction.atomic
 def create_purchase(*,supplier,invoice_number,currency,exchange_rate,purchase_date,items,):
@@ -31,6 +34,28 @@ def create_purchase(*,supplier,invoice_number,currency,exchange_rate,purchase_da
         quantity = item["quantity"]
         if quantity <= 0:
             raise ValueError("Quantity must be greater than zero")
+        
+        product = item["product"]
+        current_stock = get_stock(product)
+        current_inventory_value = (
+            Decimal(current_stock)
+            * product.cost_price
+        )
+        purchase_value = (
+            Decimal(quantity)
+            * cost_price
+        )
+
+        new_stock = current_stock + quantity
+        new_average_cost = (
+            current_inventory_value +
+            purchase_value
+        ) / Decimal(new_stock)
+
+        product.cost_price = new_average_cost
+        product.save(
+            update_fields=["cost_price"]
+        )
 
         purchase_item = PurchaseItem.objects.create(
             purchase=purchase,

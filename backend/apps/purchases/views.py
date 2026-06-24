@@ -12,9 +12,7 @@ from .serializers import (
 )
 
 
-class PurchaseListCreateView(
-    generics.ListCreateAPIView
-):
+class PurchaseListCreateView(generics.ListCreateAPIView):
     queryset = Purchase.objects.all().order_by(
         "-purchase_date"
     )
@@ -46,8 +44,6 @@ class PurchaseListCreateView(
         )
 
 
-class PurchaseDetailView(
-    generics.RetrieveAPIView
-):
+class PurchaseDetailView(generics.RetrieveAPIView):
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer
