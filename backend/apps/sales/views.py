@@ -11,8 +11,17 @@ from .serializers import (
     SaleCreateSerializer,
 )
 
+from rest_framework.permissions import (
+    IsAuthenticated,
+    DjangoModelPermissions,
+)
+
 
 class SaleListCreateView(generics.ListCreateAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
     queryset = Sale.objects.all().order_by(
         "-sale_date"
     )
@@ -43,5 +52,9 @@ class SaleListCreateView(generics.ListCreateAPIView):
 
 
 class SaleDetailView(generics.RetrieveAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer

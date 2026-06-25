@@ -8,7 +8,9 @@ from apps.inventory.services import (
 )
 
 @transaction.atomic
-def create_purchase(*,supplier,invoice_number,currency,exchange_rate,purchase_date,items,):
+def create_purchase(*,supplier,invoice_number,currency,exchange_rate,purchase_date,items,user):
+    if not user.has_perm("purchases.add_purchase"):
+        raise PermissionError("Not allowed")
     if supplier is None:
         raise ValueError("Supplier cannot be None")
 

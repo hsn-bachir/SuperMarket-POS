@@ -21,3 +21,8 @@ class InventoryMovementSerializer(serializers.ModelSerializer):
             "reference_id",
             "created_at",
         )
+
+class InventoryAdjustmentSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField()
+    reason = serializers.CharField()

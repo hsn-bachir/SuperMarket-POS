@@ -3,7 +3,10 @@ from apps.inventory.models import InventoryMovement
 from apps.common.enums import MovementType
 
 
-def create_inventory_movement(*,product,movement_type,quantity,reference_type,reference_id,):
+def create_inventory_movement(*,product,movement_type,quantity,reference_type,reference_id,user):
+    if not user.has_perm("inventory.add_inventorymovement"):
+        raise PermissionError("Not allowed")
+
     if product is None:
         raise ValueError("Product cannot be None")
 
@@ -63,3 +66,13 @@ def validate_stock(product, quantity):
             f"Available={stock}, Requested={quantity}"
         )
     return True
+
+def create_adjustment(product, quantity, reason):
+
+    return InventoryMovement.objects.create(
+        product=product,
+        movement_type=MovementType.ADJUSTMENT,
+        quantity=quantity,
+        reference_type="ADJUSTMENT",
+        reference_id=reason,
+    )

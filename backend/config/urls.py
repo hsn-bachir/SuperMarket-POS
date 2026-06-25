@@ -21,6 +21,11 @@ urlpatterns = [
     ),
 
     path(
+    "api/suppliers/",
+    include("apps.suppliers.urls"),
+),
+
+    path(
         "api/inventory/",
         include("apps.inventory.urls"),
     ),
@@ -28,5 +33,10 @@ urlpatterns = [
     path(
         "api/",
         include("apps.reports.urls"),
+    ),
+
+    path(
+        "api/accounts/",
+        include("apps.accounts.urls"),
     ),
 ]

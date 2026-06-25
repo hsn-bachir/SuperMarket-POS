@@ -11,8 +11,17 @@ from .serializers import (
     PurchaseCreateSerializer,
 )
 
+from rest_framework.permissions import (
+    IsAuthenticated,
+    DjangoModelPermissions,
+)
+
 
 class PurchaseListCreateView(generics.ListCreateAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
     queryset = Purchase.objects.all().order_by(
         "-purchase_date"
     )
@@ -45,5 +54,9 @@ class PurchaseListCreateView(generics.ListCreateAPIView):
 
 
 class PurchaseDetailView(generics.RetrieveAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer

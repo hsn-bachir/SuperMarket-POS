@@ -6,8 +6,16 @@ from rest_framework.response import Response
 from .models import Product
 from .serializers import ProductSerializer,LowStockProductSerializer
 from apps.inventory.services import get_stock
+from rest_framework.permissions import (
+    IsAuthenticated,
+    DjangoModelPermissions,
+)
 
 class ProductListView(generics.ListAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [SearchFilter]
@@ -17,10 +25,17 @@ class ProductListView(generics.ListAPIView):
     ]
 
 class ProductDetailView(generics.RetrieveAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 class LowStockProductsView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
     def get(self, request):
         products = Product.objects.filter(
             is_active=True
@@ -39,3 +54,31 @@ class LowStockProductsView(APIView):
         )
 
         return Response(serializer.data)
+    
+class ProductCreateView(generics.CreateAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+class ProductUpdateView(generics.UpdateAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
+class ProductDeleteView(generics.DestroyAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer

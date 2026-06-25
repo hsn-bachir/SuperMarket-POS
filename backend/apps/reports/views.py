@@ -28,7 +28,12 @@ from .serializers import (
     StockAgingSerializer
 )
 
+from apps.accounts.permissions import CanViewReports
+
 class DashboardView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -59,6 +64,9 @@ class DashboardView(APIView):
     
 
 class DeadStockView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -112,6 +120,9 @@ class DeadStockView(APIView):
     
 
 class SlowMovingView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -138,6 +149,9 @@ class SlowMovingView(APIView):
         )
     
 class FastMovingView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -167,6 +181,9 @@ class FastMovingView(APIView):
         )
     
 class TopProfitProductsView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -204,6 +221,9 @@ class TopProfitProductsView(APIView):
         return Response(serializer.data)
     
 class ReorderSuggestionsView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -241,6 +261,9 @@ class ReorderSuggestionsView(APIView):
 
 
 class InventoryValuationView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
     def get(self, request):
 
         data = (
@@ -259,6 +282,9 @@ class InventoryValuationView(APIView):
         )
     
 class InventorySummaryView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -275,6 +301,9 @@ class InventorySummaryView(APIView):
         )
     
 class COGSReportView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -302,6 +331,9 @@ class COGSReportView(APIView):
         )
     
 class ProfitLossReportView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
@@ -329,6 +361,9 @@ class ProfitLossReportView(APIView):
         )
     
 class StockAgingView(APIView):
+    permission_classes = [
+    CanViewReports,
+]
 
     def get(self, request):
 
