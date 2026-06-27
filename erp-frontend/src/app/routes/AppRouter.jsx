@@ -3,6 +3,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import { useAuth } from "@/features/auth/authContext";
 
 import Login from "@/features/auth/pages/Login";
+import Dashboard from "@/features/dashboard/pages/Dashboard";
 import MainLayout from "@/app/layouts/MainLayout";
 
 function RootRedirect() {
@@ -24,7 +25,14 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<div>Dashboard</div>} />
+          <Route
+            index
+            element={
+              <div>
+                <Dashboard />
+              </div>
+            }
+          />
         </Route>
 
         <Route path="*" element={<RootRedirect />} />

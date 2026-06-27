@@ -1,0 +1,36 @@
+:root {
+  /* Backgrounds */
+  --background: #f4f6f8;
+  --surface: #ffffff;
+  --surface-hover: #f8fafc;
+
+  /* Sidebar */
+  --sidebar-bg: #1f2937;
+  --sidebar-hover: #374151;
+  --sidebar-active: #334155;
+  --sidebar-text: #f9fafb;
+
+  /* Brand */
+  --primary: #1e3a5f;
+  --primary-hover: #274b78;
+
+  /* Status */
+  --success: #15803d;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #0f766e;
+
+  /* Typography */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+
+  /* UI */
+  --border: #e5e7eb;
+
+  /* Radius */
+  --radius: 10px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+}
