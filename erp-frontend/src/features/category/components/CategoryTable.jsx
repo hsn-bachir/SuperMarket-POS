@@ -1,0 +1,31 @@
+import { Pencil, Trash2 } from "lucide-react";
+
+import DataTable from "@/components/ui/DataTable";
+import Button from "@/components/ui/Button";
+
+export default function CategoryTable({ categories }) {
+  const columns = [
+    {
+      key: "name",
+      title: "Name",
+    },
+
+    {
+      key: "actions",
+      title: "Actions",
+      render: () => (
+        <div className="flex gap-2">
+          <Button variant="secondary" className="px-3">
+            <Pencil size={16} />
+          </Button>
+
+          <Button variant="danger" className="px-3">
+            <Trash2 size={16} />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return <DataTable columns={columns} data={categories} />;
+}

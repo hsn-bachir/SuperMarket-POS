@@ -9,20 +9,16 @@ export default function Topbar() {
   return (
     <header className="h-20 bg-white border-b border-[var(--border)] px-8 flex items-center justify-between">
       <div>
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <h1 className="text-2xl font-semibold">Welcome back</h1>
 
-        <p className="text-sm text-[var(--text-secondary)]">
-          Welcome back, {user?.username}
-        </p>
+        <p className="text-sm text-[var(--text-secondary)]">{user?.username}</p>
       </div>
 
       <div className="flex items-center gap-6">
         <Bell size={20} className="text-slate-500" />
 
         <div className="text-right">
-          <div className="font-medium">{user?.username}</div>
-
-          <div className="text-sm text-[var(--text-secondary)]">{role}</div>
+          <div className="font-medium text-[var(--text-secondary)]">{role}</div>
         </div>
       </div>
     </header>

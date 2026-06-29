@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Product
+from .models import Product,Category
 from apps.inventory.services import get_stock
 
 
@@ -42,3 +42,8 @@ class LowStockProductSerializer(serializers.ModelSerializer):
 
     def get_current_stock(self, obj):
         return get_stock(obj)
+    
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = "__all__"

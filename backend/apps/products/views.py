@@ -3,8 +3,8 @@ from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Product
-from .serializers import ProductSerializer,LowStockProductSerializer
+from .models import Product,Category
+from .serializers import ProductSerializer,LowStockProductSerializer,CategorySerializer
 from apps.inventory.services import get_stock
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -82,3 +82,48 @@ class ProductDeleteView(generics.DestroyAPIView):
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+class CategoryListView(generics.ListAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+   
+class CategoryCreateView(generics.ListCreateAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class CategoryUpdateView(generics.UpdateAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class CategoryDeleteView(generics.DestroyAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class CategoryDetailView(generics.RetrieveAPIView):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer

@@ -17,7 +17,25 @@ export default function Button({
   return (
     <button
       className={clsx(
-        "h-10 px-4 rounded-lg text-sm font-medium transition-all duration-150 shadow-sm",
+        `
+  inline-flex
+  items-center
+  justify-center
+  gap-2
+
+  h-10
+  px-4
+
+  rounded-lg
+
+  text-sm
+  font-medium
+
+  transition-all
+  duration-150
+
+  shadow-sm
+  `,
         variants[variant],
         className,
       )}

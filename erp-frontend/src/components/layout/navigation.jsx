@@ -7,6 +7,7 @@ import {
   BarChart3,
   UserCog,
   Settings,
+  Grid,
 } from "lucide-react";
 
 export const navigation = [
@@ -28,6 +29,13 @@ export const navigation = [
     title: "Products",
     path: "/products",
     icon: Package,
+    roles: ["Admin", "Manager"],
+  },
+
+  {
+    title: "Categories",
+    path: "/category",
+    icon: Grid,
     roles: ["Admin", "Manager"],
   },
 

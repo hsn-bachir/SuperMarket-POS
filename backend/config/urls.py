@@ -21,9 +21,9 @@ urlpatterns = [
     ),
 
     path(
-    "api/suppliers/",
-    include("apps.suppliers.urls"),
-),
+        "api/suppliers/",
+        include("apps.suppliers.urls"),
+    ),
 
     path(
         "api/inventory/",

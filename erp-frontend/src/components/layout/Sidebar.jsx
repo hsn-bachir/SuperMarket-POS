@@ -12,7 +12,6 @@ export default function Sidebar() {
       </aside>
     );
   }
-  console.log(user);
   const role = user?.groups?.[0] ?? "Cashier";
 
   const filteredNav = navigation.filter((item) => item.roles.includes(role));
