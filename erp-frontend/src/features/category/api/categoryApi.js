@@ -4,7 +4,7 @@ export const getCategories = (params = {}) =>
   api.get("/products/category/", { params });
 
 export const getCategory = (id) =>
-  api.get(`/products/${id}/`);
+  api.get(`/products/${id}/category/`);
 
 export const createCategory = (data) =>
   api.post("/products/create/category/", data);

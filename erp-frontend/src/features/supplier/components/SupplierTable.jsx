@@ -2,50 +2,28 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import DataTable from "@/components/ui/DataTable";
 import Button from "@/components/ui/Button";
-import ProductStatusBadge from "./ProductStatusBadge";
 
-export default function ProductTable({ products, onEdit, onDelete }) {
+export default function SupplierTable({ suppliers, onEdit, onDelete }) {
   const columns = [
     {
-      key: "barcode",
-      title: "Barcode",
-    },
-
-    {
       key: "name",
-      title: "Product",
+      title: "Company",
     },
 
     {
-      key: "category",
-      title: "Category",
-      render: (row) => row.category?.name ?? "-",
+      key: "phone",
+      title: "Phone",
     },
 
     {
-      key: "cost_price",
-      title: "Cost",
-    },
-
-    {
-      key: "selling_price",
-      title: "Price",
-    },
-
-    {
-      key: "stock",
-      title: "Stock",
-    },
-
-    {
-      key: "status",
-      title: "Status",
-      render: (row) => <ProductStatusBadge active={row.is_active} />,
+      key: "address",
+      title: "Address",
     },
 
     {
       key: "actions",
       title: "Actions",
+
       render: (row) => (
         <div className="flex gap-2">
           <Button
@@ -68,5 +46,5 @@ export default function ProductTable({ products, onEdit, onDelete }) {
     },
   ];
 
-  return <DataTable columns={columns} data={products} />;
+  return <DataTable columns={columns} data={suppliers} />;
 }

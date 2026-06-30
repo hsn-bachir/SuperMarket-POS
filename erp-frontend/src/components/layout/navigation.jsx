@@ -8,6 +8,7 @@ import {
   UserCog,
   Settings,
   Grid,
+  Factory,
 } from "lucide-react";
 
 export const navigation = [
@@ -36,6 +37,13 @@ export const navigation = [
     title: "Categories",
     path: "/category",
     icon: Grid,
+    roles: ["Admin", "Manager"],
+  },
+
+  {
+    title: "Suppliers",
+    path: "/suppliers",
+    icon: Factory,
     roles: ["Admin", "Manager"],
   },
 

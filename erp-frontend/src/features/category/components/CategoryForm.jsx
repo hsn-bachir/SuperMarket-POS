@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Button from "@/components/ui/Button";
+import FormInput from "@/components/forms/FormInput";
+import FormSection from "@/components/forms/FormSection";
+import FormActions from "@/components/forms/FormActions";
 
 export default function CategoryForm({
   initialValues = {},
@@ -29,51 +31,22 @@ export default function CategoryForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <h2 className="mb-6 text-lg font-semibold">General Information</h2>
+      <FormSection title="General Information">
         <div className="grid gap-5 md:grid-cols-2">
-          <Input
+          <FormInput
             label="Category Name"
             name="name"
             value={form.name}
             onChange={handleChange}
           />
         </div>
-      </div>
+      </FormSection>
 
-      <div className="flex justify-end gap-3">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => navigate("/category")}
-        >
-          Cancel
-        </Button>
-
-        <Button type="submit">{loading ? "Saving..." : "Save Category"}</Button>
-      </div>
-    </form>
-  );
-}
-
-function Input({ label, ...props }) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-medium">{label}</label>
-
-      <input
-        className="
-          h-10
-          w-full
-          rounded-lg
-          border
-          border-[var(--border)]
-          px-3
-          outline-none
-          focus:border-[var(--primary)]
-        "
-        {...props}
+      <FormActions
+        cancelTo="/categories"
+        loading={loading}
+        submitText="Save Category"
       />
-    </div>
+    </form>
   );
 }

@@ -7,7 +7,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
 import CategoryForm from "../components/CategoryForm";
 
-export default function Editategory() {
+export default function EditCategory() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [category, setCategory] = useState(null);

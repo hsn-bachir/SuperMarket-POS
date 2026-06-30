@@ -78,7 +78,6 @@ class PurchaseSerializer(serializers.ModelSerializer):
     items = PurchaseItemSerializer(
         many=True,
         read_only=True,
-        source="purchaseitem_set"
     )
 
     class Meta:

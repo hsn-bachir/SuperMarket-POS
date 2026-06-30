@@ -1,20 +1,41 @@
 from django.urls import path
 
 from .views import (
-    PurchaseListCreateView,
+    PurchaseListView,
+    PurchaseCreateView,
     PurchaseDetailView,
+    PurchaseUpdateView,
+    PurchaseDeleteView,
 )
 
 urlpatterns = [
     path(
         "",
-        PurchaseListCreateView.as_view(),
-        name="purchase-list-create",
+        PurchaseListView.as_view(),
+        name="purchase-list",
+    ),
+
+    path(
+        "create/",
+        PurchaseCreateView.as_view(),
+        name="purchase-create",
     ),
 
     path(
         "<int:pk>/",
         PurchaseDetailView.as_view(),
         name="purchase-detail",
+    ),
+
+    path(
+        "<int:pk>/update/",
+        PurchaseUpdateView.as_view(),
+        name="purchase-update",
+    ),
+
+    path(
+        "<int:pk>/delete/",
+        PurchaseDeleteView.as_view(),
+        name="purchase-delete",
     ),
 ]

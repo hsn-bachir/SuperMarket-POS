@@ -14,6 +14,14 @@ import Category from "@/features/category/pages/Category";
 import CreateCategory from "@/features/category/pages/CreateCategory";
 import EditCategory from "@/features/category/pages/EditCategory";
 
+import Suppliers from "@/features/supplier/pages/Suppliers";
+import CreateSupplier from "@/features/supplier/pages/CreateSupplier";
+import EditSupplier from "@/features/supplier/pages/EditSupplier";
+
+import Purchases from "@/features/purchases/pages/Purchases";
+import CreatePurchases from "@/features/purchases/pages/CreatePurchase";
+import PurcahseDetails from "@/features/purchases/pages/PurchaseDetails";
+
 function RootRedirect() {
   const { user } = useAuth();
   return <Navigate to={user ? "/" : "/login"} replace />;
@@ -42,6 +50,12 @@ export default function AppRouter() {
           <Route path="category" element={<Category />} />
           <Route path="category/new" element={<CreateCategory />} />
           <Route path="category/:id/edit" element={<EditCategory />} />
+          <Route path="suppliers" element={<Suppliers />} />
+          <Route path="suppliers/new" element={<CreateSupplier />} />
+          <Route path="suppliers/:id/edit" element={<EditSupplier />} />
+          <Route path="purchases" element={<Purchases />} />
+          <Route path="purchases/new" element={<CreatePurchases />} />
+          <Route path="purchases/:id/edit" element={<PurcahseDetails />} />
         </Route>
 
         {/* fallback */}
