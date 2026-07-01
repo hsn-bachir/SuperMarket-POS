@@ -22,6 +22,8 @@ import Purchases from "@/features/purchases/pages/Purchases";
 import CreatePurchases from "@/features/purchases/pages/CreatePurchase";
 import PurcahseDetails from "@/features/purchases/pages/PurchaseDetails";
 
+import POS from "@/features/sales/pages/POS";
+
 function RootRedirect() {
   const { user } = useAuth();
   return <Navigate to={user ? "/" : "/login"} replace />;
@@ -56,6 +58,7 @@ export default function AppRouter() {
           <Route path="purchases" element={<Purchases />} />
           <Route path="purchases/new" element={<CreatePurchases />} />
           <Route path="purchases/:id/edit" element={<PurcahseDetails />} />
+          <Route path="sales" element={<POS />} />
         </Route>
 
         {/* fallback */}

@@ -7,7 +7,7 @@ export const getPurchase = (id) =>
   api.get(`/purchases/${id}/`);
 
 export const createPurchase = (data) =>
-  api.post("/purchases/", data);
+  api.post("/purchases/create/", data);
 
 export const updatePurchase = (id, data) =>
   api.put(`/purchases/${id}/`, data);

@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (
     SaleListCreateView,
-    SaleDetailView,
+    SaleDetailUpdateDestroyView,
 )
 
 urlpatterns = [
@@ -14,7 +14,7 @@ urlpatterns = [
 
     path(
         "<int:pk>/",
-        SaleDetailView.as_view(),
+        SaleDetailUpdateDestroyView.as_view(),
         name="sale-detail"
     ),
 ]

@@ -23,31 +23,27 @@ class SaleItemInputSerializer(serializers.Serializer):
     )
 
 
-class SaleCreateSerializer(
-    serializers.Serializer
-):
+class SaleCreateSerializer(serializers.Serializer):
     invoice_number = serializers.CharField(
         max_length=100
     )
-
     currency = serializers.CharField()
-
     exchange_rate = serializers.DecimalField(
         max_digits=12,
         decimal_places=2,
         default=1
     )
-
     payment_method = serializers.CharField()
-
     sale_date = serializers.DateField()
-
     items = SaleItemInputSerializer(
         many=True
     )
 
     def create(self, validated_data):
-        return create_sale(**validated_data)
+        return create_sale(
+            **validated_data,
+            user=self.context["request"].user,
+        )
 
 
 class SaleItemSerializer(
@@ -72,16 +68,19 @@ class SaleItemSerializer(
         )
 
 
-class SaleSerializer(
-    serializers.ModelSerializer
-):
+class SaleSerializer(serializers.ModelSerializer):
     items = SaleItemSerializer(
-        source="saleitem_set",
         many=True,
         read_only=True
     )
-
     class Meta:
         model = Sale
-
         fields = "__all__"
+
+class SaleUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sale
+        fields = (
+            "payment_method",
+            "sale_date",
+        )

@@ -20,8 +20,8 @@ export const navigation = [
   },
 
   {
-    title: "POS",
-    path: "/pos",
+    title: "Sales",
+    path: "/sales",
     icon: ShoppingCart,
     roles: ["Admin", "Manager", "Cashier"],
   },

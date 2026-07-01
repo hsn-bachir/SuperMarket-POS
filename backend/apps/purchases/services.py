@@ -69,5 +69,6 @@ def create_purchase(*,supplier,invoice_number,currency,exchange_rate,purchase_da
             product=item["product"],
             quantity=quantity,
             purchase_item=purchase_item,
+            user=user,
         )
     return purchase

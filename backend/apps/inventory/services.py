@@ -19,29 +19,31 @@ def create_inventory_movement(*,product,movement_type,quantity,reference_type,re
     )
 
 
-def add_purchase_stock(*,product,quantity,purchase_item,):
+def add_purchase_stock(*, product, quantity, purchase_item, user):
     if product is None:
         raise ValueError("Product cannot be None")
-    
+
     return create_inventory_movement(
         product=product,
         movement_type=MovementType.PURCHASE,
         quantity=quantity,
         reference_type="PURCHASE",
         reference_id=purchase_item.id,
+        user=user,
     )
 
 
-def remove_sale_stock(*,product,quantity,sale_item,):
+def remove_sale_stock(*, product, quantity, sale_item, user):
     if product is None:
         raise ValueError("Product cannot be None")
-    
+
     return create_inventory_movement(
         product=product,
         movement_type=MovementType.SALE,
         quantity=-quantity,
         reference_type="SALE",
         reference_id=sale_item.id,
+        user=user,
     )
 
 
@@ -67,12 +69,12 @@ def validate_stock(product, quantity):
         )
     return True
 
-def create_adjustment(product, quantity, reason):
-
+def create_adjustment(product, quantity, reason, user):
     return InventoryMovement.objects.create(
         product=product,
         movement_type=MovementType.ADJUSTMENT,
         quantity=quantity,
         reference_type="ADJUSTMENT",
         reference_id=reason,
+        user=user,
     )

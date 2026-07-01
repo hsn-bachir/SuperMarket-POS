@@ -6,6 +6,8 @@ from apps.inventory.services import (
     validate_stock,
     remove_sale_stock,
 )
+from apps.inventory.services import create_inventory_movement
+from apps.common.enums import MovementType
 
 
 @transaction.atomic
@@ -52,5 +54,25 @@ def create_sale(*,invoice_number,currency,exchange_rate,payment_method,sale_date
             product=item["product"],
             quantity=quantity,
             sale_item=sale_item,
+            user=user,
         )
     return sale
+
+@transaction.atomic
+def delete_sale(*, sale, user):
+
+    if not user.has_perm("sales.delete_sale"):
+        raise PermissionError()
+
+    for item in sale.items.all():
+
+        create_inventory_movement(
+            product=item.product,
+            movement_type=MovementType.ADJUSTMENT,
+            quantity=item.quantity,
+            reference_type="SALE_DELETE",
+            reference_id=sale.id,
+            user=user,
+        )
+
+    sale.delete()

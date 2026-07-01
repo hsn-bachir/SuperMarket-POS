@@ -45,8 +45,10 @@ class PurchaseCreateSerializer(serializers.Serializer):
     )
 
     def create(self, validated_data):
-        return create_purchase(**validated_data)
-    
+        return create_purchase(
+            user=self.context["request"].user,
+            **validated_data
+        )
 
 from .models import Purchase, PurchaseItem
 
