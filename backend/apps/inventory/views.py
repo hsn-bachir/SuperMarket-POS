@@ -47,6 +47,33 @@ class InventoryAdjustmentView(APIView):
         DjangoModelPermissions,
     ]
 
+    queryset = InventoryMovement.objects.all()
+
+    def post(self, request):
+        serializer = InventoryAdjustmentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        product = Product.objects.get(
+            id=serializer.validated_data["product_id"]
+        )
+
+        movement = create_adjustment(
+            product=product,
+            quantity=serializer.validated_data["quantity"],
+            reason=serializer.validated_data["reason"],
+            user=request.user,
+        )
+
+        return Response({
+            "message": "Inventory adjusted",
+            "movement_id": movement.id,
+        })
+
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+
     def post(self, request):
 
         serializer = InventoryAdjustmentSerializer(data=request.data)
@@ -60,6 +87,7 @@ class InventoryAdjustmentView(APIView):
             product=product,
             quantity=serializer.validated_data["quantity"],
             reason=serializer.validated_data["reason"],
+            user=request.user,
         )
 
         return Response({

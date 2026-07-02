@@ -1,73 +1,62 @@
-import DataTable from "@/components/ui/DataTable";
-import { Trash2 } from "lucide-react";
-import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
 
-export default function CartTable({
-  cart,
+import CartItem from "./CartItem";
 
-  setCart,
-}) {
-  function updateQuantity(index, value) {
-    const items = [...cart];
+export default function CartTable({ cart, setCart }) {
+  function increase(id) {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
 
-    items[index].quantity = Number(value);
+        if (item.quantity >= item.stock) return item;
 
-    setCart(items);
+        return {
+          ...item,
+          quantity: item.quantity + 1,
+        };
+      }),
+    );
   }
 
-  const columns = [
-    {
-      title: "Product",
+  function decrease(id) {
+    setCart((prev) =>
+      prev
+        .map((item) => {
+          if (item.id !== id) return item;
 
-      render: (row) => row.product_name,
-    },
+          return {
+            ...item,
+            quantity: item.quantity - 1,
+          };
+        })
+        .filter((item) => item.quantity > 0),
+    );
+  }
 
-    {
-      title: "Price",
+  function remove(id) {
+    setCart((prev) => prev.filter((item) => item.id !== id));
+  }
 
-      render: (row) => `$${row.unit_price}`,
-    },
+  if (cart.length === 0) {
+    return (
+      <EmptyState
+        title="Cart is Empty"
+        description="Scan a barcode or search for a product."
+      />
+    );
+  }
 
-    {
-      title: "Qty",
-
-      render: (row) => {
-        const index = cart.indexOf(row);
-
-        return (
-          <input
-            type="number"
-            min={1}
-            value={row.quantity}
-            onChange={(e) => updateQuantity(index, e.target.value)}
-            className="w-20 border rounded px-2 h-9"
-          />
-        );
-      },
-    },
-
-    {
-      title: "Subtotal",
-
-      render: (row) => `$${(row.quantity * row.unit_price).toFixed(2)}`,
-    },
-
-    {
-      title: "",
-
-      render: (row) => (
-        <Button
-          variant="danger"
-          className="px-3"
-          onClick={() =>
-            setCart(cart.filter((item) => item.product !== row.product))
-          }
-        >
-          <Trash2 size={16} />
-        </Button>
-      ),
-    },
-  ];
-
-  return <DataTable columns={columns} data={cart} />;
+  return (
+    <div className="space-y-4">
+      {cart.map((item) => (
+        <CartItem
+          key={item.id}
+          item={item}
+          increase={increase}
+          decrease={decrease}
+          remove={remove}
+        />
+      ))}
+    </div>
+  );
 }

@@ -23,6 +23,11 @@ import CreatePurchases from "@/features/purchases/pages/CreatePurchase";
 import PurcahseDetails from "@/features/purchases/pages/PurchaseDetails";
 
 import POS from "@/features/sales/pages/POS";
+import Sales from "@/features/sales/pages/Sales";
+import SaleDetails from "@/features/sales/pages/SaleDetails";
+import EditSale from "@/features/sales/pages/EditSale";
+
+import Inventory from "@/features/inventory/pages/Inventory";
 
 function RootRedirect() {
   const { user } = useAuth();
@@ -58,7 +63,11 @@ export default function AppRouter() {
           <Route path="purchases" element={<Purchases />} />
           <Route path="purchases/new" element={<CreatePurchases />} />
           <Route path="purchases/:id/edit" element={<PurcahseDetails />} />
-          <Route path="sales" element={<POS />} />
+          <Route path="sales" element={<Sales />} />
+          <Route path="sales/:id" element={<SaleDetails />} />
+          <Route path="sales/:id/edit" element={<EditSale />} />
+          <Route path="pos" element={<POS />} />
+          <Route path="inventory" element={<Inventory />} />
         </Route>
 
         {/* fallback */}

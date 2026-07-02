@@ -9,6 +9,7 @@ import {
   Settings,
   Grid,
   Factory,
+  ListCheck,
 } from "lucide-react";
 
 export const navigation = [
@@ -16,13 +17,6 @@ export const navigation = [
     title: "Dashboard",
     path: "/",
     icon: LayoutDashboard,
-    roles: ["Admin", "Manager", "Cashier"],
-  },
-
-  {
-    title: "Sales",
-    path: "/sales",
-    icon: ShoppingCart,
     roles: ["Admin", "Manager", "Cashier"],
   },
 
@@ -48,16 +42,30 @@ export const navigation = [
   },
 
   {
-    title: "Inventory",
-    path: "/inventory",
-    icon: Boxes,
+    title: "Purchases",
+    path: "/purchases",
+    icon: Truck,
     roles: ["Admin", "Manager"],
   },
 
   {
-    title: "Purchases",
-    path: "/purchases",
-    icon: Truck,
+    title: "POS",
+    path: "/pos",
+    icon: ShoppingCart,
+    roles: ["Admin", "Manager", "Cashier"],
+  },
+
+  {
+    title: "Sales",
+    path: "/sales",
+    icon: ListCheck,
+    roles: ["Admin", "Manager", "Cashier"],
+  },
+
+  {
+    title: "Inventory",
+    path: "/inventory",
+    icon: Boxes,
     roles: ["Admin", "Manager"],
   },
 

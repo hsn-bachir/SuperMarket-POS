@@ -12,26 +12,38 @@ export default function POS() {
   const [cart, setCart] = useState([]);
 
   return (
-    <>
-      <PageHeader title="Point of Sale" subtitle="Create a new sale." />
+    <div className="h-full flex flex-col">
+      <PageHeader
+        title="Point of Sale"
+        subtitle="Scan products and complete checkout."
+      />
 
-      <div className="grid xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          <SectionCard title="Products">
+      <div className="flex-1 grid grid-cols-12 gap-6">
+        {/* LEFT SIDE (TOOLS) */}
+        <div className="col-span-12 xl:col-span-4 space-y-4">
+          <SectionCard title="Scan / Search">
             <ProductSearch cart={cart} setCart={setCart} />
           </SectionCard>
 
-          <SectionCard title="Current Cart">
+          <SectionCard title="Cart Summary">
+            <CartTotals cart={cart} />
+          </SectionCard>
+        </div>
+
+        {/* CENTER (MAIN WORKSPACE) */}
+        <div className="col-span-12 xl:col-span-5">
+          <SectionCard title="Current Cart" className="min-h-[600px]">
             <CartTable cart={cart} setCart={setCart} />
           </SectionCard>
         </div>
 
-        <div className="space-y-6">
-          <CartTotals cart={cart} />
-
-          <PaymentSection cart={cart} />
+        {/* RIGHT SIDE (PAYMENT) */}
+        <div className="col-span-12 xl:col-span-3 space-y-4">
+          <SectionCard title="Payment">
+            <PaymentSection cart={cart} />
+          </SectionCard>
         </div>
       </div>
-    </>
+    </div>
   );
 }

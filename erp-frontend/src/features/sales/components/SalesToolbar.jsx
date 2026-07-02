@@ -12,7 +12,7 @@ export default function SalesToolbar({ search, setSearch }) {
   return (
     <Toolbar
       actions={
-        <Button onClick={() => navigate("/sales/new")}>
+        <Button onClick={() => navigate("/pos")}>
           <Plus size={18} />
           New Sale
         </Button>

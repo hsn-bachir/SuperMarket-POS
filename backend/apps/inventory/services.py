@@ -1,3 +1,5 @@
+from itertools import product
+
 from django.db.models import Sum
 from apps.inventory.models import InventoryMovement
 from apps.common.enums import MovementType
@@ -69,12 +71,30 @@ def validate_stock(product, quantity):
         )
     return True
 
+from .services import get_stock
+
 def create_adjustment(product, quantity, reason, user):
+    if not user.has_perm("inventory.add_inventorymovement"):
+        raise PermissionError("Not allowed")
+
+    if product is None:
+        raise ValueError("Product cannot be None")
+
+    if quantity == 0:
+        raise ValueError("Adjustment cannot be zero")
+
+    current_stock = get_stock(product)
+
+    if current_stock + quantity < 0:
+        raise ValueError(
+            f"Cannot adjust stock below zero. "
+            f"Current stock: {current_stock}"
+        )
+
     return InventoryMovement.objects.create(
         product=product,
         movement_type=MovementType.ADJUSTMENT,
         quantity=quantity,
         reference_type="ADJUSTMENT",
-        reference_id=reason,
-        user=user,
+        reason=reason,
     )

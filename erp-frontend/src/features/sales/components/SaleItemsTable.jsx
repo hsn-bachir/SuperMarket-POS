@@ -1,71 +1,47 @@
 import Button from "@/components/ui/Button";
-
-import { Trash2 } from "lucide-react";
+import SaleItemRow from "./SaleItemRow";
 
 export default function SaleItemsTable({
   items,
-
-  setItems,
+  products,
+  onChange,
+  onAdd,
+  onRemove,
 }) {
-  function updateQuantity(index, value) {
-    const copy = [...items];
-
-    copy[index].quantity = Number(value);
-
-    setItems(copy);
-  }
-
-  function remove(index) {
-    setItems(items.filter((_, i) => i !== index));
-  }
-
   return (
-    <table className="w-full">
-      <thead>
-        <tr className="border-b">
-          <th className="py-3 text-left">Product</th>
+    <div className="rounded-xl border bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b p-4">
+        <h2 className="font-semibold">Sale Items</h2>
 
-          <th>Qty</th>
+        <Button type="button" onClick={onAdd}>
+          Add Item
+        </Button>
+      </div>
 
-          <th>Price</th>
-
-          <th>Total</th>
-
-          <th />
-        </tr>
-      </thead>
-
-      <tbody>
-        {items.map((item, index) => (
-          <tr key={index} className="border-b">
-            <td className="py-4">{item.product_name}</td>
-
-            <td>
-              <input
-                type="number"
-                min="1"
-                className="w-20 rounded border px-2 py-1"
-                value={item.quantity}
-                onChange={(e) => updateQuantity(index, e.target.value)}
-              />
-            </td>
-
-            <td>{item.unit_price}</td>
-
-            <td>{(item.quantity * item.unit_price).toFixed(2)}</td>
-
-            <td>
-              <Button
-                variant="danger"
-                className="px-3"
-                onClick={() => remove(index)}
-              >
-                <Trash2 size={16} />
-              </Button>
-            </td>
+      <table className="w-full">
+        <thead className="bg-gray-50 text-left">
+          <tr>
+            <th className="p-3">Product</th>
+            <th className="p-3">Qty</th>
+            <th className="p-3">Price</th>
+            <th className="p-3 text-right">Subtotal</th>
+            <th className="p-3"></th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+
+        <tbody>
+          {items.map((item, index) => (
+            <SaleItemRow
+              key={index}
+              index={index}
+              item={item}
+              products={products}
+              onChange={onChange}
+              onRemove={onRemove}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
