@@ -34,12 +34,7 @@ export default function InventoryTable({ movements }) {
 
     {
       key: "reference_type",
-      title: "Reference",
-    },
-
-    {
-      key: "reference_id",
-      title: "Reference ID",
+      title: "Reason",
     },
 
     {

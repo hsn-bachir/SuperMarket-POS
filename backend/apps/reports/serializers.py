@@ -2,13 +2,16 @@ from rest_framework import serializers
 
 
 class DeadStockSerializer(serializers.Serializer):
+
     id = serializers.IntegerField()
 
     name = serializers.CharField()
 
+    minimum_stock = serializers.IntegerField()
+
     current_stock = serializers.DecimalField(
         max_digits=12,
-        decimal_places=2
+        decimal_places=2,
     )
 
     last_sale_date = serializers.DateField(
@@ -43,20 +46,21 @@ class TopProfitProductSerializer(serializers.Serializer):
 
 
 class InventoryValuationSerializer(serializers.Serializer):
+
     product_id = serializers.IntegerField()
-
+    barcode = serializers.CharField()
+    category = serializers.CharField()
     product_name = serializers.CharField()
-
     stock = serializers.IntegerField()
 
     cost_price = serializers.DecimalField(
         max_digits=12,
-        decimal_places=2
+        decimal_places=2,
     )
 
     inventory_value = serializers.DecimalField(
         max_digits=14,
-        decimal_places=2
+        decimal_places=2,
     )
 
 class InventorySummarySerializer(serializers.Serializer):
@@ -127,21 +131,39 @@ class ProfitLossSerializer(serializers.Serializer):
     )
 
 class StockAgingSerializer(serializers.Serializer):
+
     product_id = serializers.IntegerField()
 
     product_name = serializers.CharField()
+
+    minimum_stock = serializers.IntegerField()
 
     stock = serializers.IntegerField()
 
     inventory_value = serializers.DecimalField(
         max_digits=14,
-        decimal_places=2
+        decimal_places=2,
     )
 
     last_sale_date = serializers.DateField(
-        allow_null=True
+        allow_null=True,
     )
 
     days_since_last_sale = serializers.IntegerField(
-        allow_null=True
-    )   
+        allow_null=True,
+    )
+
+
+class ReorderSuggestionSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+
+    product_name = serializers.CharField()
+
+    current_stock = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    minimum_stock = serializers.IntegerField()
+
+    recommended_order = serializers.IntegerField()

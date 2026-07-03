@@ -1,21 +1,70 @@
-from django.db.models import F, Sum, Value, DecimalField, ExpressionWrapper, Max
-from django.db.models.functions import Coalesce
-from apps.sales.models import SaleItem
-from apps.inventory.services import get_stock
-from django.db.models import Sum, Value
-from django.db.models.functions import Coalesce
-from apps.sales.models import SaleItem
-from apps.sales.models import Sale
-from decimal import Decimal
-from apps.products.models import Product
 from datetime import date
+from decimal import Decimal
 
-def get_sales_aggregation(*, since_date=None):
+from django.db.models import (
+    F,
+    Sum,
+    Max,
+    Value,
+    DecimalField,
+    ExpressionWrapper,
+)
+from django.db.models.functions import Coalesce
+
+from apps.products.models import Product
+from apps.sales.models import Sale, SaleItem
+from apps.inventory.services import get_stock
+
+
+# ----------------------------------------------------
+# Helpers
+# ----------------------------------------------------
+
+def apply_sale_filters(queryset, start_date=None, end_date=None):
+    if start_date:
+        queryset = queryset.filter(
+            sale__sale_date__gte=start_date
+        )
+
+    if end_date:
+        queryset = queryset.filter(
+            sale__sale_date__lte=end_date
+        )
+
+    return queryset
+
+
+def apply_sales_filters(queryset, start_date=None, end_date=None):
+    if start_date:
+        queryset = queryset.filter(
+            sale_date__gte=start_date
+        )
+
+    if end_date:
+        queryset = queryset.filter(
+            sale_date__lte=end_date
+        )
+
+    return queryset
+
+
+# ----------------------------------------------------
+# Sales Aggregation
+# ----------------------------------------------------
+
+def get_sales_aggregation(
+    *,
+    start_date=None,
+    end_date=None,
+):
 
     qs = SaleItem.objects.all()
 
-    if since_date:
-        qs = qs.filter(sale__sale_date__gte=since_date)
+    qs = apply_sale_filters(
+        qs,
+        start_date,
+        end_date,
+    )
 
     return (
         qs.values(
@@ -24,26 +73,37 @@ def get_sales_aggregation(*, since_date=None):
             "product__minimum_stock",
         )
         .annotate(
-            quantity_sold=Coalesce(Sum("quantity"), Value(0))
+            quantity_sold=Coalesce(
+                Sum("quantity"),
+                Value(0),
+            )
         )
     )
 
+
+# ----------------------------------------------------
+# Stock
+# ----------------------------------------------------
+
 def get_stock_map():
-    from apps.products.models import Product
 
     return {
-        p.id: get_stock(p)
-        for p in Product.objects.all()
+        product.id: get_stock(product)
+        for product in Product.objects.all()
     }
 
+
+# ----------------------------------------------------
+# Inventory Valuation
+# ----------------------------------------------------
+
 def get_inventory_valuation():
+
     results = []
 
-    products = Product.objects.filter(
+    for product in Product.objects.filter(
         is_active=True
-    )
-
-    for product in products:
+    ):
 
         stock = get_stock(product)
 
@@ -52,33 +112,39 @@ def get_inventory_valuation():
             * product.cost_price
         )
 
-        results.append(
-            {
-                "product_id": product.id,
-                "product_name": product.name,
-                "stock": stock,
-                "cost_price": product.cost_price,
-                "inventory_value": inventory_value,
-            }
-        )
+        results.append({
+            "product_id": product.id,
+            "barcode": product.barcode,
+            "category":
+                product.category.name
+                if product.category
+                else None,
+            "product_name": product.name,
+            "stock": stock,
+            "cost_price": product.cost_price,
+            "inventory_value": inventory_value,
+        })
 
     return results
 
+
+# ----------------------------------------------------
+# Inventory Summary
+# ----------------------------------------------------
+
 def get_inventory_summary():
-    products = Product.objects.filter(
-        is_active=True
-    )
 
     total_products = 0
     total_units = 0
-
     inventory_value = Decimal("0")
 
-    for product in products:
+    for product in Product.objects.filter(
+        is_active=True
+    ):
+
         stock = get_stock(product)
 
         total_products += 1
-
         total_units += stock
 
         inventory_value += (
@@ -92,31 +158,27 @@ def get_inventory_summary():
         "inventory_value": inventory_value,
     }
 
+
+# ----------------------------------------------------
+# COGS
+# ----------------------------------------------------
+
 def get_cogs_report(
     start_date=None,
     end_date=None,
 ):
-    sales = Sale.objects.all()
 
-    sale_items = SaleItem.objects.all()
+    sales = apply_sales_filters(
+        Sale.objects.all(),
+        start_date,
+        end_date,
+    )
 
-    if start_date:
-        sales = sales.filter(
-            sale_date__gte=start_date
-        )
-
-        sale_items = sale_items.filter(
-            sale__sale_date__gte=start_date
-        )
-
-    if end_date:
-        sales = sales.filter(
-            sale_date__lte=end_date
-        )
-
-        sale_items = sale_items.filter(
-            sale__sale_date__lte=end_date
-        )
+    sale_items = apply_sale_filters(
+        SaleItem.objects.all(),
+        start_date,
+        end_date,
+    )
 
     revenue = (
         sales.aggregate(
@@ -146,7 +208,8 @@ def get_cogs_report(
 
     if revenue > 0:
         gross_margin = (
-            gross_profit / revenue
+            gross_profit
+            / revenue
         ) * Decimal("100")
 
     return {
@@ -156,54 +219,54 @@ def get_cogs_report(
         "gross_margin": gross_margin,
     }
 
+
+# ----------------------------------------------------
+# Profit & Loss
+# ----------------------------------------------------
+
 def get_profit_loss_report(
     start_date=None,
     end_date=None,
 ):
-    cogs_data = get_cogs_report(
-        start_date=start_date,
-        end_date=end_date,
+
+    cogs = get_cogs_report(
+        start_date,
+        end_date,
     )
 
     operating_expenses = Decimal("0")
 
     net_profit = (
-        cogs_data["gross_profit"]
+        cogs["gross_profit"]
         - operating_expenses
     )
 
     net_margin = Decimal("0")
 
-    if cogs_data["revenue"] > 0:
+    if cogs["revenue"] > 0:
+
         net_margin = (
             net_profit
-            / cogs_data["revenue"]
+            / cogs["revenue"]
         ) * Decimal("100")
 
     return {
-        "revenue":
-            cogs_data["revenue"],
-
-        "cogs":
-            cogs_data["cogs"],
-
-        "gross_profit":
-            cogs_data["gross_profit"],
-
-        "operating_expenses":
-            operating_expenses,
-
-        "net_profit":
-            net_profit,
-
-        "gross_margin":
-            cogs_data["gross_margin"],
-
-        "net_margin":
-            net_margin,
+        "revenue": cogs["revenue"],
+        "cogs": cogs["cogs"],
+        "gross_profit": cogs["gross_profit"],
+        "operating_expenses": operating_expenses,
+        "net_profit": net_profit,
+        "gross_margin": cogs["gross_margin"],
+        "net_margin": net_margin,
     }
 
+
+# ----------------------------------------------------
+# Last Sale Map
+# ----------------------------------------------------
+
 def get_last_sale_map():
+
     rows = (
         SaleItem.objects
         .values("product_id")
@@ -217,9 +280,13 @@ def get_last_sale_map():
     return {
         row["product_id"]:
         row["last_sale_date"]
-
         for row in rows
     }
+
+
+# ----------------------------------------------------
+# Stock Aging
+# ----------------------------------------------------
 
 def get_stock_aging_report():
 
@@ -227,70 +294,54 @@ def get_stock_aging_report():
 
     last_sale_map = get_last_sale_map()
 
-    results = []
-
-    products = Product.objects.filter(
-        is_active=True
-    )
-
     today = date.today()
 
-    for product in products:
+    results = []
+
+    for product in Product.objects.filter(
+        is_active=True
+    ):
 
         stock = stock_map.get(
             product.id,
-            0
+            0,
         )
 
         if stock <= 0:
             continue
 
-        last_sale_date = (
-            last_sale_map.get(
-                product.id
-            )
+        last_sale = last_sale_map.get(
+            product.id
         )
 
-        if last_sale_date:
+        days = None
 
-            days_since_last_sale = (
-                today -
-                last_sale_date
+        if last_sale:
+            days = (
+                today
+                - last_sale
             ).days
 
-        else:
-
-            days_since_last_sale = None
-
         inventory_value = (
-            stock *
-            product.cost_price
+            stock
+            * product.cost_price
         )
 
-        results.append(
-            {
-                "product_id": product.id,
-                "product_name": product.name,
-
-                "stock": stock,
-
-                "inventory_value":
-                    inventory_value,
-
-                "last_sale_date":
-                    last_sale_date,
-
-                "days_since_last_sale":
-                    days_since_last_sale,
-            }
-        )
+        results.append({
+            "product_id": product.id,
+            "product_name": product.name,
+            "minimum_stock": product.minimum_stock,
+            "stock": stock,
+            "inventory_value": inventory_value,
+            "last_sale_date": last_sale,
+            "days_since_last_sale": days,
+        })
 
     return sorted(
         results,
         key=lambda x:
             x["days_since_last_sale"]
-            if x["days_since_last_sale"]
-            is not None
+            if x["days_since_last_sale"] is not None
             else 999999,
         reverse=True,
     )

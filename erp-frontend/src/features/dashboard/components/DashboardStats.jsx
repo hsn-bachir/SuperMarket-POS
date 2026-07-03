@@ -1,37 +1,23 @@
-import { Boxes, Truck, ShoppingCart, TriangleAlert } from "lucide-react";
+import SectionCard from "@/components/ui/SectionCard";
 
-import StatCard from "@/components/ui/StatCard";
+export default function DashboardStats({ data }) {
+  const stats = [
+    { label: "Products", value: data.total_products },
+    { label: "Suppliers", value: data.total_suppliers },
+    { label: "Sales", value: data.total_sales },
+    { label: "Purchases", value: data.total_purchases },
+  ];
 
-export default function DashboardStats({ dashboard }) {
   return (
-    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-      <StatCard
-        title="Products"
-        value={dashboard.total_products}
-        subtitle="Active products"
-        icon={Boxes}
-      />
-
-      <StatCard
-        title="Suppliers"
-        value={dashboard.total_suppliers}
-        subtitle="Registered suppliers"
-        icon={Truck}
-      />
-
-      <StatCard
-        title="Sales"
-        value={dashboard.total_sales}
-        subtitle="Completed sales"
-        icon={ShoppingCart}
-      />
-
-      <StatCard
-        title="Low Stock"
-        value={dashboard.low_stock_count}
-        subtitle="Require attention"
-        icon={TriangleAlert}
-      />
-    </div>
+    <SectionCard>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {stats.map((s) => (
+          <div key={s.label} className="p-4 bg-gray-50 rounded-lg">
+            <div className="text-sm text-gray-500">{s.label}</div>
+            <div className="text-xl font-semibold">{s.value}</div>
+          </div>
+        ))}
+      </div>
+    </SectionCard>
   );
 }

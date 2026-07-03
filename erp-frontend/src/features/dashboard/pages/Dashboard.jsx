@@ -2,27 +2,27 @@ import { useEffect, useState } from "react";
 
 import PageHeader from "@/components/ui/PageHeader";
 
-import { getDashboard } from "../api/dashboardApi";
+import { getDashboardCharts } from "../services/dashboardCharts";
 
-import DashboardStats from "../components/DashboardStats";
-import InventoryValue from "../components/InventoryValue";
+import StatsGrid from "../components/StatsGrid";
+import SalesLineChart from "../components/charts/SalesLineChart";
+import ProfitPieChart from "../components/charts/ProfitPieChart";
+import StockRiskChart from "../components/charts/StockRiskChart";
 import LowStockWidget from "../components/LowStockWidget";
 import RecentSalesWidget from "../components/RecentSalesWidget";
 
 export default function Dashboard() {
-  const [dashboard, setDashboard] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboard();
+    load();
   }, []);
 
-  async function loadDashboard() {
+  async function load() {
     try {
-      const res = await getDashboard();
-      setDashboard(res.data);
-    } catch (err) {
-      console.error(err);
+      const res = await getDashboardCharts();
+      setData(res);
     } finally {
       setLoading(false);
     }
@@ -36,20 +36,35 @@ export default function Dashboard() {
     <>
       <PageHeader
         title="Dashboard"
-        subtitle="Overview of today's business performance."
+        subtitle="Business overview & performance"
       />
 
-      <DashboardStats dashboard={dashboard} />
+      {/* KPI */}
+      <StatsGrid dashboard={data} />
 
-      <div className="grid xl:grid-cols-3 gap-6 my-8">
-        <div className="xl:col-span-2">
-          <InventoryValue value={dashboard.inventory_value} />
-        </div>
+      {/* CHART SECTION A (Sales Trend) */}
+      <div className="grid xl:grid-cols-3 gap-6 my-6">
+        <SalesLineChart data={data.salesTrend} />
+
+        <StockRiskChart data={data.stockRisk} />
 
         <LowStockWidget />
       </div>
 
-      <RecentSalesWidget />
+      {/* CHART SECTION B (Profit Focus) */}
+      <div className="grid xl:grid-cols-3 gap-6 my-6">
+        <ProfitPieChart data={data.salesActivity} />
+
+        <RecentSalesWidget />
+
+        <div className="p-4 rounded-xl border bg-white dark:bg-gray-900">
+          <h3 className="font-semibold mb-2">Quick Insights</h3>
+
+          <p className="text-sm text-gray-500">
+            Monitor sales vs purchases and stock risk in real time.
+          </p>
+        </div>
+      </div>
     </>
   );
 }
