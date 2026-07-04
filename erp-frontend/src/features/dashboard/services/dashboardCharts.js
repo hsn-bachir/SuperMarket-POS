@@ -6,6 +6,7 @@ export async function getDashboardCharts() {
 
   return {
     total_products: d.total_products,
+    total_suppliers: d.total_suppliers,
     total_sales: d.total_sales,
     total_purchases: d.total_purchases,
     today_sales: d.today_sales,

@@ -33,15 +33,26 @@ export default function PaymentSection({ cart }) {
 
     try {
       setLoading(true);
+      const payload = {
+        invoice_number: form.invoice_number,
+        currency: form.currency,
+        exchange_rate: form.exchange_rate,
+        payment_method: form.payment_method,
+        sale_date: form.sale_date,
 
-      await createSale({
-        ...form,
-        items: cart,
-      });
+        items: cart.map((item) => ({
+          product: item.id,
+          quantity: item.quantity,
+          unit_price: item.price,
+        })),
+      };
+
+      await createSale(payload);
 
       toast.success("Sale completed.");
       window.location.reload();
     } catch (err) {
+      console.log("ERROR RESPONSE:", err.response?.data);
       console.error(err);
       toast.error("Unable to complete sale.");
     } finally {

@@ -26,6 +26,7 @@ export default function Products() {
     try {
       const res = await getProducts();
       setProducts(res.data);
+      console.log("Products data:", res.data);
     } catch (err) {
       console.error(err);
     } finally {

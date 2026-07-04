@@ -19,7 +19,7 @@ export default function ProductTable({ products, onEdit, onDelete }) {
     {
       key: "category",
       title: "Category",
-      render: (row) => row.category?.name ?? "-",
+      render: (row) => row.category || "-",
     },
 
     {
