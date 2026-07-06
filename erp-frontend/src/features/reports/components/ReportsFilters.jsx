@@ -1,51 +1,31 @@
-export default function ReportsFilters({ filters, setFilters }) {
-  function handleChange(e) {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
-  }
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
-  function clearFilters() {
-    setFilters({
-      start_date: "",
-      end_date: "",
-    });
-  }
-
+export default function ReportsFilters() {
   return (
-    <div className="rounded-xl border bg-white dark:bg-gray-900 p-5">
-      <div className="flex flex-wrap items-end gap-5">
+    <div className="flex flex-wrap items-end justify-between gap-4 rounded-xl border bg-white dark:bg-gray-900 p-5">
+      <div className="flex flex-wrap gap-4">
         <div>
-          <label className="block mb-2 text-sm font-medium">Start Date</label>
+          <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">
+            Start Date
+          </label>
 
-          <input
-            type="date"
-            name="start_date"
-            value={filters.start_date}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 w-48"
-          />
+          <Input type="date" />
         </div>
 
         <div>
-          <label className="block mb-2 text-sm font-medium">End Date</label>
+          <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">
+            End Date
+          </label>
 
-          <input
-            type="date"
-            name="end_date"
-            value={filters.end_date}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 w-48"
-          />
+          <Input type="date" />
         </div>
+      </div>
 
-        <button
-          onClick={clearFilters}
-          className="px-5 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800"
-        >
-          Reset
-        </button>
+      <div className="flex gap-2">
+        <Button>Reset</Button>
+
+        <Button>Apply Filters</Button>
       </div>
     </div>
   );

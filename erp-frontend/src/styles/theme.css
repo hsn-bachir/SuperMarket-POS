@@ -5,10 +5,13 @@
   --surface-hover: #f8fafc;
 
   /* Sidebar */
-  --sidebar-bg: #1f2937;
-  --sidebar-hover: #374151;
-  --sidebar-active: #334155;
-  --sidebar-text: #f9fafb;
+  /* --sidebar-bg: #1f2937; */
+--sidebar-bg: #111827;
+--sidebar-hover: #1f2937;
+--sidebar-active: #374151;
+--sidebar-text: #f9fafb;
+--sidebar-muted: #9ca3af;
+--sidebar-border: #374151;
 
   /* Brand */
   --primary: #1e3a5f;

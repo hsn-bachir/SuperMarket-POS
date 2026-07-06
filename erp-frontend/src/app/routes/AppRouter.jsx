@@ -29,6 +29,8 @@ import EditSale from "@/features/sales/pages/EditSale";
 
 import Inventory from "@/features/inventory/pages/Inventory";
 
+import Reports from "@/features/reports/pages/Reports";
+
 function RootRedirect() {
   const { user } = useAuth();
   return <Navigate to={user ? "/" : "/login"} replace />;
@@ -68,6 +70,7 @@ export default function AppRouter() {
           <Route path="sales/:id/edit" element={<EditSale />} />
           <Route path="pos" element={<POS />} />
           <Route path="inventory" element={<Inventory />} />
+          <Route path="/reports" element={<Reports />} />
         </Route>
 
         {/* fallback */}

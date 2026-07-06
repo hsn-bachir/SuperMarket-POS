@@ -20,7 +20,13 @@ export default function StatCard({
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-[var(--sidebar-bg)] border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all duration-300">
+    <div
+      className="relative overflow-hidden rounded-2xl bg-[var(--sidebar-bg)] border border-gray-200 dark:border-gray-800 shadow-sm
+      hover:shadow-xl
+      transition-all
+      duration-300
+      hover:-translate-y-1"
+    >
       <div className="p-6">
         <div className="flex justify-between items-center">
           <div>
