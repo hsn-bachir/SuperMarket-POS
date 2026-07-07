@@ -3,20 +3,16 @@ import Input from "@/components/ui/Input";
 
 export default function ReportsFilters() {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 rounded-xl border bg-white dark:bg-gray-900 p-5">
+    <div className="flex flex-wrap items-end justify-between gap-4 rounded-xl border border-gray-300 bg-white  p-5">
       <div className="flex flex-wrap gap-4">
         <div>
-          <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">
-            Start Date
-          </label>
+          <label className="mb-1 block text-sm text-gray-900">Start Date</label>
 
           <Input type="date" />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-gray-700 dark:text-gray-300">
-            End Date
-          </label>
+          <label className="mb-1 block text-sm text-gray-900">End Date</label>
 
           <Input type="date" />
         </div>

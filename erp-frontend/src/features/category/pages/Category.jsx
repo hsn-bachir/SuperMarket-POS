@@ -9,25 +9,39 @@ import EmptyState from "@/components/ui/EmptyState";
 import LoadingSpinner from "@/components/ui/Loader";
 import CategoryTable from "../components/CategoryTable";
 import CategoryToolbar from "../components/CategoryToolbar";
+import Pagination from "@/components/ui/Pagination";
 
 export default function Category() {
-  const [category, setCategory] = useState([]);
+  const [categories, setCategories] = useState([]);
+
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+
+  const [count, setCount] = useState(0);
+
   const [deleteId, setDeleteId] = useState(null);
+
   const [deleting, setDeleting] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     loadCategory();
-  }, []);
+  }, [page, search]);
 
   async function loadCategory() {
     try {
-      const res = await getCategories();
-      setCategory(res.data);
+      setLoading(true);
+
+      const res = await getCategories(page, search);
+
+      setCategories(res.data.results);
+      setCount(res.data.count);
     } catch (err) {
-      console.error(err);
+      toast.error("Failed to load categories.");
     } finally {
       setLoading(false);
     }
@@ -44,11 +58,13 @@ export default function Category() {
   async function confirmDelete() {
     try {
       setDeleting(true);
+
       await deleteCategory(deleteId);
-      setCategory((prev) =>
-        prev.filter((category) => category.id !== deleteId),
-      );
-      toast.success("Category deleted successfully.");
+
+      toast.success("Category deleted.");
+
+      await loadCategory();
+
       setDeleteId(null);
     } catch (err) {
       toast.error("Unable to delete category.");
@@ -68,22 +84,27 @@ export default function Category() {
 
       {loading ? (
         <LoadingSpinner />
-      ) : category.length === 0 ? (
+      ) : categories.length === 0 ? (
         <EmptyState
           title="No Categories Found"
-          description="There are no cotegories."
+          description="There are no categories."
         />
       ) : (
-        <CategoryTable
-          categories={category}
-          onDelete={handleDelete}
-          onEdit={handleEdit}
-        />
+        <>
+          <CategoryTable
+            categories={categories}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
+          />
+
+          <Pagination page={page} setPage={setPage} count={count} />
+        </>
       )}
+
       <ConfirmDialog
         open={deleteId !== null}
         title="Delete Category"
-        description="This action cannot be undone. Are you sure you want to delete this Category?"
+        description="This action cannot be undone. Are you sure you want to delete this category?"
         onConfirm={confirmDelete}
         onCancel={() => setDeleteId(null)}
         loading={deleting}

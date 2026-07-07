@@ -13,6 +13,7 @@ from .serializers import (
     PurchaseSerializer,
     PurchaseCreateSerializer,
 )
+from rest_framework.filters import SearchFilter
 
 
 class PurchaseListView(generics.ListAPIView):
@@ -35,6 +36,13 @@ class PurchaseListView(generics.ListAPIView):
     )
 
     serializer_class = PurchaseSerializer
+
+    filter_backends = [SearchFilter]
+
+    search_fields = [
+        "invoice_number",
+        "supplier__name",
+    ]
 
 
 class PurchaseCreateView(generics.CreateAPIView):

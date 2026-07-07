@@ -11,17 +11,50 @@ from rest_framework.permissions import (
     DjangoModelPermissions,
 )
 
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import (
+    SearchFilter,
+    OrderingFilter,
+)
+
+from .filters import ProductFilter
+
 class ProductListView(generics.ListAPIView):
+
     permission_classes = [
         IsAuthenticated,
         DjangoModelPermissions,
     ]
-    queryset = Product.objects.all()
+
+    queryset = (
+        Product.objects
+        .select_related("category")
+        .all()
+    )
+
     serializer_class = ProductSerializer
-    filter_backends = [SearchFilter]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    ]
+
+    filterset_class = ProductFilter
+
     search_fields = [
         "name",
         "barcode",
+    ]
+
+    ordering_fields = [
+        "name",
+        "selling_price",
+        "created_at",
+    ]
+
+    ordering = [
+        "name",
     ]
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -89,8 +122,12 @@ class CategoryListView(generics.ListAPIView):
         IsAuthenticated,
         DjangoModelPermissions,
     ]
-    queryset = Category.objects.all()
+
+    queryset = Category.objects.all().order_by("name")
     serializer_class = CategorySerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ["name"]
    
 class CategoryCreateView(generics.ListCreateAPIView):
     permission_classes = [

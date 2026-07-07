@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import (
     IsAuthenticated,
     DjangoModelPermissions,
@@ -6,7 +7,6 @@ from rest_framework.permissions import (
 
 from .models import Supplier
 from .serializers import SupplierSerializer
-
 
 class SupplierListView(generics.ListAPIView):
     permission_classes = [
@@ -16,6 +16,15 @@ class SupplierListView(generics.ListAPIView):
 
     queryset = Supplier.objects.all().order_by("-id")
     serializer_class = SupplierSerializer
+
+    filter_backends = [SearchFilter]
+
+    search_fields = [
+        "name",
+        "contact_person",
+        "phone",
+        "email",
+    ]
 
 
 class SupplierCreateView(generics.CreateAPIView):

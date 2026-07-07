@@ -5,7 +5,7 @@ import Toolbar from "@/components/ui/Toolbar";
 import SearchInput from "@/components/ui/SearchInput";
 import Button from "@/components/ui/Button";
 
-export default function SupplierToolbar({ search, setSearch }) {
+export default function SupplierToolbar({ search, setSearch, setPage }) {
   const navigate = useNavigate();
 
   return (
@@ -19,7 +19,10 @@ export default function SupplierToolbar({ search, setSearch }) {
     >
       <SearchInput
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
         placeholder="Search suppliers..."
       />
     </Toolbar>

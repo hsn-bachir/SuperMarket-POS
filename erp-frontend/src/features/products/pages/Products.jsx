@@ -12,21 +12,37 @@ import ProductTable from "../components/ProductTable";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [search, category, status, page]);
 
   async function loadProducts() {
     try {
-      const res = await getProducts();
-      setProducts(res.data);
-      console.log("Products data:", res.data);
+      setLoading(true);
+
+      const res = await getProducts({
+        page,
+
+        search,
+
+        category,
+
+        is_active: status,
+      });
+
+      setProducts(res.data.results);
+
+      setCount(res.data.count);
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,31 +72,29 @@ export default function Products() {
     }
   }
 
-  const filteredProducts = products.filter((product) => {
-    const term = search.toLowerCase();
-
-    return (
-      product.name.toLowerCase().includes(term) ||
-      product.barcode.includes(search)
-    );
-  });
-
   return (
     <>
       <PageHeader title="Products" subtitle="Manage your inventory products." />
 
-      <ProductToolbar search={search} setSearch={setSearch} />
+      <ProductToolbar
+        search={search}
+        setSearch={setSearch}
+        category={category}
+        setCategory={setCategory}
+        status={status}
+        setStatus={setStatus}
+      />
 
       {loading ? (
         <LoadingSpinner />
-      ) : filteredProducts.length === 0 ? (
+      ) : products.length === 0 ? (
         <EmptyState
           title="No Products Found"
           description="There are no products matching your search."
         />
       ) : (
         <ProductTable
-          products={filteredProducts}
+          products={products}
           onDelete={handleDelete}
           onEdit={handleEdit}
         />

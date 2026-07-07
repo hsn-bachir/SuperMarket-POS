@@ -9,8 +9,18 @@ import Button from "@/components/ui/Button";
 
 import { getCategories } from "../../category/api/categoryApi";
 
-export default function ProductToolbar({ search, setSearch }) {
+export default function ProductToolbar({
+  search,
+  setSearch,
+
+  category,
+  setCategory,
+
+  status,
+  setStatus,
+}) {
   const navigate = useNavigate();
+
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -20,7 +30,7 @@ export default function ProductToolbar({ search, setSearch }) {
   async function loadCategories() {
     try {
       const res = await getCategories();
-      setCategories(res.data);
+      setCategories(res.data.results ?? res.data);
     } catch (err) {
       console.error(err);
     }
@@ -41,10 +51,15 @@ export default function ProductToolbar({ search, setSearch }) {
         placeholder="Search products..."
       />
 
-      {/* CATEGORY FILTER */}
       <FilterSelect
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
         options={[
-          { value: "", label: "All Categories" },
+          {
+            value: "",
+            label: "All Categories",
+          },
+
           ...categories.map((c) => ({
             value: c.id,
             label: c.name,
@@ -53,10 +68,21 @@ export default function ProductToolbar({ search, setSearch }) {
       />
 
       <FilterSelect
+        value={status}
+        onChange={(e) => setStatus(e.target.value)}
         options={[
-          { value: "", label: "All Status" },
-          { value: "true", label: "Active" },
-          { value: "false", label: "Inactive" },
+          {
+            value: "",
+            label: "All Status",
+          },
+          {
+            value: "true",
+            label: "Active",
+          },
+          {
+            value: "false",
+            label: "Inactive",
+          },
         ]}
       />
     </Toolbar>

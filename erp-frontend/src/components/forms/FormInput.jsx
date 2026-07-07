@@ -13,13 +13,16 @@ export default function FormInput({ label, error, className = "", ...props }) {
           w-full
           rounded-lg
           border
-          border-[var(--border)]
+          border-black
           bg-white
           px-3
           text-sm
           outline-none
           transition-colors
-          focus:border-[var(--primary)]
+          focus:border-gray-600
+          focus:ring-2 focus:ring-gray-600/50
+          disabled:cursor-not-allowed
+        disabled:opacity-50
           ${className}
         `}
         {...props}

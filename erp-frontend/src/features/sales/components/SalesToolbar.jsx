@@ -6,7 +6,13 @@ import SearchInput from "@/components/ui/SearchInput";
 import FilterSelect from "@/components/ui/FilterSelect";
 import Button from "@/components/ui/Button";
 
-export default function SalesToolbar({ search, setSearch }) {
+export default function SalesToolbar({
+  search,
+  setSearch,
+  payment,
+  setPayment,
+  setPage,
+}) {
   const navigate = useNavigate();
 
   return (
@@ -20,11 +26,19 @@ export default function SalesToolbar({ search, setSearch }) {
     >
       <SearchInput
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
         placeholder="Search invoice..."
       />
 
       <FilterSelect
+        value={payment}
+        onChange={(e) => {
+          setPayment(e.target.value);
+          setPage(1);
+        }}
         options={[
           {
             value: "",
@@ -37,6 +51,10 @@ export default function SalesToolbar({ search, setSearch }) {
           {
             value: "CARD",
             label: "Card",
+          },
+          {
+            value: "TRANSFER",
+            label: "Transfer",
           },
         ]}
       />

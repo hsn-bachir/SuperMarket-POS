@@ -1,7 +1,10 @@
 import api from "@/api/axios";
 
-export const getSales = () =>
-  api.get("/sales/");
+export function getSales(params = {}) {
+  return api.get("/sales/", {
+    params,
+  });
+}
 
 export const getSale = (id) =>
   api.get(`/sales/${id}/`);

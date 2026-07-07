@@ -29,8 +29,8 @@ export default function Dashboard() {
       const resSales = await getSales();
       const resPurchases = await getPurchases();
       setData(res);
-      setSales(resSales.data.slice(0, 5));
-      setPurchases(resPurchases.data.slice(0, 5));
+      setSales(resSales.data.results.slice(0, 5));
+      setPurchases(resPurchases.data.results.slice(0, 5));
     } finally {
       setLoading(false);
     }
@@ -51,14 +51,14 @@ export default function Dashboard() {
       <StatsGrid dashboard={data} />
 
       {/* CHART SECTION A (Sales Trend) */}
-      <div className="grid xl:grid-cols-2 gap-10 my-6">
+      <div className="grid xl:grid-cols-2 gap-6 my-6">
         <SalesLineChart data={data.salesTrend} />
 
         <StockRiskChart data={data.stockRisk} />
       </div>
 
       {/* CHART SECTION B (Profit Focus) */}
-      <div className="grid xl:grid-cols-3 gap-6 my-6">
+      <div className="grid xl:grid-cols-3 gap-3 my-6">
         <ProfitPieChart data={data.salesActivity} />
 
         <RecentSalesWidget data={sales} />

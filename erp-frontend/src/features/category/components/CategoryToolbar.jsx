@@ -18,7 +18,10 @@ export default function CategoryToolbar({ search, setSearch }) {
     >
       <SearchInput
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
         placeholder="Search categories..."
       />
     </Toolbar>

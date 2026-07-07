@@ -1,37 +1,42 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
 import { getSuppliers, deleteSupplier } from "../api/supplierApi";
 
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
 import EmptyState from "@/components/ui/EmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-
 import SupplierToolbar from "../components/SupplierToolbar";
 import SupplierTable from "../components/SupplierTable";
+import Pagination from "@/components/ui/Pagination";
 
 export default function Suppliers() {
   const navigate = useNavigate();
-
   const [suppliers, setSuppliers] = useState([]);
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
   const [search, setSearch] = useState("");
-
   const [loading, setLoading] = useState(true);
-
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadSuppliers();
-  }, []);
+  }, [page, search]);
 
   async function loadSuppliers() {
     try {
-      const res = await getSuppliers();
+      setLoading(true);
 
-      setSuppliers(res.data);
+      const res = await getSuppliers({
+        page,
+        search,
+      });
+
+      setSuppliers(res.data.results);
+
+      setCount(res.data.count);
     } catch (err) {
       console.error(err);
     } finally {
@@ -50,15 +55,9 @@ export default function Suppliers() {
   async function confirmDelete() {
     try {
       setDeleting(true);
-
       await deleteSupplier(deleteId);
-
-      setSuppliers((prev) =>
-        prev.filter((supplier) => supplier.id !== deleteId),
-      );
-
+      await loadSuppliers();
       toast.success("Supplier deleted successfully.");
-
       setDeleteId(null);
     } catch (err) {
       toast.error("Unable to delete supplier.");
@@ -67,36 +66,32 @@ export default function Suppliers() {
     }
   }
 
-  const filteredSuppliers = suppliers.filter((supplier) => {
-    const term = search.toLowerCase();
-
-    return (
-      supplier.name.toLowerCase().includes(term) ||
-      supplier.contact_person.toLowerCase().includes(term) ||
-      supplier.phone.includes(search) ||
-      supplier.email.toLowerCase().includes(term)
-    );
-  });
-
   return (
     <>
       <PageHeader title="Suppliers" subtitle="Manage your suppliers." />
 
-      <SupplierToolbar search={search} setSearch={setSearch} />
+      <SupplierToolbar
+        search={search}
+        setSearch={setSearch}
+        setPage={setPage}
+      />
 
       {loading ? (
         <LoadingSpinner />
-      ) : filteredSuppliers.length === 0 ? (
+      ) : suppliers.length === 0 ? (
         <EmptyState
           title="No Suppliers Found"
           description="There are no suppliers matching your search."
         />
       ) : (
-        <SupplierTable
-          suppliers={filteredSuppliers}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <>
+          <SupplierTable
+            suppliers={suppliers}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+          <Pagination page={page} setPage={setPage} count={count} />
+        </>
       )}
 
       <ConfirmDialog

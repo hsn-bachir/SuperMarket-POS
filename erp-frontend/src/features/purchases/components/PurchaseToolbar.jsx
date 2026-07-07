@@ -5,7 +5,7 @@ import Toolbar from "@/components/ui/Toolbar";
 import SearchInput from "@/components/ui/SearchInput";
 import Button from "@/components/ui/Button";
 
-export default function PurchaseToolbar({ search, setSearch }) {
+export default function PurchaseToolbar({ search, setSearch, setPage }) {
   const navigate = useNavigate();
 
   return (
@@ -19,7 +19,10 @@ export default function PurchaseToolbar({ search, setSearch }) {
     >
       <SearchInput
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
         placeholder="Search invoice..."
       />
     </Toolbar>

@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
-
+from rest_framework.filters import SearchFilter
 from apps.sales.services import delete_sale
 
 from .models import Sale
@@ -26,14 +26,32 @@ class SaleListCreateView(generics.ListCreateAPIView):
         IsAuthenticated,
         DjangoModelPermissions,
     ]
-    queryset = Sale.objects.all().order_by(
-        "-sale_date"
+
+    def get_queryset(self):
+        queryset = (
+        Sale.objects
+        .all()
+        .order_by("-sale_date", "-id")
     )
+
+        payment = self.request.query_params.get("payment")
+
+        if payment:
+            queryset = queryset.filter(
+            payment_method=payment
+        )
+
+        return queryset
+
+    filter_backends = [SearchFilter]
+
+    search_fields = [
+        "invoice_number",
+    ]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
             return SaleCreateSerializer
-
         return SaleSerializer
 
     def create(self, request, *args, **kwargs):
@@ -44,9 +62,7 @@ class SaleListCreateView(generics.ListCreateAPIView):
             },
         )
 
-        serializer.is_valid(
-            raise_exception=True
-        )
+        serializer.is_valid(raise_exception=True)
 
         sale = serializer.save()
 
@@ -54,7 +70,7 @@ class SaleListCreateView(generics.ListCreateAPIView):
 
         return Response(
             output.data,
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )
 
 

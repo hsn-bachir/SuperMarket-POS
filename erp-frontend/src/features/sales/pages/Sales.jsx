@@ -6,34 +6,39 @@ import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
 import EmptyState from "@/components/ui/EmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-
 import SalesToolbar from "../components/SalesToolbar";
 import SalesTable from "../components/SalesTable";
-
+import Pagination from "@/components/ui/Pagination";
 import { getSales, deleteSale } from "../api/salesApi";
 
 export default function Sales() {
   const navigate = useNavigate();
-
   const [sales, setSales] = useState([]);
-
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
+  const [payment, setPayment] = useState("");
   const [loading, setLoading] = useState(true);
-
   const [search, setSearch] = useState("");
-
   const [deleteId, setDeleteId] = useState(null);
-
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadSales();
-  }, []);
+  }, [page, search, payment]);
 
   async function loadSales() {
     try {
-      const res = await getSales();
+      setLoading(true);
 
-      setSales(res.data);
+      const res = await getSales({
+        page,
+        search,
+        payment,
+      });
+
+      setSales(res.data.results);
+
+      setCount(res.data.count);
     } catch (err) {
       toast.error("Unable to load sales.");
     } finally {
@@ -59,8 +64,7 @@ export default function Sales() {
 
       await deleteSale(deleteId);
 
-      setSales((prev) => prev.filter((sale) => sale.id !== deleteId));
-
+      await loadSales();
       toast.success("Sale deleted.");
 
       setDeleteId(null);
@@ -71,27 +75,32 @@ export default function Sales() {
     }
   }
 
-  const filteredSales = sales.filter((sale) =>
-    sale.invoice_number.toLowerCase().includes(search.toLowerCase()),
-  );
-
   return (
     <>
       <PageHeader title="Sales" subtitle="Manage completed sales." />
 
-      <SalesToolbar search={search} setSearch={setSearch} />
+      <SalesToolbar
+        search={search}
+        setSearch={setSearch}
+        payment={payment}
+        setPayment={setPayment}
+        setPage={setPage}
+      />
 
       {loading ? (
         <LoadingSpinner />
-      ) : filteredSales.length === 0 ? (
+      ) : sales.length === 0 ? (
         <EmptyState title="No Sales" description="No completed sales yet." />
       ) : (
-        <SalesTable
-          sales={filteredSales}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <>
+          <SalesTable
+            sales={sales}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+          <Pagination page={page} setPage={setPage} count={count} />
+        </>
       )}
 
       <ConfirmDialog

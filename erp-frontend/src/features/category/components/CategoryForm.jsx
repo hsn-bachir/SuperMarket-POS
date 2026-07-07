@@ -43,7 +43,7 @@ export default function CategoryForm({
       </FormSection>
 
       <FormActions
-        cancelTo="/categories"
+        cancelTo="/category"
         loading={loading}
         submitText="Save Category"
       />
