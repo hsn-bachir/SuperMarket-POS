@@ -1,5 +1,6 @@
 from decimal import Decimal
 from datetime import date, timedelta
+from urllib import request
 
 from django.db.models import (
     Sum,
@@ -343,24 +344,34 @@ class TopProfitProductsView(BaseReportView):
             queryset = queryset.filter(
                 sale__sale_date__lte=end_date
             )
+
         rows = (
-            queryset
-            .values(
-                "product_id",
-                "product__name",
-            )
-            .annotate(
-                total_profit=Sum(
-                    profit_expr
-                )
-            )
-            .order_by("-total_profit")
+    queryset
+    .values(
+        "product_id",
+        "product__name",
+    )
+    .annotate(
+        total_profit=Sum(
+            profit_expr
         )
+    )
+    .order_by("-total_profit")
+)
+
+        results = [
+    {
+        "product_id": row["product_id"],
+        "product_name": row["product__name"],
+        "total_profit": row["total_profit"],
+    }
+    for row in rows
+]
 
         return self.render(
-            request,
-            list(rows),
-        )
+    request,
+    results,
+)
     
 class ReorderSuggestionsView(BaseReportView):
     serializer_class = ReorderSuggestionSerializer

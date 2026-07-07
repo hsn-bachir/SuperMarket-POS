@@ -29,3 +29,6 @@ export const getCOGS = (params) =>
 
 export const getProfitLoss = (params) =>
   api.get("/reports/profit-loss/", { params });
+
+export const getCogs = () =>
+    api.get("/reports/cogs/");
