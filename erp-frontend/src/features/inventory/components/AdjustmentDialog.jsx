@@ -6,7 +6,7 @@ import { Dialog } from "@/components/ui/Dialog";
 import Button from "@/components/ui/Button";
 
 import FormInput from "@/components/forms/FormInput";
-import FormSelect from "@/components/forms/FormSelect";
+import ProductCombobox from "@/components/forms/ProductCombobox";
 
 import { getProducts } from "@/features/products/api/productsApi";
 import { createAdjustment } from "../api/inventoryApi";
@@ -95,21 +95,14 @@ export default function AdjustmentDialog({ open, onClose, onSuccess }) {
           </div>
         </div>
 
-        <FormSelect
-          label="Product"
-          name="product_id"
+        <ProductCombobox
           value={form.product_id}
-          onChange={handleChange}
-          options={[
-            {
-              value: "",
-              label: "Select a product",
-            },
-            ...products.map((p) => ({
-              value: p.id,
-              label: p.name,
-            })),
-          ]}
+          onChange={(id) =>
+            setForm((prev) => ({
+              ...prev,
+              product_id: id,
+            }))
+          }
         />
 
         <FormInput

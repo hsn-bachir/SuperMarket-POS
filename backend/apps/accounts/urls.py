@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView
 )
 
-from .views import CurrentUserView,UserDetailView,UserListCreateView
+from .views import CurrentUserView, GroupListView,UserDetailView,UserListCreateView
 
 urlpatterns = [
     path(
@@ -26,4 +26,9 @@ urlpatterns = [
     ),
     path("users/", UserListCreateView.as_view()),
     path("users/<int:pk>/", UserDetailView.as_view()),
+
+    path(
+        "groups/",
+        GroupListView.as_view(),
+    ),
 ]

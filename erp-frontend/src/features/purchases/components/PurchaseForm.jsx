@@ -47,8 +47,8 @@ export default function PurchaseForm({
         getProducts(),
       ]);
 
-      setSuppliers(supplierRes.data);
-      setProducts(productRes.data);
+      setSuppliers(supplierRes.data.results ?? supplierRes.data);
+      setProducts(productRes.data.results ?? productRes.data);
     } catch (err) {
       console.error(err);
     }

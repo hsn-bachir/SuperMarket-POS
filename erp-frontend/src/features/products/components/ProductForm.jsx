@@ -33,7 +33,7 @@ export default function ProductForm({
     try {
       const res = await getCategories();
 
-      setCategories(res.data);
+      setCategories(res.data.results ?? res.data);
     } catch (err) {
       console.error(err);
     }

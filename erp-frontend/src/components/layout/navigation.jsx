@@ -84,9 +84,10 @@ export const navigation = [
   },
 
   {
-    title: "Settings",
-    path: "/settings",
+    title: "Admin Panel",
+    path: "http://localhost:8000/admin/",
     icon: Settings,
     roles: ["Admin"],
+    external: true,
   },
 ];

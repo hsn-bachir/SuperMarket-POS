@@ -1,14 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 
 import { getProducts } from "@/features/products/api/productsApi";
 
 export default function ProductSearch({ cart, setCart }) {
   const inputRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const listRef = useRef(null);
 
   const [products, setProducts] = useState([]);
-
   const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState(-1);
 
   useEffect(() => {
     loadProducts();
@@ -18,10 +21,36 @@ export default function ProductSearch({ cart, setCart }) {
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+        setHighlighted(-1);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!listRef.current || highlighted < 0) return;
+
+    const element = listRef.current.children[highlighted];
+
+    element?.scrollIntoView({
+      block: "nearest",
+    });
+  }, [highlighted]);
+
   async function loadProducts() {
     try {
-      const res = await getProducts();
-      setProducts(res.data);
+      const res = await getProducts({
+        page_size: 1000,
+      });
+
+      setProducts(res.data.results ?? res.data);
     } catch (err) {
       console.error(err);
     }
@@ -58,55 +87,108 @@ export default function ProductSearch({ cart, setCart }) {
     }
 
     setSearch("");
+    setOpen(false);
+    setHighlighted(-1);
 
-    inputRef.current?.focus();
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   }
 
-  function handleEnter(e) {
-    if (e.key !== "Enter") return;
+  const filteredProducts = useMemo(() => {
+    if (!search.trim()) return [];
 
-    e.preventDefault();
+    return products
+      .filter((product) => {
+        const term = search.toLowerCase();
 
-    const value = search.trim();
+        return (
+          product.name.toLowerCase().includes(term) ||
+          product.barcode.includes(search)
+        );
+      })
+      .slice(0, 8);
+  }, [products, search]);
 
-    if (!value) return;
+  function handleKeyDown(e) {
+    switch (e.key) {
+      case "ArrowDown":
+        if (!open || filteredProducts.length === 0) return;
 
-    const product = products.find(
-      (p) =>
-        p.barcode === value || p.name.toLowerCase() === value.toLowerCase(),
-    );
+        e.preventDefault();
 
-    if (product) {
-      addProduct(product);
+        setHighlighted((prev) =>
+          prev < filteredProducts.length - 1 ? prev + 1 : 0,
+        );
+
+        break;
+
+      case "ArrowUp":
+        if (!open || filteredProducts.length === 0) return;
+
+        e.preventDefault();
+
+        setHighlighted((prev) =>
+          prev > 0 ? prev - 1 : filteredProducts.length - 1,
+        );
+
+        break;
+
+      case "Enter":
+        e.preventDefault();
+
+        if (open && highlighted >= 0) {
+          addProduct(filteredProducts[highlighted]);
+          return;
+        }
+
+        const value = search.trim();
+
+        if (!value) return;
+
+        const product = products.find(
+          (p) =>
+            p.barcode === value || p.name.toLowerCase() === value.toLowerCase(),
+        );
+
+        if (product) {
+          addProduct(product);
+        }
+
+        break;
+
+      case "Escape":
+        setOpen(false);
+        setHighlighted(-1);
+        break;
+
+      default:
+        break;
     }
   }
 
-  const filtered =
-    search.length === 0
-      ? []
-      : products.filter(
-          (p) =>
-            p.name.toLowerCase().includes(search.toLowerCase()) ||
-            p.barcode.includes(search),
-        );
-
   return (
-    <div className="space-y-4">
+    <div ref={wrapperRef} className="space-y-4">
       <div className="relative">
         <Search size={18} className="absolute left-3 top-3 text-gray-400" />
 
         <input
           ref={inputRef}
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={handleEnter}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setOpen(true);
+            setHighlighted(-1);
+          }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={handleKeyDown}
           placeholder="Scan barcode or search..."
           className="
             h-11
             w-full
             rounded-xl
             border
-            border-[var(--border)]
+            border-gray-300
             pl-10
             pr-4
             outline-none
@@ -115,14 +197,15 @@ export default function ProductSearch({ cart, setCart }) {
         />
       </div>
 
-      {filtered.length > 0 && (
-        <div className="grid gap-3">
-          {filtered.slice(0, 8).map((product) => (
+      {open && filteredProducts.length > 0 && (
+        <div ref={listRef} className="grid gap-3">
+          {filteredProducts.map((product, index) => (
             <button
               key={product.id}
               onClick={() => addProduct(product)}
+              onMouseEnter={() => setHighlighted(index)}
               disabled={product.stock <= 0}
-              className="
+              className={`
                 rounded-xl
                 border
                 p-4
@@ -131,7 +214,9 @@ export default function ProductSearch({ cart, setCart }) {
                 hover:border-[var(--primary)]
                 disabled:cursor-not-allowed
                 disabled:opacity-50
-              "
+
+                ${highlighted === index ? "border-[var(--primary)]" : ""}
+              `}
             >
               <div className="flex items-center justify-between">
                 <div>

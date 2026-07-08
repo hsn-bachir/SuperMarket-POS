@@ -31,6 +31,10 @@ import Inventory from "@/features/inventory/pages/Inventory";
 
 import Reports from "@/features/reports/pages/Reports";
 
+import Users from "@/features/users/pages/Users";
+import AddUser from "@/features/users/pages/AddUser";
+import EditUser from "@/features/users/pages/EditUser";
+
 function RootRedirect() {
   const { user } = useAuth();
   return <Navigate to={user ? "/" : "/login"} replace />;
@@ -71,6 +75,9 @@ export default function AppRouter() {
           <Route path="pos" element={<POS />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/users/new" element={<AddUser />} />
+          <Route path="/users/:id/edit" element={<EditUser />} />
         </Route>
 
         {/* fallback */}

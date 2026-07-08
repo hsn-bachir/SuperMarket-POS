@@ -11,7 +11,9 @@ export default function Pagination({ page, setPage, count, pageSize = 10 }) {
 
     if (page <= 3) end = Math.min(5, totalPages);
 
-    if (page >= totalPages - 2) start = Math.max(1, totalPages - 4);
+    if (page >= totalPages - 2) {
+      start = Math.max(1, totalPages - 4);
+    }
 
     for (let i = start; i <= end; i++) {
       pages.push(i);
@@ -21,17 +23,30 @@ export default function Pagination({ page, setPage, count, pageSize = 10 }) {
   }
 
   return (
-    <div className="mt-6 flex items-center justify-between">
-      <p className="text-sm text-gray-500 dark:text-gray-400">
-        Showing page <span className="font-semibold">{page}</span> of{" "}
-        <span className="font-semibold">{totalPages}</span>
+    <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <p className="text-sm text-gray-400">
+        Showing page <span className="font-semibold text-gray-400">{page}</span>{" "}
+        of <span className="font-semibold text-gray-400">{totalPages}</span>
       </p>
 
       <div className="flex items-center gap-2">
         <button
           disabled={page === 1}
           onClick={() => setPage(page - 1)}
-          className="rounded-lg border px-3 py-2 text-sm transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="
+            rounded-xl
+            border border-gray-700
+            bg-gray-800
+            px-4 py-2
+            text-sm font-medium
+            text-gray-300
+            transition-all
+
+            hover:border-gray-600
+            hover:bg-gray-700
+
+            disabled:cursor-not-allowed
+          "
         >
           Previous
         </button>
@@ -40,11 +55,31 @@ export default function Pagination({ page, setPage, count, pageSize = 10 }) {
           <button
             key={number}
             onClick={() => setPage(number)}
-            className={`h-10 w-10 rounded-lg border text-sm font-medium transition ${
-              number === page
-                ? "bg-blue-600 text-white border-blue-600"
-                : "hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-            }`}
+            className={`
+              h-10 w-10
+              rounded-xl
+              border
+              text-sm font-semibold
+              transition-all
+
+              ${
+                number === page
+                  ? `
+                    border-emerald-500
+                    bg-emerald-500/15
+                    text-emerald-400
+                  `
+                  : `
+                    border-gray-700
+                    bg-gray-800
+                    text-gray-300
+
+                    hover:border-gray-600
+                    hover:bg-gray-700
+                    hover:text-gray-100
+                  `
+              }
+            `}
           >
             {number}
           </button>
@@ -53,7 +88,20 @@ export default function Pagination({ page, setPage, count, pageSize = 10 }) {
         <button
           disabled={page === totalPages}
           onClick={() => setPage(page + 1)}
-          className="rounded-lg border px-3 py-2 text-sm transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="
+            rounded-xl
+            border border-gray-700
+            bg-gray-800
+            px-4 py-2
+            text-sm font-medium
+            text-gray-300
+            transition-all
+
+            hover:border-gray-600
+            hover:bg-gray-700
+
+            disabled:cursor-not-allowed
+          "
         >
           Next
         </button>
