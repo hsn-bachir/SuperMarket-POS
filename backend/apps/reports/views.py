@@ -1,6 +1,6 @@
 from decimal import Decimal
 from datetime import date, timedelta
-from urllib import request
+import math
 
 from django.db.models import (
     Sum,
@@ -42,15 +42,6 @@ from .services import (
     get_profit_loss_report,
     get_stock_aging_report,
 )
-
-from rest_framework.generics import GenericAPIView
-
-from apps.common.pagination import (
-    StandardResultsPagination,
-)
-
-from .utils import paginate_api_view
-
 class DashboardView(APIView):
     permission_classes = [CanViewReports]
     def get(self, request):
@@ -373,61 +364,147 @@ class TopProfitProductsView(BaseReportView):
     results,
 )
     
+from django.db.models.functions import Coalesce
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+
+
+
 class ReorderSuggestionsView(BaseReportView):
+
     serializer_class = ReorderSuggestionSerializer
+
     filename = "reorder-suggestions"
 
     def get(self, request):
-        start_date = request.GET.get("start_date")
-        end_date = request.GET.get("end_date")
-        if not start_date:
-            start_date = (
-                date.today()
-                - timedelta(days=30)
-            )
-        data = get_sales_aggregation(
-            start_date=start_date,
-            end_date=end_date,
+
+        three_months_ago = (
+            timezone.now().date()
+            - relativedelta(months=3)
         )
-        stock_map = get_stock_map()
-        results = []
-        for row in data:
-            stock = stock_map.get(
-                row["product_id"],
+
+        sales = (
+            SaleItem.objects
+            .filter(
+                sale__sale_date__gte=three_months_ago
+            )
+            .values("product")
+            .annotate(
+                sold=Coalesce(
+                    Sum("quantity"),
+                    0,
+                )
+            )
+        )
+
+        sold_map = {
+            row["product"]: float(row["sold"])
+            for row in sales
+        }
+
+        rows = []
+
+        products = Product.objects.all()
+
+        for product in products:
+
+            current = get_stock(product)
+
+            minimum = product.minimum_stock
+
+            if current >= minimum:
+                continue
+
+            sold_last_3_months = sold_map.get(
+                product.id,
                 0,
             )
-            minimum_stock = row[
-                "product__minimum_stock"
-            ]
-            if stock > minimum_stock:
-                continue
-            recommended = max(
-                minimum_stock * 2,
-                max(
-                    row["quantity_sold"] - stock,
-                    0,
-                ),
-            )
-            results.append({
-                "product_id":
-                    row["product_id"],
-                "product_name":
-                    row["product__name"],
-                "current_stock":
-                    stock,
-                "minimum_stock":
-                    minimum_stock,
-                "recommended_order":
-                    recommended,
-            })
 
-        results.sort(
-            key=lambda x:
-                x["current_stock"]
+            avg_monthly = sold_last_3_months / 3
+            daily_sales = avg_monthly / 30 if avg_monthly > 0 else 0
+            days_of_stock = (
+                current / daily_sales
+                if daily_sales > 0
+                else 999
+            )
+
+            profit = (
+                Decimal(product.selling_price)
+                - Decimal(product.cost_price)
+            )   
+
+            shortage = max(
+                minimum - current,
+                0,
+            )
+
+            if avg_monthly < 3:
+                suggested = shortage
+                priority = "TO MINIMUM"
+                reason = "Slow moving product"
+
+            elif profit <= 0:
+                suggested = shortage
+                priority = "TO MINIMUM"
+                reason = "Low or negative profit"
+
+            elif days_of_stock > 60:
+                suggested = shortage
+                priority = "TO MINIMUM"
+                reason = (
+                    f"Stock covers {int(days_of_stock)} days"
+                )
+
+            else:
+                if avg_monthly < 10:
+                    multiplier = 1
+                elif avg_monthly < 30:
+                    multiplier = 1.5
+                else:
+                    multiplier = 2
+
+                suggested = math.ceil(
+                    shortage +
+                    (avg_monthly * multiplier)
+                )
+                priority = "ORDER MORE"
+                reason = "Profitable and sells well"
+
+            rows.append(
+        {
+            "id": product.id,
+            "barcode": product.barcode,
+            "product": product.name,
+            "current_stock": current,
+            "minimum_stock": minimum,
+            "avg_monthly_sales": round(
+                avg_monthly,
+                2,
+            ),
+            "profit_per_unit": round(
+                profit,
+                2,
+            ),
+            "shortage": shortage,
+            "suggested_order": suggested,
+            "priority": priority,
+            "reason": reason,
+            "days_of_stock": round(
+                days_of_stock,
+                1,
+            ),
+        }
+    )
+        rows.sort(
+            key=lambda x: (
+                x["priority"] != "ORDER MORE",
+                x["current_stock"],
+            )
         )
+
         return self.render(
             request,
-            results,
+            rows,
         )
     
 class InventoryValuationView(BaseReportView):

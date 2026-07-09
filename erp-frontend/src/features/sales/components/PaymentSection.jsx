@@ -11,7 +11,6 @@ export default function PaymentSection({ cart }) {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    invoice_number: "",
     currency: "USD",
     exchange_rate: 1,
     payment_method: "CASH",
@@ -34,7 +33,6 @@ export default function PaymentSection({ cart }) {
     try {
       setLoading(true);
       const payload = {
-        invoice_number: form.invoice_number,
         currency: form.currency,
         exchange_rate: form.exchange_rate,
         payment_method: form.payment_method,
@@ -65,13 +63,6 @@ export default function PaymentSection({ cart }) {
       <h2 className="mb-6 text-lg font-semibold">Payment</h2>
 
       <div className="space-y-4">
-        <FormInput
-          label="Invoice Number"
-          name="invoice_number"
-          value={form.invoice_number}
-          onChange={handleChange}
-        />
-
         <FormInput
           label="Sale Date"
           type="date"

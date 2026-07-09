@@ -25,7 +25,7 @@ class SaleItemInputSerializer(serializers.Serializer):
 
 class SaleCreateSerializer(serializers.Serializer):
     invoice_number = serializers.CharField(
-        max_length=100
+        required=False
     )
     currency = serializers.CharField()
     exchange_rate = serializers.DecimalField(

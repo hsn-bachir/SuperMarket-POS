@@ -1,7 +1,6 @@
 import { Boxes, Package, DollarSign } from "lucide-react";
 
 import useReports from "../hooks/useReports";
-
 import { getInventorySummary } from "../api/reportsApi";
 
 import KpiCard from "./KpiCard";
@@ -11,11 +10,17 @@ export default function InventorySummaryCards() {
 
   if (loading) {
     return (
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-36 rounded-2xl bg-slate-100 animate-pulse"
+            className="
+              h-40
+              animate-pulse
+              rounded-3xl
+              border border-gray-700
+              bg-gray-900
+            "
           />
         ))}
       </div>
@@ -23,26 +28,29 @@ export default function InventorySummaryCards() {
   }
 
   return (
-    <div className="grid lg:grid-cols-3 gap-6">
+    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
       <KpiCard
         title="Products"
-        value={data.total_products}
+        value={data?.total_products ?? 0}
+        subtitle="Active Products"
         icon={Boxes}
-        color="bg-blue-600"
+        type="products"
       />
 
       <KpiCard
         title="Stock Units"
-        value={data.total_units}
+        value={data?.total_units ?? 0}
+        subtitle="Total Inventory Units"
         icon={Package}
-        color="bg-emerald-600"
+        type="stock"
       />
 
       <KpiCard
         title="Inventory Value"
-        value={`$${Number(data.inventory_value).toLocaleString()}`}
+        value={`$${Number(data?.inventory_value ?? 0).toLocaleString()}`}
+        subtitle="Current Stock Value"
         icon={DollarSign}
-        color="bg-violet-600"
+        type="value"
       />
     </div>
   );

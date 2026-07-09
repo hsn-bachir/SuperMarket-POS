@@ -37,7 +37,7 @@ export default function ReorderSuggestionsTable({ data }) {
             {data.length > 0 ? (
               data.map((item) => (
                 <tr
-                  key={item.product_id}
+                  key={item.id}
                   className="
                     border-b
                     border-gray-800
@@ -47,7 +47,7 @@ export default function ReorderSuggestionsTable({ data }) {
                 >
                   <td className="px-6 py-4">
                     <span className="font-medium text-gray-100">
-                      {item.product_name}
+                      {item.product}
                     </span>
                   </td>
 
@@ -63,7 +63,7 @@ export default function ReorderSuggestionsTable({ data }) {
 
                   <td className="px-6 py-4 text-right">
                     <span className="font-bold text-emerald-400">
-                      {item.recommended_order}
+                      {item.suggested_order}
                     </span>
                   </td>
                 </tr>

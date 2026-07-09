@@ -7,7 +7,7 @@ export default function Button({
   ...props
 }) {
   const variants = {
-    primary: "bg-[var(--primary)] hover:opacity-90 text-white",
+    primary: "bg-[var(--sidebar-bg)] hover:opacity-90 text-white",
 
     secondary: "bg-white border border-[var(--border)] hover:bg-gray-50",
 

@@ -21,7 +21,6 @@ export default function PurchaseForm({
 
   const [form, setForm] = useState({
     supplier: initialValues.supplier || "",
-    invoice_number: initialValues.invoice_number || "",
     currency: initialValues.currency || "USD",
     exchange_rate: initialValues.exchange_rate || 1,
     purchase_date:
@@ -56,6 +55,16 @@ export default function PurchaseForm({
 
   function handleChange(e) {
     const { name, value } = e.target;
+
+    if (name === "currency") {
+      setForm((prev) => ({
+        ...prev,
+        currency: value,
+        exchange_rate: value === "USD" ? 1 : prev.exchange_rate,
+      }));
+
+      return;
+    }
 
     setForm((prev) => ({
       ...prev,
@@ -135,13 +144,6 @@ export default function PurchaseForm({
                 label: s.name,
               })),
             ]}
-          />
-
-          <FormInput
-            label="Invoice Number"
-            name="invoice_number"
-            value={form.invoice_number}
-            onChange={handleChange}
           />
 
           <FormSelect

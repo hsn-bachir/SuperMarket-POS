@@ -136,7 +136,10 @@ class StockAgingSerializer(serializers.Serializer):
 
     product_name = serializers.CharField()
 
-    minimum_stock = serializers.IntegerField()
+    minimum_stock = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
 
     stock = serializers.IntegerField()
 
@@ -153,17 +156,46 @@ class StockAgingSerializer(serializers.Serializer):
         allow_null=True,
     )
 
-
 class ReorderSuggestionSerializer(serializers.Serializer):
-    product_id = serializers.IntegerField()
 
-    product_name = serializers.CharField()
+    id = serializers.IntegerField()
+
+    barcode = serializers.CharField()
+
+    product = serializers.CharField()
 
     current_stock = serializers.DecimalField(
         max_digits=12,
         decimal_places=2,
     )
 
-    minimum_stock = serializers.IntegerField()
+    minimum_stock = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
 
-    recommended_order = serializers.IntegerField()
+    avg_monthly_sales = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    profit_per_unit = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    shortage = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    days_of_stock = serializers.DecimalField(
+    max_digits=12,
+    decimal_places=1,
+)
+
+    suggested_order = serializers.IntegerField()
+
+    priority = serializers.CharField()
+
+    reason = serializers.CharField()

@@ -26,7 +26,7 @@ class PurchaseCreateSerializer(serializers.Serializer):
     )
 
     invoice_number = serializers.CharField(
-        max_length=100
+        required=False
     )
 
     currency = serializers.CharField()

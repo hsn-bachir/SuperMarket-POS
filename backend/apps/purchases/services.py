@@ -6,9 +6,10 @@ from apps.inventory.services import (
     add_purchase_stock,
     get_stock,
 )
+from apps.common.services import get_next_document_number
 
 @transaction.atomic
-def create_purchase(*,supplier,invoice_number,currency,exchange_rate,purchase_date,items,user):
+def create_purchase(*,supplier,currency,exchange_rate,purchase_date,items,user):
     if not user.has_perm("purchases.add_purchase"):
         raise PermissionError("Not allowed")
     if supplier is None:
@@ -19,7 +20,7 @@ def create_purchase(*,supplier,invoice_number,currency,exchange_rate,purchase_da
     
     purchase = Purchase.objects.create(
         supplier=supplier,
-        invoice_number=invoice_number,
+        invoice_number=get_next_document_number("PURCHASE"),
         currency=currency,
         exchange_rate=exchange_rate,
         purchase_date=purchase_date,
