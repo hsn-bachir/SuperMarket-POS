@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 
 import StockStatusBadge from "./StockStatusBadge";
+import Pagination from "@/components/ui/Pagination";
 
-export default function StockAgingTable({ data }) {
+export default function StockAgingTable({ data, count, page, setPage }) {
   const [search, setSearch] = useState("");
 
   const rows = useMemo(() => {
@@ -140,6 +141,7 @@ export default function StockAgingTable({ data }) {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} setPage={setPage} count={count} />
     </div>
   );
 }

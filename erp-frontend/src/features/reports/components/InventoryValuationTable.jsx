@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 
-export default function InventoryValuationTable({ data }) {
+export default function InventoryValuationTable({
+  data,
+  count,
+  page,
+  setPage,
+}) {
   const [search, setSearch] = useState("");
 
   const rows = useMemo(() => {
@@ -131,6 +137,7 @@ export default function InventoryValuationTable({ data }) {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} setPage={setPage} count={count} />
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {
 } from "recharts";
 
 export default function FastMovingChart({ data }) {
-  const chartData = data.slice(0, 10);
+  const chartData = data ?? [];
 
   return (
     <div className="overflow-hidden rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">

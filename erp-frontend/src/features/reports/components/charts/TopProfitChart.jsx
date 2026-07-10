@@ -12,8 +12,7 @@ import {
 const COLORS = ["#34d399", "#10b981", "#059669", "#047857", "#065f46"];
 
 export default function TopProfitChart({ data }) {
-  const chartData = data.slice(0, 10);
-  console.log("TopProfitChart data:", chartData);
+  const chartData = data ?? [];
 
   return (
     <div className="overflow-hidden rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">

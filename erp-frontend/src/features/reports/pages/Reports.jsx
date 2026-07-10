@@ -12,6 +12,11 @@ import FinancialSection from "../sections/FinancialSection";
 export default function Reports() {
   const [activeTab, setActiveTab] = useState("inventory");
 
+  const [filters, setFilters] = useState({
+    start_date: "",
+    end_date: "",
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -19,15 +24,15 @@ export default function Reports() {
         subtitle="Analyze inventory, sales and financial performance."
       />
 
-      <ReportsFilters />
+      <ReportsFilters filters={filters} setFilters={setFilters} />
 
       <ReportsTabs active={activeTab} onChange={setActiveTab} />
 
-      {activeTab === "inventory" && <InventorySection />}
+      {activeTab === "inventory" && <InventorySection filters={filters} />}
 
-      {activeTab === "sales" && <SalesSection />}
+      {activeTab === "sales" && <SalesSection filters={filters} />}
 
-      {activeTab === "financial" && <FinancialSection />}
+      {activeTab === "financial" && <FinancialSection filters={filters} />}
     </div>
   );
 }

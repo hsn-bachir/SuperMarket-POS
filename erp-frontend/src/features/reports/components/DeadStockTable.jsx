@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 
-export default function DeadStockTable({ data }) {
+export default function DeadStockTable({ data, count, page, setPage }) {
   const [search, setSearch] = useState("");
 
   const rows = useMemo(() => {
@@ -123,6 +124,7 @@ export default function DeadStockTable({ data }) {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} setPage={setPage} count={count} />
     </div>
   );
 }

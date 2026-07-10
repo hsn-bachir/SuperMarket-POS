@@ -1,27 +1,54 @@
 import {
   getProfitLoss,
+  getCogs,
   getTopProfitProducts,
   getFastMoving,
   getSlowMoving,
-} from "../api/reportApi";
+} from "../api/reportsApi";
 
-export async function getSalesReport(filters = {}) {
+export async function loadSalesReports(filters = {}) {
   const [
-    profit,
+    profitLoss,
+    cogs,
     topProfit,
     fastMoving,
     slowMoving,
   ] = await Promise.all([
     getProfitLoss(filters),
-    getTopProfitProducts(filters),
-    getFastMoving(filters),
-    getSlowMoving(filters),
+
+    getCogs(filters),
+
+    getTopProfitProducts({
+      ...filters,
+      limit: 5,
+    }),
+
+    getFastMoving({
+      ...filters,
+      limit: 10,
+    }),
+
+    getSlowMoving({
+      ...filters,
+      limit: 10,
+    }),
   ]);
 
   return {
-    profit: profit.data,
-    topProfit: topProfit.data.results ?? topProfit.data,
-    fastMoving: fastMoving.data.results ?? fastMoving.data,
-    slowMoving: slowMoving.data.results ?? slowMoving.data,
+    profitLoss: profitLoss.data,
+
+    cogs: cogs.data,
+
+    topProfit:
+      topProfit.data.results ??
+      topProfit.data,
+
+    fastMoving:
+      fastMoving.data.results ??
+      fastMoving.data,
+
+    slowMoving:
+      slowMoving.data.results ??
+      slowMoving.data,
   };
 }

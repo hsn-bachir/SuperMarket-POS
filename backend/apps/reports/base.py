@@ -2,26 +2,82 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from apps.accounts.permissions import CanViewReports
-from apps.common.pagination import (
-    StandardResultsPagination,
-)
+from apps.common.pagination import StandardResultsPagination
 
 from .exporters import export_response
 
 
 class BaseReportView(GenericAPIView):
 
-    permission_classes = [
-        CanViewReports,
-    ]
+    permission_classes = [CanViewReports]
 
-    pagination_class = (
-        StandardResultsPagination
-    )
+    pagination_class = StandardResultsPagination
 
     serializer_class = None
 
     filename = "report"
+
+    paginate = True
+
+    search_fields = []
+
+    ordering_fields = []
+
+    default_ordering = None
+
+    def apply_search(self, request, rows):
+
+        search = request.query_params.get("search")
+
+        if not search or not self.search_fields:
+            return rows
+
+        search = search.lower()
+
+        filtered = []
+
+        for row in rows:
+
+            for field in self.search_fields:
+
+                value = str(
+                    row.get(field, "")
+                ).lower()
+
+                if search in value:
+                    filtered.append(row)
+                    break
+
+        return filtered
+
+    def apply_ordering(self, request, rows):
+
+        ordering = request.query_params.get(
+            "ordering",
+            self.default_ordering,
+        )
+
+        if not ordering:
+            return rows
+
+        reverse = ordering.startswith("-")
+
+        field = ordering.lstrip("-")
+
+        if field not in self.ordering_fields:
+            return rows
+
+        return sorted(
+            rows,
+            key=lambda x: x.get(field) or 0,
+            reverse=reverse,
+        )
+
+    def get_summary(self, rows):
+        """
+        Override in reports that need summary cards.
+        """
+        return None
 
     def render(self, request, rows):
 
@@ -34,22 +90,44 @@ class BaseReportView(GenericAPIView):
         if export:
             return export
 
-        page = self.paginate_queryset(rows)
+        rows = self.apply_search(
+            request,
+            rows,
+        )
 
-        if page is not None:
+        rows = self.apply_ordering(
+            request,
+            rows,
+        )
 
-            serializer = self.serializer_class(
-                page,
-                many=True,
-            )
+        summary = self.get_summary(rows)
 
-            return self.get_paginated_response(
-                serializer.data
-            )
+        if self.paginate:
+
+            page = self.paginate_queryset(rows)
+
+            if page is not None:
+
+                serializer = self.serializer_class(
+                    page,
+                    many=True,
+                )
+
+                response = self.get_paginated_response(
+                    serializer.data
+                )
+
+                if summary:
+                    response.data["summary"] = summary
+
+                return response
 
         serializer = self.serializer_class(
             rows,
             many=True,
         )
 
-        return Response(serializer.data)
+        return Response({
+            "summary": summary,
+            "results": serializer.data,
+        })

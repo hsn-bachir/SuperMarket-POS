@@ -97,7 +97,8 @@ def get_stock_map():
 # Inventory Valuation
 # ----------------------------------------------------
 
-def get_inventory_valuation():
+def get_inventory_valuation(start_date=None,
+    end_date=None):
 
     results = []
 
@@ -265,10 +266,23 @@ def get_profit_loss_report(
 # Last Sale Map
 # ----------------------------------------------------
 
-def get_last_sale_map():
+def get_last_sale_map(
+    start_date=None,
+    end_date=None,
+):
+
+    qs = SaleItem.objects.all()
+
+
+    qs = apply_sale_filters(
+        qs,
+        start_date,
+        end_date,
+    )
+
 
     rows = (
-        SaleItem.objects
+        qs
         .values("product_id")
         .annotate(
             last_sale_date=Max(
@@ -276,6 +290,7 @@ def get_last_sale_map():
             )
         )
     )
+
 
     return {
         row["product_id"]:
@@ -288,11 +303,17 @@ def get_last_sale_map():
 # Stock Aging
 # ----------------------------------------------------
 
-def get_stock_aging_report():
+def get_stock_aging_report(
+    start_date=None,
+    end_date=None,
+):
 
     stock_map = get_stock_map()
 
-    last_sale_map = get_last_sale_map()
+    last_sale_map = get_last_sale_map(
+        start_date,
+        end_date,
+    )
 
     today = date.today()
 
@@ -318,8 +339,7 @@ def get_stock_aging_report():
 
         if last_sale:
             days = (
-                today
-                - last_sale
+                today - last_sale
             ).days
 
         inventory_value = (

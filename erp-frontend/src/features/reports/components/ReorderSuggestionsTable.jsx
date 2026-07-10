@@ -1,4 +1,11 @@
-export default function ReorderSuggestionsTable({ data }) {
+import Pagination from "@/components/ui/Pagination";
+
+export default function ReorderSuggestionsTable({
+  data,
+  count,
+  page,
+  setPage,
+}) {
   return (
     <div className="overflow-hidden rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
       <div className="border-b border-gray-700 px-6 py-5">
@@ -81,6 +88,7 @@ export default function ReorderSuggestionsTable({ data }) {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} setPage={setPage} count={count} />
     </div>
   );
 }

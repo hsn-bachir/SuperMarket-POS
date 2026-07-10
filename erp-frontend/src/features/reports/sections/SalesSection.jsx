@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 
-import {
-  getProfitLoss,
-  getCogs,
-  getTopProfitProducts,
-  getFastMoving,
-  getSlowMoving,
-} from "../api/reportsApi";
+import { loadSalesReports } from "../services/salesReports";
 
 import SalesKPIs from "../components/SalesKPIs";
 
@@ -16,65 +10,48 @@ import TopProfitChart from "../components/charts/TopProfitChart";
 import FastMovingChart from "../components/charts/FastMovingChart";
 import SlowMovingChart from "../components/charts/SlowMovingChart";
 
-import TopProfitTable from "../components/TopProfitTable";
-
-export default function SalesSection() {
-  const [profitLoss, setProfitLoss] = useState(null);
-  const [cogs, setCogs] = useState(null);
-
-  const [topProfit, setTopProfit] = useState([]);
-  const [fastMoving, setFastMoving] = useState([]);
-  const [slowMoving, setSlowMoving] = useState([]);
+export default function SalesSection({ filters }) {
+  const [data, setData] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    load();
+  }, [filters]);
 
-  async function loadData() {
+  async function load() {
+    setLoading(true);
+
     try {
-      const [profitRes, cogsRes, topProfitRes, fastRes, slowRes] =
-        await Promise.all([
-          getProfitLoss(),
-          getCogs(),
-          getTopProfitProducts(),
-          getFastMoving(),
-          getSlowMoving(),
-        ]);
+      const result = await loadSalesReports(filters);
 
-      setProfitLoss(profitRes.data);
-      setCogs(cogsRes.data);
-
-      setTopProfit(topProfitRes.data.results || topProfitRes.data);
-      setFastMoving(fastRes.data.results || fastRes.data);
-      setSlowMoving(slowRes.data.results || slowRes.data);
+      setData(result);
     } finally {
       setLoading(false);
     }
   }
 
-  if (loading) return <div className="py-20 text-center">Loading...</div>;
+  if (loading || !data) {
+    return <div className="py-20 text-center">Loading...</div>;
+  }
 
   return (
     <div className="space-y-8">
-      <SalesKPIs profitLoss={profitLoss} cogs={cogs} />
+      <SalesKPIs profitLoss={data.profitLoss} cogs={data.cogs} />
 
-      <div className="grid xl:grid-cols-2 gap-6">
-        <RevenueVsCogsChart profitLoss={profitLoss} />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <RevenueVsCogsChart profitLoss={data.profitLoss} />
 
-        <ProfitMarginChart profitLoss={profitLoss} />
+        <ProfitMarginChart profitLoss={data.profitLoss} />
       </div>
 
-      <TopProfitChart data={topProfit} />
+      <TopProfitChart data={data.topProfit} />
 
-      <div className="grid xl:grid-cols-2 gap-6">
-        <FastMovingChart data={fastMoving} />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <FastMovingChart data={data.fastMoving} />
 
-        <SlowMovingChart data={slowMoving} />
+        <SlowMovingChart data={data.slowMoving} />
       </div>
-
-      <TopProfitTable data={topProfit} />
     </div>
   );
 }
