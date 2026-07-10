@@ -276,6 +276,7 @@ class DeadStockView(BaseReportView):
         request,
         results,
     )
+
 class SlowMovingView(BaseReportView):
 
     serializer_class = SlowMovingSerializer

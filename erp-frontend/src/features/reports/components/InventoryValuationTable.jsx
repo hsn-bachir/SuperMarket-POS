@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import TableHeader from "./TableHeader";
 import Pagination from "@/components/ui/Pagination";
 
 export default function InventoryValuationTable({
@@ -17,45 +17,14 @@ export default function InventoryValuationTable({
   }, [data, search]);
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-      <div className="flex flex-col gap-5 border-b border-gray-700 px-6 py-5 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-100">
-            Inventory Valuation
-          </h2>
-
-          <p className="mt-1 text-sm text-gray-400">
-            Financial value of every stocked product.
-          </p>
-        </div>
-
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-
-          <input
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="
-              h-11
-              w-full
-              rounded-xl
-              border
-              border-gray-700
-              bg-gray-800
-              pl-10
-              pr-4
-              text-sm
-              text-gray-100
-              placeholder:text-gray-500
-              outline-none
-              transition
-              focus:border-gray-600
-              focus:bg-gray-750
-            "
-          />
-        </div>
-      </div>
+    <div className="overflow-visible rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+      <TableHeader
+        title="Inventory Valuation"
+        description="Financial value of every stocked product."
+        search={search}
+        setSearch={setSearch}
+        exportName="/reports/inventory-valuation/"
+      />
 
       <div className="max-h-[600px] overflow-auto">
         <table className="w-full">

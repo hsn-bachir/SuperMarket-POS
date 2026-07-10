@@ -1,4 +1,5 @@
 import Pagination from "@/components/ui/Pagination";
+import TableHeader from "./TableHeader";
 
 export default function ReorderSuggestionsTable({
   data,
@@ -7,16 +8,12 @@ export default function ReorderSuggestionsTable({
   setPage,
 }) {
   return (
-    <div className="overflow-hidden rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-      <div className="border-b border-gray-700 px-6 py-5">
-        <h2 className="text-xl font-semibold text-gray-100">
-          Reorder Suggestions
-        </h2>
-
-        <p className="mt-1 text-sm text-gray-400">
-          Products that should be reordered soon.
-        </p>
-      </div>
+    <div className="overflow-visible rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+      <TableHeader
+        title="Reorder Suggestions"
+        description="Products that should be reordered soon."
+        exportName="/reports/reorder-suggestions/"
+      />
 
       <div className="max-h-[600px] overflow-auto">
         <table className="w-full">

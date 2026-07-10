@@ -35,8 +35,6 @@ export default function InventorySection({ filters }) {
       setLoading(true);
 
       try {
-        console.log("Inventory filters:", filters);
-
         const res = await loadInventoryReports({
           ...filters,
 
