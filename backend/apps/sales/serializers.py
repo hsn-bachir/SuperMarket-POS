@@ -84,3 +84,23 @@ class SaleUpdateSerializer(serializers.ModelSerializer):
             "payment_method",
             "sale_date",
         )
+
+class InvoiceSerializer(serializers.ModelSerializer):
+
+    items = SaleItemSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = Sale
+
+        fields = (
+            "invoice_number",
+            "sale_date",
+            "payment_method",
+            "currency",
+            "exchange_rate",
+            "total",
+            "items",
+        )

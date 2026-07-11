@@ -13,4 +13,10 @@ export const updatePurchase = (id, data) =>
   api.put(`/purchases/${id}/`, data);
 
 export const deletePurchase = (id) =>
-  api.delete(`/purchases/${id}/`);
+  api.delete(`/purchases/${id}/delete/`);
+
+export function getDefault(params = {}) {
+  return api.get("/config/default/", {
+    params,
+  });
+}

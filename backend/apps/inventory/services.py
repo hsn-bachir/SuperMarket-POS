@@ -1,5 +1,3 @@
-from itertools import product
-
 from django.db.models import Sum
 from apps.inventory.models import InventoryMovement
 from apps.common.enums import MovementType
@@ -34,6 +32,18 @@ def add_purchase_stock(*, product, quantity, purchase_item, user):
         user=user,
     )
 
+def remove_purchase_stock(*, product, quantity, purchase_item, user):
+    if product is None:
+        raise ValueError("Product cannot be None")
+
+    return create_inventory_movement(
+        product=product,
+        movement_type=MovementType.ADJUSTMENT,
+        quantity=-quantity,
+        reference_type="PURCHASE_DELETE",
+        reference_id=purchase_item.id,
+        user=user,
+    )
 
 def remove_sale_stock(*, product, quantity, sale_item, user):
     if product is None:
@@ -98,3 +108,35 @@ def create_adjustment(product, quantity, reason, user):
         reference_type="ADJUSTMENT",
         reason=reason,
     )
+
+from decimal import Decimal
+
+from apps.purchases.models import PurchaseItem
+
+
+def recalculate_average_cost(product):
+    purchase_items = (
+        PurchaseItem.objects
+        .filter(product=product)
+        .select_related("purchase")
+    )
+
+    total_quantity = 0
+    total_value = Decimal("0")
+
+    for item in purchase_items:
+        total_quantity += item.quantity
+        total_value += (
+            Decimal(item.quantity)
+            * item.cost_price
+        )
+
+    if total_quantity == 0:
+        product.cost_price = Decimal("0")
+    else:
+        product.cost_price = (
+            total_value /
+            Decimal(total_quantity)
+        )
+
+    product.save(update_fields=["cost_price"])

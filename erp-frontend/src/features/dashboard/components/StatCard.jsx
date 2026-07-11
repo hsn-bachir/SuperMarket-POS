@@ -1,4 +1,5 @@
 import CountUpModule from "react-countup";
+
 const CountUp = CountUpModule.default;
 
 export default function StatCard({
@@ -6,46 +7,58 @@ export default function StatCard({
   value,
   subtitle,
   icon,
-  color = "blue",
+  color = "emerald",
 }) {
   const colors = {
-    blue: "from-blue-500 to-indigo-600",
-    emerald: "from-emerald-500 to-teal-600",
-    amber: "from-amber-500 to-orange-600",
-    red: "from-red-500 to-rose-600",
-    purple: "from-violet-500 to-fuchsia-600",
-    cyan: "from-cyan-500 to-blue-600",
-    teal: "from-teal-500 to-emerald-600",
-    slate: "from-slate-600 to-gray-800",
+    emerald: "bg-emerald-500/15 text-emerald-400",
+    amber: "bg-amber-500/15 text-amber-400",
+    red: "bg-red-500/15 text-red-400",
+    purple: "bg-violet-500/15 text-violet-400",
+    cyan: "bg-cyan-500/15 text-cyan-400",
+    teal: "bg-teal-500/15 text-teal-400",
+    slate: "bg-slate-500/15 text-slate-400",
+    blue: "bg-blue-500/15 text-blue-400",
   };
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl bg-[var(--sidebar-bg)] border border-gray-200 dark:border-gray-800 shadow-sm
-      hover:shadow-xl
-      transition-all
-      duration-300
-      hover:-translate-y-1"
+      className="
+        rounded-3xl
+        border border-gray-700
+        bg-gray-900
+        p-6
+        shadow-[0_8px_30px_rgb(0,0,0,0.25)]
+        transition-all
+        duration-300
+        hover:border-gray-600
+        hover:-translate-y-1
+      "
     >
-      <div className="p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-xl text-gray-400">{title}</p>
-            <h2 className="mt-3 text-2xl text-white font-bold">
-              <CountUp
-                end={Number(value) || 0}
-                separator=","
-                decimals={String(value).includes(".") ? 2 : 0}
-              />
-            </h2>
-            <p className="mt-2 text-xs text-white">{subtitle}</p>
-          </div>
+      <div className="flex items-start justify-between">
+        <div className="space-y-3">
+          <p className="text-sm font-medium tracking-wide text-gray-400 uppercase">
+            {title}
+          </p>
 
-          <div
-            className={`h-14 w-14 rounded-xl flex items-center justify-center text-white bg-gradient-to-r ${colors[color]}`}
-          >
-            {icon}
-          </div>
+          <h2 className="text-3xl font-bold text-white">
+            <CountUp
+              end={Number(value) || 0}
+              separator=","
+              decimals={String(value).includes(".") ? 2 : 0}
+            />
+          </h2>
+
+          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+        </div>
+
+        <div
+          className={`
+            flex h-14 w-14 items-center justify-center
+            rounded-2xl
+            ${colors[color]}
+          `}
+        >
+          {icon}
         </div>
       </div>
     </div>

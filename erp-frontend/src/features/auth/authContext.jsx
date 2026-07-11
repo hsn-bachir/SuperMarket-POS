@@ -14,14 +14,18 @@ export function AuthProvider({ children }) {
 
       if (!token) {
         setUser(null);
-        return;
+        return null;
       }
 
       const res = await getMe();
+
       setUser(res.data);
+
+      return res.data; // return user
     } catch (err) {
       clearTokens();
       setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -33,7 +37,7 @@ export function AuthProvider({ children }) {
 
   // 🔥 ADD THIS
   const reloadUser = async () => {
-    await loadUser();
+    return await loadUser();
   };
 
   const logout = () => {

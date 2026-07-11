@@ -13,6 +13,7 @@ from .serializers import (
     SaleSerializer,
     SaleCreateSerializer,
     SaleUpdateSerializer,
+    InvoiceSerializer,
 )
 
 from rest_framework.permissions import (
@@ -109,3 +110,21 @@ class SaleDetailUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         return Response(
             status=status.HTTP_204_NO_CONTENT
         )
+    
+class SaleInvoiceView(
+    generics.RetrieveAPIView
+):
+    permission_classes = [
+        IsAuthenticated,
+        DjangoModelPermissions,
+    ]
+
+    queryset = (
+        Sale.objects
+        .prefetch_related(
+            "items",
+            "items__product",
+        )
+    )
+
+    serializer_class = InvoiceSerializer

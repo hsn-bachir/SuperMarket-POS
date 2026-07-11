@@ -17,7 +17,7 @@ export const navigation = [
     title: "Dashboard",
     path: "/",
     icon: LayoutDashboard,
-    roles: ["Admin", "Manager", "Cashier"],
+    roles: ["Admin"],
   },
 
   {
@@ -73,21 +73,21 @@ export const navigation = [
     title: "Reports",
     path: "/reports",
     icon: BarChart3,
-    roles: ["Admin", "Manager"],
-  },
-
-  {
-    title: "Users",
-    path: "/users",
-    icon: UserCog,
     roles: ["Admin"],
   },
 
   {
     title: "Admin Panel",
-    path: "http://localhost:8000/admin/",
+    path: "/users",
     icon: Settings,
     roles: ["Admin"],
-    external: true,
   },
+
+  // {
+  //   title: "Admin Panel",
+  //   path: "http://localhost:8000/admin/",
+  //   icon: Settings,
+  //   roles: ["Admin"],
+  //   external: true,
+  // },
 ];

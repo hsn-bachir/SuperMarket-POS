@@ -8,6 +8,7 @@ import FormSelect from "@/components/forms/FormSelect";
 
 import { getSuppliers } from "@/features/supplier/api/supplierApi";
 import { getProducts } from "@/features/products/api/productsApi";
+import { getDefault } from "@/features/purchases/api/purchasesApi";
 
 export default function PurchaseForm({
   initialValues = {},
@@ -18,11 +19,12 @@ export default function PurchaseForm({
 
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [defaults, setDefaults] = useState(null);
 
   const [form, setForm] = useState({
     supplier: initialValues.supplier || "",
-    currency: initialValues.currency || "USD",
-    exchange_rate: initialValues.exchange_rate || 1,
+    currency: "",
+    exchange_rate: "",
     purchase_date:
       initialValues.purchase_date || new Date().toISOString().slice(0, 10),
 
@@ -41,13 +43,23 @@ export default function PurchaseForm({
 
   async function loadData() {
     try {
-      const [supplierRes, productRes] = await Promise.all([
+      const [supplierRes, productRes, defaultRes] = await Promise.all([
         getSuppliers(),
         getProducts(),
+        getDefault(),
       ]);
 
       setSuppliers(supplierRes.data.results ?? supplierRes.data);
       setProducts(productRes.data.results ?? productRes.data);
+
+      setDefaults(defaultRes.data);
+
+      // Apply system defaults to form
+      setForm((prev) => ({
+        ...prev,
+        currency: defaultRes.data.base_currency,
+        exchange_rate: defaultRes.data.exchange_rate,
+      }));
     } catch (err) {
       console.error(err);
     }
@@ -55,16 +67,6 @@ export default function PurchaseForm({
 
   function handleChange(e) {
     const { name, value } = e.target;
-
-    if (name === "currency") {
-      setForm((prev) => ({
-        ...prev,
-        currency: value,
-        exchange_rate: value === "USD" ? 1 : prev.exchange_rate,
-      }));
-
-      return;
-    }
 
     setForm((prev) => ({
       ...prev,

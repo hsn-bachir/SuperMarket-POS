@@ -8,9 +8,9 @@ class Currency(models.TextChoices):
 class MovementType(models.TextChoices):
     PURCHASE = "PURCHASE", "Purchase"
     SALE = "SALE", "Sale"
-    RETURN = "RETURN", "Return"
     ADJUSTMENT = "ADJUSTMENT", "Adjustment"
-
+    PURCHASE_RETURN = "PURCHASE_RETURN", "Purchase Return"
+    SALE_RETURN = "SALE_RETURN", "Sale Return"
 
 class PaymentMethod(models.TextChoices):
     CASH = "CASH", "Cash"

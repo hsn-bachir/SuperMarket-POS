@@ -17,3 +17,9 @@ export const updateSale = (id, data) =>
 
 export const deleteSale = (id) =>
   api.delete(`/sales/${id}/`);
+
+export function getDefault(params = {}) {
+  return api.get("/config/default/", {
+    params,
+  });
+}

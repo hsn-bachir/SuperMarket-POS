@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Shield } from "lucide-react";
 import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
@@ -7,6 +8,7 @@ import LoadingSpinner from "@/components/ui/Loader";
 import EmptyState from "@/components/ui/EmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
+import Button from "@/components/ui/Button";
 
 import UserToolbar from "../components/UserToolbar";
 import UserTable from "../components/UserTable";
@@ -82,6 +84,10 @@ export default function Users() {
     }
   }
 
+  function openAdmin() {
+    window.open("http://localhost:8000/admin/", "_blank");
+  }
+
   const filteredUsers = users.filter((user) => {
     const roleMatch = !role || user.groups.includes(role);
 
@@ -92,7 +98,14 @@ export default function Users() {
 
   return (
     <>
-      <PageHeader title="Users" subtitle="Manage system users." />
+      <div className="flex justify-between items-center mb-6">
+        <PageHeader title="Users" subtitle="Manage system users." />
+
+        <Button onClick={openAdmin} className="flex items-center gap-2">
+          <Shield size={16} />
+          Admin Panel
+        </Button>
+      </div>
 
       <UserToolbar
         search={search}

@@ -26,6 +26,7 @@ import POS from "@/features/sales/pages/POS";
 import Sales from "@/features/sales/pages/Sales";
 import SaleDetails from "@/features/sales/pages/SaleDetails";
 import EditSale from "@/features/sales/pages/EditSale";
+import Print from "@/features/sales/pages/InvoicePage";
 
 import Inventory from "@/features/inventory/pages/Inventory";
 
@@ -79,6 +80,7 @@ export default function AppRouter() {
           <Route path="/users/new" element={<AddUser />} />
           <Route path="/users/:id/edit" element={<EditUser />} />
         </Route>
+        <Route path="/sales/:id/invoice" element={<Print />} />
 
         {/* fallback */}
         <Route path="*" element={<RootRedirect />} />

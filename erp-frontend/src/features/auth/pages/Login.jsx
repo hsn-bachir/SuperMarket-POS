@@ -32,9 +32,25 @@ export default function Login() {
     try {
       await loginUser(username, password);
 
-      await reloadUser();
+      const curUser = await reloadUser();
+      console.log(curUser);
 
-      navigate("/");
+      switch (curUser.role) {
+        case "admin":
+          navigate("/");
+          break;
+
+        case "manager":
+          navigate("/products");
+          break;
+
+        case "cashier":
+          navigate("/pos");
+          break;
+
+        default:
+          navigate("/pos");
+      }
     } catch {
       setError("Invalid username or password.");
     } finally {

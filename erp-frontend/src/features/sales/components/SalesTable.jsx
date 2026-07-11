@@ -1,4 +1,5 @@
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2, Printer } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import DataTable from "@/components/ui/DataTable";
 import Button from "@/components/ui/Button";
@@ -6,6 +7,8 @@ import Button from "@/components/ui/Button";
 import PaymentBadge from "./PaymentBadge";
 
 export default function SalesTable({ sales, onView, onEdit, onDelete }) {
+  const navigate = useNavigate();
+
   const columns = [
     {
       key: "invoice_number",
@@ -25,13 +28,13 @@ export default function SalesTable({ sales, onView, onEdit, onDelete }) {
 
     {
       key: "currency",
-      title: "Currency",
+      title: "Paid Currency",
     },
 
     {
       key: "total",
-      title: "Total",
-      render: (row) => `${row.total} ${row.currency}`,
+      title: "Total USD",
+      render: (row) => `${row.total}`,
     },
 
     {
@@ -54,6 +57,14 @@ export default function SalesTable({ sales, onView, onEdit, onDelete }) {
             onClick={() => onEdit(row.id)}
           >
             <Pencil size={16} />
+          </Button>
+
+          <Button
+            variant="secondary"
+            className="px-3"
+            onClick={() => window.open(`/sales/${row.id}/invoice`, "_blank")}
+          >
+            <Printer size={16} />
           </Button>
 
           <Button

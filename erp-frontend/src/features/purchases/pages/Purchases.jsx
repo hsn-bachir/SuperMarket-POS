@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
 import EmptyState from "@/components/ui/EmptyState";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 import PurchaseToolbar from "../components/PurchaseToolbar";
 import PurchaseTable from "../components/PurchaseTable";
 import Pagination from "@/components/ui/Pagination";
-import { getPurchases } from "../api/purchasesApi";
+import { getPurchases, deletePurchase } from "../api/purchasesApi";
 
 export default function Purchases() {
   const navigate = useNavigate();
@@ -18,6 +20,8 @@ export default function Purchases() {
   const [purchases, setPurchases] = useState([]);
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadPurchases();
@@ -46,6 +50,27 @@ export default function Purchases() {
     navigate(`/purchases/${id}`);
   }
 
+  function handleDelete(id) {
+    setDeleteId(id);
+  }
+
+  async function confirmDelete() {
+    try {
+      setDeleting(true);
+
+      await deletePurchase(deleteId);
+
+      await loadPurchases();
+      toast.success("Purcahse deleted.");
+
+      setDeleteId(null);
+    } catch {
+      toast.error("Unable to delete purchase.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <>
       <PageHeader title="Purchases" subtitle="Manage supplier purchases." />
@@ -64,10 +89,22 @@ export default function Purchases() {
         />
       ) : (
         <>
-          <PurchaseTable purchases={purchases} onView={handleView} />
+          <PurchaseTable
+            purchases={purchases}
+            onView={handleView}
+            onDelete={handleDelete}
+          />
           <Pagination page={page} setPage={setPage} count={count} />
         </>
       )}
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete Sale"
+        description="Deleting this purchase will restore inventory stock."
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </>
   );
 }

@@ -1,9 +1,14 @@
 import { navigation } from "./navigation";
 import SidebarItem from "./SidebarItem";
 import { useAuth } from "@/features/auth/authContext";
+import { LogOut } from "lucide-react";
 
 export default function Sidebar() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
+  function handleLogout() {
+    logout();
+    window.location.href = "/login";
+  }
 
   if (loading || !user) {
     return (
@@ -25,11 +30,21 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-3 space-y-2">
         {filteredNav.map((item) => (
           <SidebarItem key={item.title} {...item} />
         ))}
       </nav>
+
+      <div className="p-2 border-t border-white/10">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+        >
+          <LogOut size={18} />
+          <span>Logout</span>
+        </button>
+      </div>
     </aside>
   );
 }

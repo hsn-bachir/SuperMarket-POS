@@ -1,27 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import Button from "@/components/ui/Button";
 import FormInput from "@/components/forms/FormInput";
 import FormSelect from "@/components/forms/FormSelect";
 
-import { createSale } from "../api/salesApi";
+import { createSale, getDefault } from "../api/salesApi";
 
 export default function PaymentSection({ cart }) {
   const [loading, setLoading] = useState(false);
+  const [defaults, setDefaults] = useState(null);
 
   const [form, setForm] = useState({
-    currency: "USD",
-    exchange_rate: 1,
+    currency: "",
+    exchange_rate: "",
     payment_method: "CASH",
     sale_date: new Date().toISOString().split("T")[0],
   });
 
+  useEffect(() => {
+    loadDefault();
+  }, []);
+
+  async function loadDefault() {
+    try {
+      const res = await getDefault();
+
+      setDefaults(res.data);
+
+      setForm((prev) => ({
+        ...prev,
+        currency: res.data.base_currency,
+        exchange_rate: res.data.exchange_rate,
+      }));
+    } catch {
+      toast.error("Unable to load defaults.");
+    }
+  }
+
+  if (!defaults) {
+    return <div>Loading...</div>;
+  }
+
   function handleChange(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   async function handleSale() {

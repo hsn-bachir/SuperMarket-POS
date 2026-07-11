@@ -9,14 +9,21 @@ from apps.inventory.services import (
 from apps.inventory.services import create_inventory_movement
 from apps.common.enums import MovementType
 from apps.common.services import get_next_document_number
+from apps.configuration.services import get_exchange_rate
 
 
 @transaction.atomic
-def create_sale(*,currency,exchange_rate,payment_method,sale_date,items,user):
+def create_sale(*,currency,exchange_rate=None,payment_method,sale_date,items,user):
     if not user.has_perm("sales.add_sale"):
         raise PermissionError("User not allowed to create sales")
     if not items:
         raise ValueError("Purchase must contain at least one item")
+    
+    if exchange_rate is None:
+        exchange_rate = get_exchange_rate()
+    exchange_rate = Decimal(exchange_rate)
+    if exchange_rate <= 0:
+        raise ValueError("Exchange rate must be greater than zero")
 
     total = Decimal("0")
     for item in items:
@@ -69,7 +76,7 @@ def delete_sale(*, sale, user):
 
         create_inventory_movement(
             product=item.product,
-            movement_type=MovementType.ADJUSTMENT,
+            movement_type=MovementType.SALE_RETURN,
             quantity=item.quantity,
             reference_type="SALE_DELETE",
             reference_id=sale.id,
