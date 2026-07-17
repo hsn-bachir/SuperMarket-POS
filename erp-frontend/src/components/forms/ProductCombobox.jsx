@@ -123,6 +123,21 @@ export default function ProductCombobox({
       case "Enter":
         e.preventDefault();
 
+        const scannedValue = search.trim();
+
+        if (!scannedValue) return;
+
+        const exactProduct = products.find(
+          (product) =>
+            product.barcode === scannedValue ||
+            product.name.toLowerCase() === scannedValue.toLowerCase(),
+        );
+
+        if (exactProduct) {
+          selectProduct(exactProduct);
+          return;
+        }
+
         if (highlighted >= 0) {
           selectProduct(filteredProducts[highlighted]);
         }

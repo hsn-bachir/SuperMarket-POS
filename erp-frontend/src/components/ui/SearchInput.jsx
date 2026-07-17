@@ -27,7 +27,7 @@ export default function SearchInput({
           w-full
           rounded-lg
           border
-          border-[var(--border)]
+          border-gray-300
           bg-white
           pl-10
           pr-4

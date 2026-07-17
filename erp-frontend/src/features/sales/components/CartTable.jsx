@@ -33,6 +33,23 @@ export default function CartTable({ cart, setCart }) {
     );
   }
 
+  function updateQuantity(id, quantity) {
+    setCart((prev) =>
+      prev
+        .map((item) => {
+          if (item.id !== id) return item;
+
+          const newQuantity = Math.max(1, Math.min(quantity, item.stock));
+
+          return {
+            ...item,
+            quantity: newQuantity,
+          };
+        })
+        .filter((item) => item.quantity > 0),
+    );
+  }
+
   function remove(id) {
     setCart((prev) => prev.filter((item) => item.id !== id));
   }
@@ -54,6 +71,7 @@ export default function CartTable({ cart, setCart }) {
           item={item}
           increase={increase}
           decrease={decrease}
+          updateQuantity={updateQuantity}
           remove={remove}
         />
       ))}

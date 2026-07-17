@@ -7,6 +7,7 @@ import FormSelect from "@/components/forms/FormSelect";
 import FormCheckbox from "@/components/forms/FormCheckbox";
 import FormSection from "@/components/forms/FormSection";
 import FormActions from "@/components/forms/FormActions";
+import BarcodeInput from "@/components/forms/BarcodeInput";
 
 export default function ProductForm({
   initialValues = {},
@@ -65,9 +66,8 @@ export default function ProductForm({
     <form onSubmit={handleSubmit} className="space-y-8">
       <FormSection title="General Information">
         <div className="grid gap-5 md:grid-cols-2">
-          <FormInput
+          <BarcodeInput
             label="Barcode"
-            name="barcode"
             value={form.barcode}
             onChange={handleChange}
           />

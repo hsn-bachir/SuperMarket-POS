@@ -7,7 +7,7 @@ export default function FilterSelect({ value, onChange, options }) {
         h-10
         rounded-lg
         border
-        border-[var(--border)]
+        border-gray-300
         bg-white
         px-4
         outline-none

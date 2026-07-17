@@ -82,19 +82,6 @@ export default function AdjustmentDialog({ open, onClose, onSuccess }) {
   return (
     <Dialog open={open} title="Inventory Adjustment" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="rounded-lg border bg-gray-50 dark:bg-zinc-900 p-4 flex gap-3">
-          <Package className="mt-1 text-blue-600" size={20} />
-
-          <div>
-            <p className="font-medium text-white">Manual Stock Adjustment</p>
-
-            <p className="text-sm text-gray-500">
-              Use positive quantities to increase stock and negative quantities
-              to decrease stock.
-            </p>
-          </div>
-        </div>
-
         <ProductCombobox
           value={form.product_id}
           onChange={(id) =>
@@ -122,7 +109,7 @@ export default function AdjustmentDialog({ open, onClose, onSuccess }) {
           onChange={handleChange}
         />
 
-        <div className="flex justify-end gap-3 border-t pt-4">
+        <div className="flex justify-end gap-3 pt-4">
           <Button
             variant="secondary"
             type="button"
