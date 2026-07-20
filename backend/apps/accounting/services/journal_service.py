@@ -23,6 +23,12 @@ class JournalService:
         lines,
         reference=None,
     ):
+        
+        for line in lines:
+            if not line["account"].is_postable:
+                raise ValueError(
+                f"Account {line['account'].code} is not postable"
+            )
 
         # Create journal header
         entry = JournalEntry.objects.create(

@@ -10,6 +10,7 @@ from apps.inventory.services import create_inventory_movement
 from apps.common.enums import MovementType
 from apps.common.services import get_next_document_number
 from apps.configuration.services import get_exchange_rate
+from apps.accounting.services.posting_service import AccountingPostingService
 
 
 @transaction.atomic
@@ -64,6 +65,9 @@ def create_sale(*,currency,exchange_rate=None,payment_method,sale_date,items,use
             sale_item=sale_item,
             user=user,
         )
+
+    AccountingPostingService.post_sale(sale,user)
+    
     return sale
 
 @transaction.atomic
@@ -82,5 +86,8 @@ def delete_sale(*, sale, user):
             reference_id=sale.id,
             user=user,
         )
-
+        AccountingPostingService.reverse_sale(
+    sale=sale,
+    user=user,
+)
     sale.delete()

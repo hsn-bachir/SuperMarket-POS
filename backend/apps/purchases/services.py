@@ -13,6 +13,7 @@ from apps.inventory.services import (
 from apps.common.services import get_next_document_number
 from apps.configuration.services import get_exchange_rate
 from apps.common.enums import Currency
+from apps.accounting.services.posting_service import AccountingPostingService
 
 
 @transaction.atomic
@@ -85,6 +86,11 @@ def create_purchase(*,supplier,currency,exchange_rate=None,purchase_date,items,u
             purchase_item=purchase_item,
             user=user,
         )
+
+        AccountingPostingService.post_purchase(
+    purchase=purchase,
+    user=user,
+)
     return purchase
 
 @transaction.atomic
@@ -119,6 +125,10 @@ def delete_purchase(*, purchase, user):
             user=user,
         )
 
+        AccountingPostingService.reverse_purchase(
+    purchase=purchase,
+    user=user,
+)
     # Delete purchase (PurchaseItems are deleted by CASCADE)
     purchase.delete()
 
