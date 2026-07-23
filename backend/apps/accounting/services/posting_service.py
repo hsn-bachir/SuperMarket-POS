@@ -31,31 +31,36 @@ class AccountingPostingService:
     )
 )
 
+        lines = [
+    {
+        "account": cash,
+        "debit": revenue,
+    },
+    {
+        "account": sales,
+        "credit": revenue,
+    },
+]
+
+        if cogs > 0:
+            lines.extend([
+        {
+            "account": cogs_account,
+            "debit": cogs,
+        },
+        {
+            "account": inventory,
+            "credit": cogs,
+        },
+    ])
+
         return JournalService.create_entry(
             date=sale.sale_date,
             journal_type=JournalType.SALES,
             description=f"Sale #{sale.id}",
             reference=sale,
             created_by=user,
-            lines=[
-                {
-                    "account": cash,
-                    "debit": revenue,
-                },
-                {
-                    "account": sales,
-                    "credit": revenue,
-                },
-                {
-                    "account": cogs_account,
-                    "debit": cogs,
-                },
-                {
-                    "account": inventory,
-                    "credit": cogs,
-                },
-
-            ],
+            lines=lines
         )
     
     @staticmethod

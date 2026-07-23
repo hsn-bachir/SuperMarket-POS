@@ -9,6 +9,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import LoadingSpinner from "@/components/ui/Loader";
 import ProductToolbar from "../components/ProductToolbar";
 import ProductTable from "../components/ProductTable";
+import Pagination from "@/components/ui/Pagination";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -99,6 +100,7 @@ export default function Products() {
           onEdit={handleEdit}
         />
       )}
+      <Pagination page={page} setPage={setPage} count={count} />
       <ConfirmDialog
         open={deleteId !== null}
         title="Delete Product"

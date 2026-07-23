@@ -80,6 +80,7 @@ export default function ProductSearch({ cart, setCart }) {
           barcode: product.barcode,
           name: product.name,
           price: Number(product.selling_price),
+          cost_price: Number(product.cost_price),
           quantity: 1,
           stock: product.stock,
         },

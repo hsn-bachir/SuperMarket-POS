@@ -69,6 +69,7 @@ export default function PaymentSection({ cart }) {
           product: item.id,
           quantity: item.quantity,
           unit_price: item.price,
+          cost_price: item.cost_price,
         })),
       };
 

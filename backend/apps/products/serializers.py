@@ -6,7 +6,9 @@ from apps.inventory.services import get_stock
 
 class ProductSerializer(serializers.ModelSerializer):
     stock = serializers.SerializerMethodField()
-    category = serializers.SlugRelatedField(read_only=True, slug_field="name")
+    category = serializers.PrimaryKeyRelatedField(
+    queryset=Category.objects.all()
+)
 
     class Meta:
         model = Product
