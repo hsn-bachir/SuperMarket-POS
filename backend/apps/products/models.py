@@ -34,7 +34,8 @@ class Product(models.Model):
 
     cost_price = models.DecimalField(
         max_digits=12,
-        decimal_places=2
+        decimal_places=2,
+        default=0,
     )
 
     selling_price = models.DecimalField(

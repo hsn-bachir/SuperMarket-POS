@@ -33,23 +33,16 @@ export default function Login() {
       await loginUser(username, password);
 
       const curUser = await reloadUser();
-      console.log(curUser);
+      const groups = curUser.groups;
 
-      switch (curUser.role) {
-        case "admin":
-          navigate("/");
-          break;
-
-        case "manager":
-          navigate("/products");
-          break;
-
-        case "cashier":
-          navigate("/pos");
-          break;
-
-        default:
-          navigate("/pos");
+      if (groups.includes("Admin")) {
+        navigate("/");
+      } else if (groups.includes("Manager")) {
+        navigate("/products");
+      } else if (groups.includes("Cashier")) {
+        navigate("/pos");
+      } else {
+        navigate("/pos");
       }
     } catch {
       setError("Invalid username or password.");

@@ -25,6 +25,12 @@ class ProductSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+        read_only_fields = (
+            "cost_price",
+            "stock",
+            "created_at",
+            "updated_at",
+        )
 
     def get_stock(self, obj):
         return get_stock(obj)

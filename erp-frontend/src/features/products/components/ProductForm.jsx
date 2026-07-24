@@ -55,7 +55,6 @@ export default function ProductForm({
     onSubmit({
       ...form,
       category: form.category ? Number(form.category) : null,
-      cost_price: form.cost_price === "" ? null : Number(form.cost_price),
       selling_price:
         form.selling_price === "" ? null : Number(form.selling_price),
       minimum_stock: Number(form.minimum_stock),
@@ -89,14 +88,6 @@ export default function ProductForm({
               value: c.id,
               label: c.name,
             }))}
-          />
-
-          <FormInput
-            label="Cost Price"
-            name="cost_price"
-            type="number"
-            value={form.cost_price}
-            onChange={handleChange}
           />
 
           <FormInput
