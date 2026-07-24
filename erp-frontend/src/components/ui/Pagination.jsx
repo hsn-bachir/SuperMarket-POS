@@ -23,7 +23,15 @@ export default function Pagination({ page, setPage, count, pageSize = 10 }) {
   }
 
   return (
-    <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div
+      className="
+    px-6 py-5
+    flex flex-col gap-4
+    md:flex-row
+    md:items-center
+    md:justify-between
+  "
+    >
       <p className="text-sm text-gray-400">
         Showing page <span className="font-semibold text-gray-400">{page}</span>{" "}
         of <span className="font-semibold text-gray-400">{totalPages}</span>
@@ -33,6 +41,7 @@ export default function Pagination({ page, setPage, count, pageSize = 10 }) {
         <button
           disabled={page === 1}
           onClick={() => setPage(page - 1)}
+          type="button"
           className="
             rounded-xl
             border border-gray-700
@@ -55,6 +64,7 @@ export default function Pagination({ page, setPage, count, pageSize = 10 }) {
           <button
             key={number}
             onClick={() => setPage(number)}
+            type="button"
             className={`
               h-10 w-10
               rounded-xl
@@ -88,6 +98,7 @@ export default function Pagination({ page, setPage, count, pageSize = 10 }) {
         <button
           disabled={page === totalPages}
           onClick={() => setPage(page + 1)}
+          type="button"
           className="
             rounded-xl
             border border-gray-700

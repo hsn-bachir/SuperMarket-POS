@@ -512,8 +512,6 @@ class ReorderSuggestionsView(BaseReportView):
 
     def get(self, request):
 
-        limit = request.GET.get("limit")
-
         three_months_ago = (
             timezone.now().date()
             - relativedelta(months=3)
@@ -633,9 +631,6 @@ class ReorderSuggestionsView(BaseReportView):
             )
         )
 
-        if limit:
-            rows = rows[: int(limit)]
-
         return self.render(
             request,
             rows,
@@ -649,23 +644,14 @@ class InventoryValuationView(BaseReportView):
     def get(self, request):
 
         rows = get_inventory_valuation(
-        start_date=request.GET.get(
-            "start_date"
-        ),
-        end_date=request.GET.get(
-            "end_date"
-        ),
-    )
-
-        limit = request.GET.get("limit")
-
-        if limit:
-            rows = rows[: int(limit)]
+            start_date=request.GET.get("start_date"),
+            end_date=request.GET.get("end_date"),
+        )
 
         return self.render(
             request,
             rows,
-        )  
+        )
 
 class InventorySummaryView(APIView):
     permission_classes = [
@@ -744,12 +730,6 @@ class StockAgingView(BaseReportView):
             "end_date"
         ),
     )
-
-        limit = request.GET.get("limit")
-
-        if limit:
-            rows = rows[: int(limit)]
-
         return self.render(
             request,
             rows,

@@ -15,9 +15,9 @@ export default function ReorderSuggestionsTable({
         exportName="/reports/reorder-suggestions/"
       />
 
-      <div className="max-h-[600px] overflow-auto">
+      <div>
         <table className="w-full">
-          <thead className="sticky top-0 z-10 border-b border-gray-700 bg-gray-800/95 backdrop-blur">
+          <thead className="border-b border-gray-700 bg-gray-800/95 backdrop-blur">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
                 Product

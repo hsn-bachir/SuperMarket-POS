@@ -67,7 +67,7 @@ export default function InventorySection({ filters }) {
     pages.reorder,
   ]);
 
-  if (loading || !data) {
+  if (!data) {
     return (
       <div
         className="
