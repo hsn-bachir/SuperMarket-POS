@@ -4,6 +4,7 @@ export default function BarcodeInput({
   label,
   value,
   onChange,
+  required = false,
   className = "",
 }) {
   const inputRef = useRef(null);
@@ -14,7 +15,6 @@ export default function BarcodeInput({
     function handleKeyDown(e) {
       const active = document.activeElement;
 
-      // Don't interfere if user is typing in another input
       if (active && active.tagName === "INPUT" && active !== inputRef.current) {
         return;
       }
@@ -22,14 +22,12 @@ export default function BarcodeInput({
       if (e.key === "Enter") {
         if (bufferRef.current.length > 0) {
           updateBarcode(bufferRef.current);
-
           bufferRef.current = "";
         }
 
         return;
       }
 
-      // Barcode scanners type very quickly
       if (e.key.length === 1) {
         bufferRef.current += e.key;
 
@@ -63,6 +61,7 @@ export default function BarcodeInput({
       {label && (
         <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">
           {label}
+          {required && <span className="ml-1 text-red-500">*</span>}
         </label>
       )}
 
@@ -71,6 +70,7 @@ export default function BarcodeInput({
         name="barcode"
         value={value}
         onChange={onChange}
+        required={required}
         className={`
           h-10
           w-full

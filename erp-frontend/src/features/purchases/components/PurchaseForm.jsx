@@ -148,6 +148,7 @@ export default function PurchaseForm({
                 label: s.name,
               })),
             ]}
+            required
           />
 
           <FormSelect
@@ -165,6 +166,7 @@ export default function PurchaseForm({
                 label: "LBP",
               },
             ]}
+            required
           />
 
           <FormInput
@@ -173,6 +175,7 @@ export default function PurchaseForm({
             name="exchange_rate"
             value={form.exchange_rate}
             onChange={handleChange}
+            required
           />
 
           <FormSelect
@@ -190,6 +193,7 @@ export default function PurchaseForm({
                 label: "Card",
               },
             ]}
+            required
           />
 
           <FormInput
@@ -198,6 +202,7 @@ export default function PurchaseForm({
             name="purchase_date"
             value={form.purchase_date}
             onChange={handleChange}
+            required
           />
         </div>
       </div>
@@ -229,6 +234,7 @@ export default function PurchaseForm({
                     label: p.name,
                   })),
                 ]}
+                required
               />
 
               <FormInput
@@ -236,6 +242,7 @@ export default function PurchaseForm({
                 type="number"
                 value={item.quantity}
                 onChange={(e) => updateItem(index, "quantity", e.target.value)}
+                required
               />
 
               <FormInput
@@ -245,6 +252,7 @@ export default function PurchaseForm({
                 onChange={(e) =>
                   updateItem(index, "cost_price", e.target.value)
                 }
+                required
               />
 
               <Button

@@ -1,9 +1,16 @@
-export default function FormInput({ label, error, className = "", ...props }) {
+export default function FormInput({
+  label,
+  error,
+  required = false,
+  className = "",
+  ...props
+}) {
   return (
     <div>
       {label && (
         <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">
           {label}
+          {required && <span className="ml-1 text-red-500">*</span>}
         </label>
       )}
 
@@ -22,9 +29,10 @@ export default function FormInput({ label, error, className = "", ...props }) {
           focus:border-gray-600
           focus:ring-2 focus:ring-gray-600/50
           disabled:cursor-not-allowed
-        disabled:opacity-50
+          disabled:opacity-50
           ${className}
         `}
+        required={required}
         {...props}
       />
 

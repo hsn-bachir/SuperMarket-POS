@@ -90,6 +90,7 @@ export default function AdjustmentDialog({ open, onClose, onSuccess }) {
               product_id: id,
             }))
           }
+          required
         />
 
         <FormInput
@@ -99,6 +100,7 @@ export default function AdjustmentDialog({ open, onClose, onSuccess }) {
           placeholder="+10 or -5"
           value={form.quantity}
           onChange={handleChange}
+          required
         />
 
         <FormInput
@@ -107,6 +109,7 @@ export default function AdjustmentDialog({ open, onClose, onSuccess }) {
           placeholder="Damaged items, stock count correction..."
           value={form.reason}
           onChange={handleChange}
+          required
         />
 
         <div className="flex justify-end gap-3 pt-4">

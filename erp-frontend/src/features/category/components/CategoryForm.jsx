@@ -38,6 +38,7 @@ export default function CategoryForm({
             name="name"
             value={form.name}
             onChange={handleChange}
+            required
           />
         </div>
       </FormSection>

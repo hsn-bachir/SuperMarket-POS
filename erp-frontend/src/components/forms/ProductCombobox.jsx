@@ -7,6 +7,7 @@ export default function ProductCombobox({
   value,
   onChange,
   label = "Product",
+  required = false,
   placeholder = "Search product name or barcode...",
 }) {
   const inputRef = useRef(null);
@@ -156,7 +157,10 @@ export default function ProductCombobox({
 
   return (
     <div ref={wrapperRef} className="relative space-y-2">
-      <label className="text-sm font-medium text-gray-900">{label}</label>
+      <label className="text-sm font-medium text-gray-900">
+        {label}
+        {required && <span className="ml-1 text-red-500">*</span>}
+      </label>
 
       <div className="relative">
         <Search

@@ -43,6 +43,7 @@ export default function SupplierForm({
             name="name"
             value={form.name}
             onChange={handleChange}
+            required
           />
 
           <FormInput

@@ -129,10 +129,10 @@ export default function Users() {
           />
 
           <Pagination
-            currentPage={page}
-            totalItems={count}
+            page={page}
+            setPage={setPage}
+            count={count}
             pageSize={10}
-            onPageChange={setPage}
           />
         </>
       )}

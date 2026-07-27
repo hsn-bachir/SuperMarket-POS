@@ -175,6 +175,7 @@ export default function UserForm({ id }) {
                 label: group.name,
               })),
             ]}
+            required
           />
         </div>
 

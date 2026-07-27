@@ -69,6 +69,7 @@ export default function ProductForm({
             label="Barcode"
             value={form.barcode}
             onChange={handleChange}
+            required
           />
 
           <FormInput
@@ -76,6 +77,7 @@ export default function ProductForm({
             name="name"
             value={form.name}
             onChange={handleChange}
+            required
           />
 
           <FormSelect
@@ -88,6 +90,7 @@ export default function ProductForm({
               value: c.id,
               label: c.name,
             }))}
+            required
           />
 
           <FormInput
@@ -96,6 +99,7 @@ export default function ProductForm({
             type="number"
             value={form.selling_price}
             onChange={handleChange}
+            required
           />
 
           <FormInput
@@ -104,6 +108,7 @@ export default function ProductForm({
             type="number"
             value={form.minimum_stock}
             onChange={handleChange}
+            required
           />
         </div>
 
@@ -113,6 +118,7 @@ export default function ProductForm({
           name="is_active"
           checked={form.is_active}
           onChange={handleChange}
+          required
         />
       </FormSection>
 

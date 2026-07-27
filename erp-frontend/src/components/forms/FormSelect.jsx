@@ -3,6 +3,7 @@ export default function FormSelect({
   options = [],
   placeholder = "Select...",
   error,
+  required = false,
   className = "",
   ...props
 }) {
@@ -11,6 +12,7 @@ export default function FormSelect({
       {label && (
         <label className="mb-2 block text-sm font-medium text-[var(--text-primary)]">
           {label}
+          {required && <span className="ml-1 text-red-500">*</span>}
         </label>
       )}
 
@@ -30,6 +32,7 @@ export default function FormSelect({
           focus:ring-2 focus:ring-gray-600/50
           ${className}
         `}
+        required={required}
         {...props}
       >
         <option value="">{placeholder}</option>
