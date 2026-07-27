@@ -1,6 +1,7 @@
 from django.db import models
 
 from apps.common.enums import Currency
+from apps.common.enums import PaymentMethod
 
 
 class Purchase(models.Model):
@@ -25,6 +26,12 @@ class Purchase(models.Model):
         max_digits=12,
         decimal_places=2,
         default=1,
+    )
+
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.CASH,
     )
 
     purchase_date = models.DateField()

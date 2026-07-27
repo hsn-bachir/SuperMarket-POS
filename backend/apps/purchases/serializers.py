@@ -38,6 +38,7 @@ class PurchaseCreateSerializer(serializers.Serializer):
         default=1
     )
 
+    payment_method = serializers.CharField()
     purchase_date = serializers.DateField()
 
     items = PurchaseItemInputSerializer(

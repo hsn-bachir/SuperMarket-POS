@@ -17,7 +17,7 @@ from apps.accounting.services.posting_service import AccountingPostingService
 
 
 @transaction.atomic
-def create_purchase(*,supplier,currency,exchange_rate=None,purchase_date,items,user):
+def create_purchase(*,supplier,currency,exchange_rate=None,payment_method,purchase_date,items,user):
     if not user.has_perm("purchases.add_purchase"):
         raise PermissionError("Not allowed")
     if supplier is None:
@@ -35,6 +35,7 @@ def create_purchase(*,supplier,currency,exchange_rate=None,purchase_date,items,u
         invoice_number=get_next_document_number("PURCHASE"),
         currency=currency,
         exchange_rate=exchange_rate,
+        payment_method=payment_method,
         purchase_date=purchase_date,
     )
 

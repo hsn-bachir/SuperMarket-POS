@@ -15,7 +15,8 @@ class MovementType(models.TextChoices):
 class PaymentMethod(models.TextChoices):
     CASH = "CASH", "Cash"
     CARD = "CARD", "Card"
-    TRANSFER = "TRANSFER", "Transfer"
+    TRANSFER = "TRANSFER", "Bank Transfer"
+    CREDIT = "CREDIT", "Credit"
 
 class AccountType(models.TextChoices):
     ASSET = "ASSET", "Asset"
@@ -35,6 +36,7 @@ class JournalType(models.TextChoices):
     CASH_RECEIPT = "CASH_RECEIPT", "Cash Receipt"
     CASH_PAYMENT = "CASH_PAYMENT", "Cash Payment"
     ADJUSTMENT = "ADJUSTMENT", "Adjustment"
+    EXPENSE = "EXPENSE", "Expense"
 
 class ReferenceType(models.TextChoices):
     SALE = "SALE", "Sale"
@@ -45,6 +47,11 @@ class ReferenceType(models.TextChoices):
     OPENING_BALANCE = "OPENING_BALANCE", "Opening Balance"
 
 class EntryStatus(models.TextChoices):
+    DRAFT = "DRAFT", "Draft"
+    POSTED = "POSTED", "Posted"
+    CANCELLED = "CANCELLED", "Cancelled"
+
+class ExpenseStatus(models.TextChoices):
     DRAFT = "DRAFT", "Draft"
     POSTED = "POSTED", "Posted"
     CANCELLED = "CANCELLED", "Cancelled"

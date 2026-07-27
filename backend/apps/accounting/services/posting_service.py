@@ -2,7 +2,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from apps.accounting.models import Account
 from apps.accounting.services.journal_service import JournalService
-from apps.common.enums import JournalType
+from apps.common.enums import JournalType,PaymentMethod
 
 
 def money(value):
@@ -17,12 +17,13 @@ class AccountingPostingService:
     @staticmethod
     def get_accounts():
         return {
-            "cash": Account.objects.get(code="1110"),
-            "sales": Account.objects.get(code="4100"),
-            "inventory": Account.objects.get(code="1141"),
-            "cogs": Account.objects.get(code="5100"),
-            "payable": Account.objects.get(code="2110"),
-        }
+        "cash": Account.objects.get(code="1110"),
+        "bank": Account.objects.get(code="1120"),
+        "sales": Account.objects.get(code="4100"),
+        "inventory": Account.objects.get(code="1141"),
+        "cogs": Account.objects.get(code="5100"),
+        "payable": Account.objects.get(code="2110"),
+    }
 
     @staticmethod
     def calculate_sale_cogs(sale):
@@ -132,26 +133,38 @@ class AccountingPostingService:
         accounts = AccountingPostingService.get_accounts()
 
         total = AccountingPostingService.calculate_purchase_total(
-            purchase
-        )
+        purchase
+    )
+
+        payment_account = accounts["payable"]
+
+        if purchase.payment_method == PaymentMethod.CASH:
+            payment_account = accounts["cash"]
+
+        elif purchase.payment_method in (
+        PaymentMethod.CARD,
+        PaymentMethod.TRANSFER,
+    ):
+            payment_account = accounts["bank"]
+
 
         return JournalService.create_entry(
-            date=purchase.purchase_date,
-            journal_type=JournalType.PURCHASE,
-            description=f"Purchase #{purchase.invoice_number}",
-            reference=purchase,
-            created_by=user,
-            lines=[
-                {
-                    "account": accounts["inventory"],
-                    "debit": total,
-                },
-                {
-                    "account": accounts["payable"],
-                    "credit": total,
-                },
-            ],
-        )
+        date=purchase.purchase_date,
+        journal_type=JournalType.PURCHASE,
+        description=f"Purchase #{purchase.invoice_number}",
+        reference=purchase,
+        created_by=user,
+        lines=[
+            {
+                "account": accounts["inventory"],
+                "debit": total,
+            },
+            {
+                "account": payment_account,
+                "credit": total,
+            },
+        ],
+    )
 
 
     @staticmethod
@@ -160,23 +173,104 @@ class AccountingPostingService:
         accounts = AccountingPostingService.get_accounts()
 
         total = AccountingPostingService.calculate_purchase_total(
-            purchase
-        )
+        purchase
+    )
+
+        payment_account = accounts["payable"]
+
+        if purchase.payment_method == PaymentMethod.CASH:
+            payment_account = accounts["cash"]
+
+        elif purchase.payment_method in (
+        PaymentMethod.CARD,
+        PaymentMethod.TRANSFER,
+    ):
+            payment_account = accounts["bank"]
+
 
         return JournalService.create_entry(
-            date=purchase.purchase_date,
-            journal_type=JournalType.PURCHASE,
-            description=f"Reverse Purchase #{purchase.invoice_number}",
-            reference=purchase,
-            created_by=user,
-            lines=[
-                {
-                    "account": accounts["payable"],
-                    "debit": total,
-                },
-                {
-                    "account": accounts["inventory"],
-                    "credit": total,
-                },
-            ],
-        )
+        date=purchase.purchase_date,
+        journal_type=JournalType.PURCHASE,
+        description=f"Reverse Purchase #{purchase.invoice_number}",
+        reference=purchase,
+        created_by=user,
+        lines=[
+            {
+                "account": payment_account,
+                "debit": total,
+            },
+            {
+                "account": accounts["inventory"],
+                "credit": total,
+            },
+        ],
+    )
+
+    @staticmethod
+    def post_expense(expense, user):
+
+        accounts = AccountingPostingService.get_accounts()
+
+        payment_account = accounts["payable"]
+
+        if expense.payment_method == PaymentMethod.CASH:
+            payment_account = accounts["cash"]
+
+        elif expense.payment_method in (
+        PaymentMethod.CARD,
+        PaymentMethod.TRANSFER,
+    ):
+            payment_account = accounts["bank"]
+
+        return JournalService.create_entry(
+        date=expense.date,
+        journal_type=JournalType.EXPENSE,
+        description=f"Expense #{expense.number}",
+        reference=expense,
+        created_by=user,
+        lines=[
+            {
+                "account": expense.category.account,
+                "debit": money(expense.amount),
+            },
+            {
+                "account": payment_account,
+                "credit": money(expense.amount),
+            },
+        ],
+    )
+
+
+    @staticmethod
+    def reverse_expense(expense, user):
+
+        accounts = AccountingPostingService.get_accounts()
+
+        payment_account = accounts["payable"]
+
+        if expense.payment_method == PaymentMethod.CASH:
+            payment_account = accounts["cash"]
+
+        elif expense.payment_method in (
+            PaymentMethod.CARD,
+            PaymentMethod.TRANSFER,
+    ):
+            payment_account = accounts["bank"]
+
+        return JournalService.create_entry(
+        date=expense.date,
+        journal_type=JournalType.EXPENSE,
+        description=f"Reverse Expense #{expense.number}",
+        reference=expense,
+        created_by=user,
+        lines=[
+            {
+                "account": payment_account,
+                "debit": money(expense.amount),
+            },
+            {
+                "account": expense.category.account,
+                "credit": money(expense.amount),
+            },
+        ],
+    )

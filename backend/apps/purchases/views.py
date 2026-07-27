@@ -23,19 +23,6 @@ class PurchaseListView(generics.ListAPIView):
         DjangoModelPermissions,
     ]
 
-    queryset = (
-        Purchase.objects
-        .select_related("supplier")
-        .prefetch_related(
-            "items",
-            "items__product",
-        )
-        .order_by(
-            "-purchase_date",
-            "-id",
-        )
-    )
-
     serializer_class = PurchaseSerializer
 
     filter_backends = [SearchFilter]
@@ -45,6 +32,28 @@ class PurchaseListView(generics.ListAPIView):
         "supplier__name",
     ]
 
+    def get_queryset(self):
+        queryset = (
+            Purchase.objects
+            .select_related("supplier")
+            .prefetch_related(
+                "items",
+                "items__product",
+            )
+            .order_by(
+                "-purchase_date",
+                "-id",
+            )
+        )
+
+        payment = self.request.query_params.get("payment")
+
+        if payment:
+            queryset = queryset.filter(
+                payment_method=payment
+            )
+
+        return queryset
 
 class PurchaseCreateView(generics.CreateAPIView):
     permission_classes = [
@@ -64,6 +73,8 @@ class PurchaseCreateView(generics.CreateAPIView):
         serializer.is_valid(
             raise_exception=True
         )
+
+        
 
         purchase = serializer.save()
 

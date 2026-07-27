@@ -25,6 +25,7 @@ export default function PurchaseForm({
     supplier: initialValues.supplier || "",
     currency: "",
     exchange_rate: "",
+    payment_method: "CASH",
     purchase_date:
       initialValues.purchase_date || new Date().toISOString().slice(0, 10),
 
@@ -113,6 +114,7 @@ export default function PurchaseForm({
       ...form,
 
       supplier: Number(form.supplier),
+      payment_method: form.payment_method,
 
       exchange_rate: Number(form.exchange_rate),
 
@@ -171,6 +173,23 @@ export default function PurchaseForm({
             name="exchange_rate"
             value={form.exchange_rate}
             onChange={handleChange}
+          />
+
+          <FormSelect
+            label="Payment Method"
+            name="payment_method"
+            value={form.payment_method}
+            onChange={handleChange}
+            options={[
+              {
+                value: "CASH",
+                label: "Cash",
+              },
+              {
+                value: "CARD",
+                label: "Card",
+              },
+            ]}
           />
 
           <FormInput
