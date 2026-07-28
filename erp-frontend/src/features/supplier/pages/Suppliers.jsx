@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { getSuppliers, deleteSupplier } from "../api/supplierApi";
+import { getListSuppliers, deleteSupplier } from "../api/supplierApi";
 
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
@@ -29,7 +29,7 @@ export default function Suppliers() {
     try {
       setLoading(true);
 
-      const res = await getSuppliers({
+      const res = await getListSuppliers({
         page,
         search,
       });

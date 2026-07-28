@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { getProducts, deleteProduct } from "../api/productsApi";
+import { getListProducts, deleteProduct } from "../api/productsApi";
 
 import PageHeader from "@/components/ui/PageHeader";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -31,7 +31,7 @@ export default function Products() {
     try {
       setLoading(true);
 
-      const res = await getProducts({
+      const res = await getListProducts({
         page,
 
         search,

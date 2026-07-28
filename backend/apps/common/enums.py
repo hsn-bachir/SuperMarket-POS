@@ -37,6 +37,7 @@ class JournalType(models.TextChoices):
     CASH_PAYMENT = "CASH_PAYMENT", "Cash Payment"
     ADJUSTMENT = "ADJUSTMENT", "Adjustment"
     EXPENSE = "EXPENSE", "Expense"
+    PAYMENT = "PAYMENT", "Payment"
 
 class ReferenceType(models.TextChoices):
     SALE = "SALE", "Sale"
@@ -55,3 +56,13 @@ class ExpenseStatus(models.TextChoices):
     DRAFT = "DRAFT", "Draft"
     POSTED = "POSTED", "Posted"
     CANCELLED = "CANCELLED", "Cancelled"
+
+class PaymentStatus(models.TextChoices):
+    DRAFT = "DRAFT", "Draft"
+    POSTED = "POSTED", "Posted"
+    CANCELLED = "CANCELLED", "Cancelled"
+
+class PaymentType(models.TextChoices):
+    CUSTOMER = "CUSTOMER", "Customer"
+    SUPPLIER = "SUPPLIER", "Supplier"
+    EXPENSE = "EXPENSE", "Expense"

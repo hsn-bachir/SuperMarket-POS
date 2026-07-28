@@ -2,7 +2,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from apps.accounting.models import Account
 from apps.accounting.services.journal_service import JournalService
-from apps.common.enums import JournalType,PaymentMethod
+from apps.common.enums import JournalType,PaymentMethod,PaymentType
 
 
 def money(value):
@@ -15,14 +15,29 @@ def money(value):
 class AccountingPostingService:
 
     @staticmethod
+    def get_payment_account(payment_method, accounts):
+
+        if payment_method == PaymentMethod.CASH:
+            return accounts["cash"]
+
+        if payment_method in (
+        PaymentMethod.CARD,
+        PaymentMethod.TRANSFER,
+    ):
+            return accounts["bank"]
+
+        return accounts["receivable"]
+
+    @staticmethod
     def get_accounts():
         return {
         "cash": Account.objects.get(code="1110"),
         "bank": Account.objects.get(code="1120"),
-        "sales": Account.objects.get(code="4100"),
+        "receivable": Account.objects.get(code="1130"),
         "inventory": Account.objects.get(code="1141"),
-        "cogs": Account.objects.get(code="5100"),
         "payable": Account.objects.get(code="2110"),
+        "sales": Account.objects.get(code="4100"),
+        "cogs": Account.objects.get(code="5100"),
     }
 
     @staticmethod
@@ -51,16 +66,21 @@ class AccountingPostingService:
         revenue = money(sale.total)
         cogs = AccountingPostingService.calculate_sale_cogs(sale)
 
+        payment_account = AccountingPostingService.get_payment_account(
+    sale.payment_method,
+    accounts,
+)
+
         lines = [
-            {
-                "account": accounts["cash"],
-                "debit": revenue,
-            },
-            {
-                "account": accounts["sales"],
-                "credit": revenue,
-            },
-        ]
+    {
+        "account": payment_account,
+        "debit": revenue,
+    },
+    {
+        "account": accounts["sales"],
+        "credit": revenue,
+    },
+]
 
         # Inventory decrease + COGS recognition
         if cogs > 0:
@@ -93,15 +113,20 @@ class AccountingPostingService:
         revenue = money(sale.total)
         cogs = AccountingPostingService.calculate_sale_cogs(sale)
 
+        payment_account = AccountingPostingService.get_payment_account(
+    sale.payment_method,
+    accounts,
+)
+
         lines = [
             {
                 "account": accounts["sales"],
                 "debit": revenue,
             },
             {
-                "account": accounts["cash"],
-                "credit": revenue,
-            },
+    "account": payment_account,
+    "credit": revenue,
+},
         ]
 
         # Restore inventory
@@ -136,16 +161,13 @@ class AccountingPostingService:
         purchase
     )
 
-        payment_account = accounts["payable"]
-
-        if purchase.payment_method == PaymentMethod.CASH:
-            payment_account = accounts["cash"]
-
-        elif purchase.payment_method in (
-        PaymentMethod.CARD,
-        PaymentMethod.TRANSFER,
-    ):
-            payment_account = accounts["bank"]
+        if purchase.payment_method == PaymentMethod.CREDIT:
+            payment_account = accounts["payable"]
+        else:
+            payment_account = AccountingPostingService.get_payment_account(
+        purchase.payment_method,
+        accounts,
+    )
 
 
         return JournalService.create_entry(
@@ -178,14 +200,13 @@ class AccountingPostingService:
 
         payment_account = accounts["payable"]
 
-        if purchase.payment_method == PaymentMethod.CASH:
-            payment_account = accounts["cash"]
-
-        elif purchase.payment_method in (
-        PaymentMethod.CARD,
-        PaymentMethod.TRANSFER,
-    ):
-            payment_account = accounts["bank"]
+        if purchase.payment_method == PaymentMethod.CREDIT:
+            payment_account = accounts["payable"]
+        else:
+            payment_account = AccountingPostingService.get_payment_account(
+        purchase.payment_method,
+        accounts,
+    )
 
 
         return JournalService.create_entry(
@@ -273,4 +294,135 @@ class AccountingPostingService:
                 "credit": money(expense.amount),
             },
         ],
+    )
+
+
+    @staticmethod
+    def post_payment(payment, user):
+
+        accounts = AccountingPostingService.get_accounts()
+
+        if payment.payment_method == PaymentMethod.CASH:
+            payment_account = accounts["cash"]
+
+        elif payment.payment_method in (
+        PaymentMethod.CARD,
+        PaymentMethod.TRANSFER,
+    ):
+            payment_account = accounts["bank"]
+
+        else:
+            raise ValueError(
+            "Payments cannot be made using CREDIT."
+        )
+
+        if payment.payment_type == PaymentType.SUPPLIER:
+
+            lines = [
+            {
+                "account": accounts["payable"],
+                "debit": money(payment.amount),
+            },
+            {
+                "account": payment_account,
+                "credit": money(payment.amount),
+            },
+        ]
+
+        elif payment.payment_type == PaymentType.CUSTOMER:
+
+            lines = [
+            {
+                "account": payment_account,
+                "debit": money(payment.amount),
+            },
+            {
+                "account": accounts["receivable"],
+                "credit": money(payment.amount),
+            },
+        ]
+
+        elif payment.payment_type == PaymentType.EXPENSE:
+
+            lines = [
+            {
+                "account": accounts["payable"],
+                "debit": money(payment.amount),
+            },
+            {
+                "account": payment_account,
+                "credit": money(payment.amount),
+            },
+        ]
+
+        else:
+            raise ValueError("Invalid payment type.")
+
+        return JournalService.create_entry(
+        date=payment.date,
+        journal_type=JournalType.PAYMENT,
+        description=f"Payment #{payment.number}",
+        reference=payment,
+        created_by=user,
+        lines=lines,
+    )
+
+    @staticmethod
+    def reverse_payment(payment, user):
+
+        accounts = AccountingPostingService.get_accounts()
+
+        if payment.payment_method == PaymentMethod.CASH:
+            payment_account = accounts["cash"]
+
+        elif payment.payment_method in (
+        PaymentMethod.CARD,
+        PaymentMethod.TRANSFER,
+    ):
+            payment_account = accounts["bank"]
+
+        else:
+            raise ValueError(
+            "Payments cannot be made using CREDIT."
+        )
+
+        if payment.payment_type in (
+        PaymentType.SUPPLIER,
+        PaymentType.EXPENSE,
+    ):
+
+            lines = [
+            {
+                "account": payment_account,
+                "debit": money(payment.amount),
+            },
+            {
+                "account": accounts["payable"],
+                "credit": money(payment.amount),
+            },
+        ]
+
+        elif payment.payment_type == PaymentType.CUSTOMER:
+
+            lines = [
+            {
+                "account": accounts["receivable"],
+                "debit": money(payment.amount),
+            },
+            {
+                "account": payment_account,
+                "credit": money(payment.amount),
+            },
+        ]
+
+        else:
+            raise ValueError("Invalid payment type.")
+
+        return JournalService.create_entry(
+        date=payment.date,
+        journal_type=JournalType.PAYMENT,
+        description=f"Reverse Payment #{payment.number}",
+        reference=payment,
+        created_by=user,
+        lines=lines,
     )

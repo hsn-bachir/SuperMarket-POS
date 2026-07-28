@@ -282,3 +282,85 @@ class ExpenseAdmin(admin.ModelAdmin):
     )
 
     date_hierarchy = "date"
+
+## payments
+from apps.accounting.models import Payment
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "number",
+        "date",
+        "payment_type",
+        "payment_method",
+        "amount",
+        "status",
+        "created_by",
+    )
+
+    list_filter = (
+        "payment_type",
+        "payment_method",
+        "status",
+        "date",
+    )
+
+    search_fields = (
+        "number",
+        "description",
+        "external_reference",
+    )
+
+    ordering = (
+        "-date",
+        "-id",
+    )
+
+    readonly_fields = (
+        "number",
+        "status",
+        "created_at",
+        "updated_at",
+    )
+
+    autocomplete_fields = (
+        "created_by",
+    )
+
+    fieldsets = (
+        (
+            "Payment Information",
+            {
+                "fields": (
+                    "number",
+                    "date",
+                    "payment_type",
+                    "payment_method",
+                    "amount",
+                    "status",
+                ),
+            },
+        ),
+        (
+            "Reference",
+            {
+                "fields": (
+                    "content_type",
+                    "object_id",
+                    "external_reference",
+                    "description",
+                ),
+            },
+        ),
+        (
+            "Audit",
+            {
+                "fields": (
+                    "created_by",
+                    "created_at",
+                    "updated_at",
+                ),
+            },
+        ),
+    )

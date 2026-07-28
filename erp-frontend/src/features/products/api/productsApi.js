@@ -1,7 +1,20 @@
 import api from "@/api/axios";
 
-export const getProducts = (params = {}) =>
-  api.get("/products/", { params });
+export const getProducts = (
+  page = 1,
+  search = "",
+) =>
+  api.get("/products/", {
+    params: {
+      page,
+      search,
+    },
+  });
+
+  export const getListProducts = (params = {}) =>
+  api.get("/products/", {
+    params,
+  });
 
 export const getProduct = (id) =>
   api.get(`/products/${id}/`);

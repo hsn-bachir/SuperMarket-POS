@@ -1,10 +1,20 @@
 import api from "@/api/axios";
 
-export function getSuppliers(params = {}) {
-  return api.get("/suppliers/", {
+export const getSuppliers = (
+  page = 1,
+  search = "",
+) =>
+  api.get("/suppliers/", {
+    params: {
+      page,
+      search,
+    },
+  });
+
+  export const getListSuppliers = (params = {}) =>
+    api.get("/suppliers/", {
     params,
   });
-}
 
 export const getSupplier = (id) =>
   api.get(`/suppliers/${id}/`);

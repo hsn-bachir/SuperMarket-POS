@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getCategories } from "../../category/api/categoryApi";
 
 import FormInput from "@/components/forms/FormInput";
-import FormSelect from "@/components/forms/FormSelect";
+import FormSearchSelect from "@/components/forms/FormSearchSelect";
 import FormCheckbox from "@/components/forms/FormCheckbox";
 import FormSection from "@/components/forms/FormSection";
 import FormActions from "@/components/forms/FormActions";
@@ -14,8 +14,6 @@ export default function ProductForm({
   onSubmit,
   loading = false,
 }) {
-  const [categories, setCategories] = useState([]);
-
   const [form, setForm] = useState({
     barcode: initialValues.barcode || "",
     name: initialValues.name || "",
@@ -25,20 +23,6 @@ export default function ProductForm({
     minimum_stock: initialValues.minimum_stock || 0,
     is_active: initialValues.is_active ?? true,
   });
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  async function loadCategories() {
-    try {
-      const res = await getCategories();
-
-      setCategories(res.data.results ?? res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  }
 
   function handleChange(e) {
     const { name, value, checked, type } = e.target;
@@ -80,17 +64,18 @@ export default function ProductForm({
             required
           />
 
-          <FormSelect
+          <FormSearchSelect
             label="Category"
-            name="category"
             value={form.category}
             onChange={handleChange}
-            placeholder="Select category"
-            options={categories.map((c) => ({
-              value: c.id,
-              label: c.name,
-            }))}
-            required
+            loadOptions={async (search) => {
+              const res = await getCategories(1, search);
+
+              return (res.data.results ?? res.data).map((c) => ({
+                value: c.id,
+                label: c.name,
+              }));
+            }}
           />
 
           <FormInput

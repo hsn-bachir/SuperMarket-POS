@@ -1,5 +1,4 @@
-from rest_framework import generics
-from rest_framework.filters import SearchFilter
+from rest_framework import generics, filters
 from rest_framework.permissions import (
     IsAuthenticated,
     DjangoModelPermissions,
@@ -8,60 +7,72 @@ from rest_framework.permissions import (
 from .models import Supplier
 from .serializers import SupplierSerializer
 
-class SupplierListView(generics.ListAPIView):
+
+class SupplierPermissionMixin:
     permission_classes = [
         IsAuthenticated,
         DjangoModelPermissions,
     ]
 
-    queryset = Supplier.objects.all().order_by("-id")
+
+class SupplierListView(
+    SupplierPermissionMixin,
+    generics.ListAPIView
+):
+    queryset = (
+        Supplier.objects
+        .all()
+        .order_by("-id")
+    )
+
     serializer_class = SupplierSerializer
 
-    filter_backends = [SearchFilter]
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
 
     search_fields = [
         "name",
-        "contact_person",
-        "phone",
-        "email",
+    ]
+
+    ordering_fields = [
+        "name",
+        "created_at",
+    ]
+
+    ordering = [
+        "-id",
     ]
 
 
-class SupplierCreateView(generics.CreateAPIView):
-    permission_classes = [
-        IsAuthenticated,
-        DjangoModelPermissions,
-    ]
-
+class SupplierCreateView(
+    SupplierPermissionMixin,
+    generics.CreateAPIView
+):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
 
 
-class SupplierDetailView(generics.RetrieveAPIView):
-    permission_classes = [
-        IsAuthenticated,
-        DjangoModelPermissions,
-    ]
-
+class SupplierDetailView(
+    SupplierPermissionMixin,
+    generics.RetrieveAPIView
+):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
 
 
-class SupplierUpdateView(generics.UpdateAPIView):
-    permission_classes = [
-        IsAuthenticated,
-        DjangoModelPermissions,
-    ]
-
+class SupplierUpdateView(
+    SupplierPermissionMixin,
+    generics.UpdateAPIView
+):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
 
 
-class SupplierDeleteView(generics.DestroyAPIView):
-    permission_classes = [
-        IsAuthenticated,
-        DjangoModelPermissions,
-    ]
-
+class SupplierDeleteView(
+    SupplierPermissionMixin,
+    generics.DestroyAPIView
+):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer

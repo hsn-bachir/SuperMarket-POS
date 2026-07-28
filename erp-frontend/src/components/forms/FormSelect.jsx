@@ -18,20 +18,27 @@ export default function FormSelect({
 
       <select
         className={`
-          h-10
-          w-full
-          rounded-lg
-          border
-          border-black
-          bg-white
-          px-3
-          text-sm
-          outline-none
-          transition-colors
-          focus:border-gray-600
-          focus:ring-2 focus:ring-gray-600/50
-          ${className}
-        `}
+    h-10
+    w-full
+    rounded-sm
+    border
+    border-gray-300
+    bg-white
+    px-3
+    text-sm
+    text-gray-900
+    placeholder:text-gray-400
+    outline-none
+    transition-all
+    focus:border-gray-600
+    focus:ring-2
+    focus:ring-gray-600/20
+    disabled:cursor-not-allowed
+    disabled:bg-gray-100
+    disabled:text-gray-500
+    disabled:opacity-100
+    ${className}
+  `}
         required={required}
         {...props}
       >

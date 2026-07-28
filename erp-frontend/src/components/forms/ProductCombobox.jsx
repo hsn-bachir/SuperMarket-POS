@@ -21,8 +21,12 @@ export default function ProductCombobox({
   const [highlighted, setHighlighted] = useState(-1);
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    const timer = setTimeout(() => {
+      loadProducts(search);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const selectedProduct = useMemo(() => {
     return products.find((p) => p.id === Number(value));
@@ -63,32 +67,19 @@ export default function ProductCombobox({
     });
   }, [highlighted]);
 
-  async function loadProducts() {
+  async function loadProducts(search = "") {
     try {
-      const res = await getProducts({
-        page_size: 1000,
-      });
+      setLoading(true);
 
-      setProducts(res.data.results ?? []);
+      const res = await getProducts(1, search);
+
+      setProducts(res.data.results ?? res.data);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }
-
-  const filteredProducts = useMemo(() => {
-    if (!search.trim()) return [];
-
-    return products
-      .filter((product) => {
-        const term = search.toLowerCase();
-
-        return (
-          product.name.toLowerCase().includes(term) ||
-          product.barcode?.includes(search)
-        );
-      })
-      .slice(0, 8);
-  }, [products, search]);
 
   function selectProduct(product) {
     onChange(product.id);
@@ -98,6 +89,8 @@ export default function ProductCombobox({
     setOpen(false);
     setHighlighted(-1);
   }
+
+  const filteredProducts = products.slice(0, 8);
 
   function handleKeyDown(e) {
     if (!open) return;
@@ -180,25 +173,32 @@ export default function ProductCombobox({
             setOpen(true);
           }}
           className="
-            h-11
-            w-full
-            rounded-xl
-            border
-            border-gray-700
+  h-11
+  w-full
+  rounded-sm
+  border
+  border-gray-300
+  bg-white
 
-            pl-10
-            pr-4
-            text-gray-800
-            placeholder:text-gray-500
-            outline-none
-            transition-all
+  px-4
+  pl-10 pr-4
+  text-sm
+  text-gray-900
+  placeholder:text-gray-500
 
-            hover:border-gray-600
+  outline-none
+  transition-all
 
-            focus:border-gray-500
-            focus:ring-2
-            focus:ring-gray-600/50
-          "
+  hover:border-gray-400
+
+  focus:border-gray-600
+  focus:ring-2
+  focus:ring-gray-600/20
+
+  disabled:cursor-not-allowed
+  disabled:bg-gray-100
+  disabled:text-gray-500
+"
         />
       </div>
 

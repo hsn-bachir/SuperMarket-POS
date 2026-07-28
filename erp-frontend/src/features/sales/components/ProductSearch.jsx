@@ -14,8 +14,12 @@ export default function ProductSearch({ cart, setCart }) {
   const [highlighted, setHighlighted] = useState(-1);
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    const timer = setTimeout(() => {
+      loadProducts(search);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -44,11 +48,9 @@ export default function ProductSearch({ cart, setCart }) {
     });
   }, [highlighted]);
 
-  async function loadProducts() {
+  async function loadProducts(search = "") {
     try {
-      const res = await getProducts({
-        page_size: 1000,
-      });
+      const res = await getProducts(1, search);
 
       setProducts(res.data.results ?? res.data);
     } catch (err) {
@@ -97,19 +99,8 @@ export default function ProductSearch({ cart, setCart }) {
   }
 
   const filteredProducts = useMemo(() => {
-    if (!search.trim()) return [];
-
-    return products
-      .filter((product) => {
-        const term = search.toLowerCase();
-
-        return (
-          product.name.toLowerCase().includes(term) ||
-          product.barcode.includes(search)
-        );
-      })
-      .slice(0, 8);
-  }, [products, search]);
+    return products.slice(0, 8);
+  }, [products]);
 
   function handleKeyDown(e) {
     switch (e.key) {

@@ -12,33 +12,59 @@ export default function POS() {
   const [cart, setCart] = useState([]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col gap-6">
       <PageHeader
         title="Point of Sale"
         subtitle="Scan products and complete checkout."
       />
 
-      <div className="flex-1 grid grid-cols-12 gap-6">
-        {/* LEFT SIDE (TOOLS) */}
-        <div className="col-span-12 xl:col-span-4 space-y-4">
-          <SectionCard title="Scan / Search">
+      <div
+        className="
+          flex-1
+          grid
+          grid-cols-12
+          gap-6
+        "
+      >
+        {/* PRODUCT SEARCH */}
+        <div
+          className="
+            col-span-12
+            lg:col-span-3
+          "
+        >
+          <SectionCard title="Products">
             <ProductSearch cart={cart} setCart={setCart} />
           </SectionCard>
+        </div>
 
-          <SectionCard title="Cart Summary">
+        {/* CART */}
+        <div
+          className="
+            col-span-12
+            lg:col-span-6
+            overflow-hidden
+          "
+        >
+          <SectionCard title="Current Cart" className="h-full">
+            <div className="h-full overflow-y-auto">
+              <CartTable cart={cart} setCart={setCart} />
+            </div>
+          </SectionCard>
+        </div>
+
+        {/* CHECKOUT */}
+        <div
+          className="
+            col-span-12
+            lg:col-span-3
+            space-y-4
+          "
+        >
+          <SectionCard title="Summary">
             <CartTotals cart={cart} />
           </SectionCard>
-        </div>
 
-        {/* CENTER (MAIN WORKSPACE) */}
-        <div className="col-span-12 xl:col-span-5">
-          <SectionCard title="Current Cart" className="min-h-[600px]">
-            <CartTable cart={cart} setCart={setCart} />
-          </SectionCard>
-        </div>
-
-        {/* RIGHT SIDE (PAYMENT) */}
-        <div className="col-span-12 xl:col-span-3 space-y-4">
           <SectionCard title="Payment">
             <PaymentSection cart={cart} />
           </SectionCard>

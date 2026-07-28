@@ -8,7 +8,6 @@ import Button from "@/components/ui/Button";
 import FormInput from "@/components/forms/FormInput";
 import ProductCombobox from "@/components/forms/ProductCombobox";
 
-import { getProducts } from "@/features/products/api/productsApi";
 import { createAdjustment } from "../api/inventoryApi";
 
 const initialForm = {
@@ -18,28 +17,8 @@ const initialForm = {
 };
 
 export default function AdjustmentDialog({ open, onClose, onSuccess }) {
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [form, setForm] = useState(initialForm);
-
-  useEffect(() => {
-    if (open) {
-      loadProducts();
-    }
-  }, [open]);
-
-  async function loadProducts() {
-    try {
-      const res = await getProducts({
-        page_size: 1000, // load all products for dropdown
-      });
-
-      setProducts(res.data.results ?? []);
-    } catch {
-      toast.error("Unable to load products.");
-    }
-  }
 
   function handleChange(e) {
     setForm((prev) => ({

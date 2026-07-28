@@ -5,6 +5,7 @@ import Button from "@/components/ui/Button";
 
 import FormInput from "@/components/forms/FormInput";
 import FormSelect from "@/components/forms/FormSelect";
+import FormSearchSelect from "@/components/forms/FormSearchSelect";
 
 import { getSuppliers } from "@/features/supplier/api/supplierApi";
 import { getProducts } from "@/features/products/api/productsApi";
@@ -16,9 +17,6 @@ export default function PurchaseForm({
   loading = false,
 }) {
   const navigate = useNavigate();
-
-  const [suppliers, setSuppliers] = useState([]);
-  const [products, setProducts] = useState([]);
   const [defaults, setDefaults] = useState(null);
 
   const [form, setForm] = useState({
@@ -44,18 +42,10 @@ export default function PurchaseForm({
 
   async function loadData() {
     try {
-      const [supplierRes, productRes, defaultRes] = await Promise.all([
-        getSuppliers(),
-        getProducts(),
-        getDefault(),
-      ]);
-
-      setSuppliers(supplierRes.data.results ?? supplierRes.data);
-      setProducts(productRes.data.results ?? productRes.data);
+      const defaultRes = await getDefault();
 
       setDefaults(defaultRes.data);
 
-      // Apply system defaults to form
       setForm((prev) => ({
         ...prev,
         currency: defaultRes.data.base_currency,
@@ -132,23 +122,18 @@ export default function PurchaseForm({
         <h2 className="text-lg font-semibold mb-6">Purchase Information</h2>
 
         <div className="grid md:grid-cols-2 gap-5">
-          <FormSelect
+          <FormSearchSelect
             label="Supplier"
-            name="supplier"
             value={form.supplier}
             onChange={handleChange}
-            options={[
-              {
-                value: "",
-                label: "Select Supplier",
-              },
+            loadOptions={async (search) => {
+              const res = await getSuppliers(1, search);
 
-              ...suppliers.map((s) => ({
+              return (res.data.results ?? res.data).map((s) => ({
                 value: s.id,
                 label: s.name,
-              })),
-            ]}
-            required
+              }));
+            }}
           />
 
           <FormSelect
@@ -219,22 +204,18 @@ export default function PurchaseForm({
         <div className="space-y-5">
           {form.items.map((item, index) => (
             <div key={index} className="grid grid-cols-4 gap-4 items-end">
-              <FormSelect
+              <FormSearchSelect
                 label="Product"
                 value={item.product}
                 onChange={(e) => updateItem(index, "product", e.target.value)}
-                options={[
-                  {
-                    value: "",
-                    label: "Select Product",
-                  },
+                loadOptions={async (search) => {
+                  const res = await getProducts(1, search);
 
-                  ...products.map((p) => ({
+                  return (res.data.results ?? res.data).map((p) => ({
                     value: p.id,
                     label: p.name,
-                  })),
-                ]}
-                required
+                  }));
+                }}
               />
 
               <FormInput
