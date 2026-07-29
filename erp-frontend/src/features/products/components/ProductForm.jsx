@@ -67,7 +67,12 @@ export default function ProductForm({
           <FormSearchSelect
             label="Category"
             value={form.category}
-            onChange={handleChange}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                category: e.target.value,
+              }))
+            }
             loadOptions={async (search) => {
               const res = await getCategories(1, search);
 

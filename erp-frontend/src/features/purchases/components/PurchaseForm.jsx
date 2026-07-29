@@ -125,7 +125,12 @@ export default function PurchaseForm({
           <FormSearchSelect
             label="Supplier"
             value={form.supplier}
-            onChange={handleChange}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                supplier: e.target.value,
+              }))
+            }
             loadOptions={async (search) => {
               const res = await getSuppliers(1, search);
 

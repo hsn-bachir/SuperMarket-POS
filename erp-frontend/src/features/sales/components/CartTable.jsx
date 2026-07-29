@@ -64,7 +64,7 @@ export default function CartTable({ cart, setCart }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="">
       {cart.map((item) => (
         <CartItem
           key={item.id}

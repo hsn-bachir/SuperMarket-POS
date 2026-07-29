@@ -1,12 +1,50 @@
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Sum
 
+from apps.accounting.models import Expense, Payment
 from apps.accounting.services.posting_service import AccountingPostingService
-from apps.accounting.models import Payment
 from apps.common.enums import PaymentStatus
+from apps.purchases.models import Purchase
+from apps.sales.models import Sale
 
 
 class PaymentService:
+
+    @staticmethod
+    def get_outstanding_balance(reference):
+
+        if isinstance(reference, Purchase):
+            document_total = reference.total
+        elif isinstance(reference, Sale):
+            document_total = reference.total
+        elif isinstance(reference, Expense):
+            document_total = reference.amount
+        else:
+            raise ValidationError(
+                {
+                    "reference": (
+                        "Unsupported payment reference type."
+                    )
+                }
+            )
+
+        content_type = ContentType.objects.get_for_model(reference)
+
+        posted_payments = (
+            Payment.objects
+            .filter(
+                content_type=content_type,
+                object_id=reference.pk,
+                status=PaymentStatus.POSTED,
+            )
+            .aggregate(total_paid=Sum("amount"))
+        )
+
+        total_paid = posted_payments.get("total_paid") or 0
+
+        return document_total - total_paid
 
     @staticmethod
     def generate_number():
@@ -46,6 +84,19 @@ class PaymentService:
                 {
                     "amount": (
                         "Payment amount must be greater than zero."
+                    )
+                }
+            )
+
+        outstanding_balance = PaymentService.get_outstanding_balance(
+            reference,
+        )
+
+        if amount > outstanding_balance:
+            raise ValidationError(
+                {
+                    "amount": (
+                        "Payment exceeds the outstanding balance."
                     )
                 }
             )

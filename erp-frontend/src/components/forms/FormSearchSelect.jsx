@@ -9,11 +9,20 @@ export default function FormSearchSelect({
   required,
 }) {
   const [options, setOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
 
   async function searchOptions(search = "") {
     try {
       const data = await loadOptions(search);
       setOptions(data);
+
+      if (value) {
+        const selected = data.find((o) => String(o.value) === String(value));
+
+        if (selected) {
+          setSelectedOption(selected);
+        }
+      }
     } catch (err) {
       console.error(err);
     }
@@ -34,18 +43,20 @@ export default function FormSearchSelect({
 
       <Select
         options={options}
-        value={options.find((o) => o.value === value) || null}
+        value={selectedOption}
         onInputChange={(input) => {
           searchOptions(input);
         }}
-        onChange={(selected) =>
+        onChange={(selected) => {
+          setSelectedOption(selected);
+
           onChange({
             target: {
               name: label,
               value: selected?.value ?? "",
             },
-          })
-        }
+          });
+        }}
         isSearchable
         placeholder={`Search ${label}...`}
       />

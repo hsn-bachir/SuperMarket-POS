@@ -1,9 +1,12 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from apps.accounting.views import (
     ExpenseCategoryViewSet,
     ExpenseViewSet,
     PaymentViewSet,
+    AccountLedgerView,
+    TrialBalanceView,
 )
 
 router = DefaultRouter()
@@ -23,4 +26,15 @@ router.register(
     PaymentViewSet,
 )
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path(
+        "ledger/<str:code>/",
+        AccountLedgerView.as_view(),
+        name="account-ledger",
+    ),
+
+    path(
+        "trial-balance/",
+        TrialBalanceView.as_view(),
+    ),
+]

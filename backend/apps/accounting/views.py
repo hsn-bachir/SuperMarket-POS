@@ -99,3 +99,85 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return Response(
             status=status.HTTP_204_NO_CONTENT,
         )
+
+###ledgar
+from django.shortcuts import get_object_or_404
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.accounting.models import Account
+from apps.accounting.serializers import (
+    LedgerSerializer,
+    TrialBalanceSerializer,
+)
+from apps.accounting.services.ledger_service import (
+    LedgerService,
+)
+
+from apps.reports.exporters import export_response
+
+
+class AccountLedgerView(APIView):
+
+    def get(
+        self,
+        request,
+        code,  # <--- Matches the <str:code> in urls.py
+    ):
+        account = get_object_or_404(
+            Account,
+            code=code,  # <--- Fetches Account by code (e.g., 1000)
+        )
+
+        ledger = LedgerService.get_account_ledger(
+            account=account,
+            start_date=request.GET.get("start_date"),
+            end_date=request.GET.get("end_date"),
+        )
+
+        export = export_response(
+            request,
+            f"ledger_{account.code}",
+            ledger["transactions"],
+        )
+
+        if export:
+            return export
+
+        serializer = LedgerSerializer(ledger)
+
+        return Response(serializer.data)
+
+
+##trail balance
+from apps.accounting.services.trial_balance_service import TrialBalanceService
+class TrialBalanceView(APIView):
+
+    def get(self, request):
+
+        report = TrialBalanceService.get_trial_balance(
+            start_date=request.GET.get(
+                "start_date"
+            ),
+            end_date=request.GET.get(
+                "end_date"
+            ),
+        )
+
+        export = export_response(
+            request,
+            "trial_balance",
+            report["accounts"],
+        )
+
+        if export:
+            return export
+
+        serializer = TrialBalanceSerializer(
+            report
+        )
+
+        return Response(
+            serializer.data
+        )

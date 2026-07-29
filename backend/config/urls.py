@@ -41,6 +41,11 @@ urlpatterns = [
     ),
 
     path(
+            "api/accounting/",
+            include("apps.accounting.urls"),
+        ),
+
+    path(
         "api/config/",
         include("apps.configuration.urls"),
     ),

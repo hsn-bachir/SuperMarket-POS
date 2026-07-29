@@ -4,9 +4,6 @@ export function calculateTotals(cart) {
     const price = Number(item.price) || 0;
 
     const lineTotal = quantity * price;
-
-    console.log("ITEM:", item, "LINE TOTAL:", lineTotal);
-
     return sum + lineTotal;
   }, 0);
 

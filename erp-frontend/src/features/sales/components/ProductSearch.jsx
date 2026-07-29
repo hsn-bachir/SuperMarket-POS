@@ -33,9 +33,9 @@ export default function ProductSearch({ cart, setCart }) {
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
 
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -94,7 +94,9 @@ export default function ProductSearch({ cart, setCart }) {
     setHighlighted(-1);
 
     setTimeout(() => {
-      inputRef.current?.focus();
+      inputRef.current?.focus({
+        preventScroll: true,
+      });
     }, 0);
   }
 
@@ -193,6 +195,7 @@ export default function ProductSearch({ cart, setCart }) {
         <div ref={listRef} className="grid gap-3">
           {filteredProducts.map((product, index) => (
             <button
+              type="button"
               key={product.id}
               onClick={() => addProduct(product)}
               onMouseEnter={() => setHighlighted(index)}

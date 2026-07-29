@@ -20,17 +20,18 @@ export default function POS() {
 
       <div
         className="
-          flex-1
-          grid
-          grid-cols-12
-          gap-6
-        "
+    flex-1
+    grid
+    grid-cols-12
+    gap-6
+  "
       >
-        {/* PRODUCT SEARCH */}
+        {/* PRODUCTS */}
         <div
           className="
             col-span-12
             lg:col-span-3
+            overflow-y-auto
           "
         >
           <SectionCard title="Products">
@@ -41,33 +42,41 @@ export default function POS() {
         {/* CART */}
         <div
           className="
-            col-span-12
-            lg:col-span-6
-            overflow-hidden
-          "
+    col-span-12
+    lg:col-span-6
+    h-full
+    overflow-hidden
+  "
         >
           <SectionCard title="Current Cart" className="h-full">
-            <div className="h-full overflow-y-auto">
-              <CartTable cart={cart} setCart={setCart} />
+            <div
+              className="
+      sticky
+      top-0
+      z-20
+      bg-white
+      pb-4
+    "
+            >
+              <CartTotals cart={cart} />
             </div>
+
+            <CartTable cart={cart} setCart={setCart} />
           </SectionCard>
         </div>
 
-        {/* CHECKOUT */}
+        {/* PAYMENT */}
         <div
           className="
             col-span-12
             lg:col-span-3
-            space-y-4
           "
         >
-          <SectionCard title="Summary">
-            <CartTotals cart={cart} />
-          </SectionCard>
-
-          <SectionCard title="Payment">
-            <PaymentSection cart={cart} />
-          </SectionCard>
+          <div className="sticky top-6">
+            <SectionCard title="Payment">
+              <PaymentSection cart={cart} />
+            </SectionCard>
+          </div>
         </div>
       </div>
     </div>
