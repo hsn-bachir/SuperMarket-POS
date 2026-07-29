@@ -4,6 +4,7 @@ from django.db import models
 from apps.common.enums import (
     AccountType,
     NormalBalance,
+    CashFlowCategory,
 )
 
 ######Account
@@ -57,6 +58,12 @@ class Account(models.Model):
     is_active = models.BooleanField(
         default=True,
     )
+
+    cash_flow_category = models.CharField(
+    max_length=20,
+    choices=CashFlowCategory.choices,
+    default=CashFlowCategory.NONE,
+)
 
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -568,3 +575,46 @@ class Payment(TimeStampedModel):
 
     def __str__(self):
         return self.number
+
+### period
+class PeriodStatus(models.TextChoices):
+
+    OPEN = (
+        "OPEN",
+        "Open",
+    )
+
+    CLOSED = (
+        "CLOSED",
+        "Closed",
+    )
+
+
+
+class AccountingPeriod(models.Model):
+
+    name = models.CharField(
+        max_length=100
+    )
+
+    start_date = models.DateField()
+
+    end_date = models.DateField()
+
+    status = models.CharField(
+        max_length=10,
+        choices=PeriodStatus.choices,
+        default=PeriodStatus.OPEN,
+    )
+
+
+    class Meta:
+
+        ordering = [
+            "-start_date"
+        ]
+
+
+    def __str__(self):
+
+        return self.name

@@ -66,3 +66,25 @@ class PaymentType(models.TextChoices):
     CUSTOMER = "CUSTOMER", "Customer"
     SUPPLIER = "SUPPLIER", "Supplier"
     EXPENSE = "EXPENSE", "Expense"
+
+class CashFlowCategory(models.TextChoices):
+
+    OPERATING = (
+        "OPERATING",
+        "Operating Activities"
+    )
+
+    INVESTING = (
+        "INVESTING",
+        "Investing Activities"
+    )
+
+    FINANCING = (
+        "FINANCING",
+        "Financing Activities"
+    )
+
+    NONE = (
+        "NONE",
+        "None"
+    )

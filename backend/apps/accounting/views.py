@@ -181,3 +181,362 @@ class TrialBalanceView(APIView):
         return Response(
             serializer.data
         )
+
+##Financial Statements
+from datetime import date
+
+from apps.accounting.serializers import (
+    IncomeStatementSerializer,
+)
+from apps.accounting.services.income_statement_service import (
+    IncomeStatementService,
+)
+
+class IncomeStatementView(APIView):
+
+    def get(self, request):
+
+        start_date = request.GET.get(
+            "start_date"
+        )
+
+        end_date = request.GET.get(
+            "end_date"
+        )
+
+        if start_date:
+            start_date = date.fromisoformat(
+                start_date
+            )
+
+        if end_date:
+            end_date = date.fromisoformat(
+                end_date
+            )
+
+        report = (
+            IncomeStatementService
+            .get_income_statement(
+                start_date=start_date,
+                end_date=end_date,
+            )
+        )
+
+        rows = []
+
+        for row in report["revenue"]:
+
+            rows.append(
+                {
+                    "Section": "Revenue",
+                    "Code": row["code"],
+                    "Account": row["name"],
+                    "Amount": row["amount"],
+                }
+            )
+
+        rows.append(
+            {
+                "Section": "",
+                "Code": "",
+                "Account": "Total Revenue",
+                "Amount": report["total_revenue"],
+            }
+        )
+
+        for row in report["expenses"]:
+
+            rows.append(
+                {
+                    "Section": "Expense",
+                    "Code": row["code"],
+                    "Account": row["name"],
+                    "Amount": row["amount"],
+                }
+            )
+
+        rows.append(
+            {
+                "Section": "",
+                "Code": "",
+                "Account": "Total Expenses",
+                "Amount": report["total_expenses"],
+            }
+        )
+
+        rows.append(
+            {
+                "Section": "",
+                "Code": "",
+                "Account": "Net Profit",
+                "Amount": report["net_profit"],
+            }
+        )
+
+        export = export_response(
+            request,
+            "income_statement",
+            rows,
+        )
+
+        if export:
+            return export
+
+        serializer = (
+            IncomeStatementSerializer(
+                report
+            )
+        )
+
+        return Response(
+            serializer.data
+        )
+
+from apps.accounting.serializers import (
+    BalanceSheetSerializer,
+)
+
+from apps.accounting.services.balance_sheet_service import (
+    BalanceSheetService,
+)
+
+class BalanceSheetView(APIView):
+
+    def get(self, request):
+
+        end_date = request.GET.get(
+            "end_date"
+        )
+
+
+        if end_date:
+
+            end_date = date.fromisoformat(
+                end_date
+            )
+
+
+        report = (
+            BalanceSheetService
+            .get_balance_sheet(
+                end_date=end_date
+            )
+        )
+
+
+        rows = []
+
+
+        # Assets
+
+        for row in report["assets"]:
+
+            rows.append(
+                {
+                    "Section": "Assets",
+                    "Code": row["code"],
+                    "Account": row["name"],
+                    "Amount": row["amount"],
+                }
+            )
+
+
+        rows.append(
+            {
+                "Section": "",
+                "Code": "",
+                "Account": "Total Assets",
+                "Amount": report["total_assets"],
+            }
+        )
+
+
+        # Liabilities
+
+        for row in report["liabilities"]:
+
+            rows.append(
+                {
+                    "Section": "Liabilities",
+                    "Code": row["code"],
+                    "Account": row["name"],
+                    "Amount": row["amount"],
+                }
+            )
+
+
+        rows.append(
+            {
+                "Section": "",
+                "Code": "",
+                "Account": "Total Liabilities",
+                "Amount": report["total_liabilities"],
+            }
+        )
+
+
+        # Equity
+
+        for row in report["equity"]:
+
+            rows.append(
+                {
+                    "Section": "Equity",
+                    "Code": row["code"],
+                    "Account": row["name"],
+                    "Amount": row["amount"],
+                }
+            )
+
+
+        rows.append(
+            {
+                "Section": "",
+                "Code": "",
+                "Account": "Total Equity",
+                "Amount": report["total_equity"],
+            }
+        )
+
+
+        export = export_response(
+            request,
+            "balance_sheet",
+            rows,
+        )
+
+
+        if export:
+
+            return export
+
+
+        serializer = BalanceSheetSerializer(
+            report
+        )
+
+
+        return Response(
+            serializer.data
+        )
+
+
+from apps.accounting.services.cash_flow_service import (
+    CashFlowService,
+)
+
+from apps.accounting.serializers import (
+    CashFlowSerializer,
+)
+
+
+class CashFlowView(APIView):
+
+    def get(self, request):
+
+        start_date = request.GET.get(
+            "start_date"
+        )
+
+        end_date = request.GET.get(
+            "end_date"
+        )
+
+
+        if start_date:
+
+            start_date = date.fromisoformat(
+                start_date
+            )
+
+
+        if end_date:
+
+            end_date = date.fromisoformat(
+                end_date
+            )
+
+
+        report = (
+            CashFlowService
+            .get_cash_flow(
+                start_date=start_date,
+                end_date=end_date,
+            )
+        )
+
+
+        rows = []
+
+
+        for section, title in [
+            ("operating", "Operating"),
+            ("investing", "Investing"),
+            ("financing", "Financing"),
+        ]:
+
+            for row in report[section]:
+
+                rows.append(
+                    {
+                        "Section": title,
+                        "Code": row["code"],
+                        "Account": row["name"],
+                        "Amount": row["amount"],
+                    }
+                )
+
+
+        rows.extend(
+            [
+                {
+                    "Section": "",
+                    "Code": "",
+                    "Account": "Net Operating Cash",
+                    "Amount": report["net_operating"],
+                },
+
+                {
+                    "Section": "",
+                    "Code": "",
+                    "Account": "Net Investing Cash",
+                    "Amount": report["net_investing"],
+                },
+
+                {
+                    "Section": "",
+                    "Code": "",
+                    "Account": "Net Financing Cash",
+                    "Amount": report["net_financing"],
+                },
+
+                {
+                    "Section": "",
+                    "Code": "",
+                    "Account": "Net Cash Change",
+                    "Amount": report["net_cash_change"],
+                },
+            ]
+        )
+
+
+        export = export_response(
+            request,
+            "cash_flow_statement",
+            rows,
+        )
+
+
+        if export:
+
+            return export
+
+
+        serializer = CashFlowSerializer(
+            report
+        )
+
+
+        return Response(
+            serializer.data
+        )

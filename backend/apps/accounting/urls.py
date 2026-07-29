@@ -7,6 +7,9 @@ from apps.accounting.views import (
     PaymentViewSet,
     AccountLedgerView,
     TrialBalanceView,
+    IncomeStatementView,
+    BalanceSheetView,
+    CashFlowView,
 )
 
 router = DefaultRouter()
@@ -36,5 +39,23 @@ urlpatterns = router.urls + [
     path(
         "trial-balance/",
         TrialBalanceView.as_view(),
+    ),
+
+    path(
+        "income-statement/",
+        IncomeStatementView.as_view(),
+        name="income-statement",
+    ),
+
+    path(
+        "balance-sheet/",
+        BalanceSheetView.as_view(),
+        name="balance-sheet",
+    ),
+
+    path(
+        "cash-flow/",
+        CashFlowView.as_view(),
+        name="cash-flow",
     ),
 ]
