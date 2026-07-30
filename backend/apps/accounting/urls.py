@@ -10,6 +10,7 @@ from apps.accounting.views import (
     IncomeStatementView,
     BalanceSheetView,
     CashFlowView,
+    AccountingPeriodViewSet,
 )
 
 router = DefaultRouter()
@@ -27,6 +28,12 @@ router.register(
 router.register(
     "payments",
     PaymentViewSet,
+)
+
+router.register(
+    "periods",
+    AccountingPeriodViewSet,
+    basename="accounting-period",
 )
 
 urlpatterns = router.urls + [

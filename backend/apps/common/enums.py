@@ -38,6 +38,7 @@ class JournalType(models.TextChoices):
     ADJUSTMENT = "ADJUSTMENT", "Adjustment"
     EXPENSE = "EXPENSE", "Expense"
     PAYMENT = "PAYMENT", "Payment"
+    CLOSING = "CLOSING", "Closing"
 
 class ReferenceType(models.TextChoices):
     SALE = "SALE", "Sale"
@@ -88,3 +89,8 @@ class CashFlowCategory(models.TextChoices):
         "NONE",
         "None"
     )
+
+class PeriodStatus(models.TextChoices):
+    OPEN = "OPEN", "Open"
+    CLOSING = "CLOSING", "Closing"
+    CLOSED = "CLOSED", "Closed"

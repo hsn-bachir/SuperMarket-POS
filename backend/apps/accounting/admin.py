@@ -364,3 +364,29 @@ class PaymentAdmin(admin.ModelAdmin):
             },
         ),
     )
+
+### periods
+from apps.accounting.models import AccountingPeriod
+
+
+@admin.register(AccountingPeriod)
+class AccountingPeriodAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "start_date",
+        "end_date",
+        "status",
+        "fiscal_year",
+    )
+
+    list_filter = (
+        "status",
+    )
+
+    search_fields = (
+        "name",
+    )
+
+    ordering = (
+        "-start_date",
+    )

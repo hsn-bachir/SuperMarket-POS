@@ -540,3 +540,116 @@ class CashFlowView(APIView):
         return Response(
             serializer.data
         )
+
+
+### periods
+
+from rest_framework.viewsets import ReadOnlyModelViewSet
+
+from apps.accounting.models import AccountingPeriod
+
+from apps.accounting.serializers import (
+    AccountingPeriodSerializer,
+)
+
+from apps.accounting.services.accounting_period_service import (
+    AccountingPeriodService,
+)
+
+from apps.accounting.services.closing_service import (
+    ClosingService,
+)
+
+
+class AccountingPeriodViewSet(
+    ReadOnlyModelViewSet
+):
+
+    queryset = (
+        AccountingPeriod.objects
+        .order_by("-start_date")
+    )
+
+    serializer_class = AccountingPeriodSerializer
+
+
+    @action(
+        detail=False,
+        methods=["get"],
+    )
+    def current(self, request):
+
+        period = (
+            AccountingPeriodService
+            .get_current_period(
+                transaction_date=date.today()
+            )
+        )
+
+        serializer = self.get_serializer(
+            period
+        )
+
+        return Response(
+            serializer.data
+        )
+
+
+    @action(
+        detail=True,
+        methods=["post"],
+    )
+    def close(
+        self,
+        request,
+        pk=None,
+    ):
+
+        period = self.get_object()
+
+
+        ClosingService.close_period(
+            period=period,
+            user=request.user,
+        )
+
+
+        serializer = self.get_serializer(
+            period
+        )
+
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
+
+
+    @action(
+        detail=True,
+        methods=["post"],
+    )
+    def reopen(
+        self,
+        request,
+        pk=None,
+    ):
+
+        period = self.get_object()
+
+
+        AccountingPeriodService.reopen_period(
+            period=period,
+            user=request.user,
+        )
+
+
+        serializer = self.get_serializer(
+            period
+        )
+
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
