@@ -37,7 +37,7 @@ class BalanceSheetService:
         )
 
 
-        journal_lines = JournalLine.objects.all()
+        journal_lines = JournalLine.objects.filter(journal_entry__status="POSTED")
 
 
         if end_date:

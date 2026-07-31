@@ -5,6 +5,7 @@ from apps.common.enums import (
     AccountType,
     NormalBalance,
     CashFlowCategory,
+    EntryStatus,
 )
 
 ######Account
@@ -196,6 +197,21 @@ from apps.common.enums import (
 )
 
 
+class JournalEntryQuerySet(models.QuerySet):
+
+    def delete(self):
+        if self.filter(status=EntryStatus.POSTED).exists():
+            raise ValidationError(
+                "Posted journal entries cannot be deleted."
+            )
+
+        return super().delete()
+
+
+class JournalEntryManager(models.Manager.from_queryset(JournalEntryQuerySet)):
+    pass
+
+
 class JournalEntry(models.Model):
 
     sequence = models.PositiveIntegerField(
@@ -223,7 +239,7 @@ class JournalEntry(models.Model):
     status = models.CharField(
         max_length=20,
         choices=EntryStatus.choices,
-        default=EntryStatus.DRAFT,
+        default=EntryStatus.POSTED,
     )
 
     content_type = models.ForeignKey(
@@ -253,6 +269,14 @@ class JournalEntry(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="journal_entries",
+    )
+
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="updated_journal_entries",
     )
 
     created_at = models.DateTimeField(
@@ -296,7 +320,15 @@ class JournalEntry(models.Model):
             self.number = f"JE-{self.sequence:06d}"
 
 
-        super().save(*args, **kwargs)   
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.status == EntryStatus.POSTED:
+            raise ValidationError(
+                "Posted journal entries cannot be deleted."
+            )
+
+        return super().delete(*args, **kwargs)
 
 
 from django.db.models import Q
@@ -320,6 +352,29 @@ class JournalLine(models.Model):
         blank=True,
     )
 
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="created_journal_lines",
+    )
+
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="updated_journal_lines",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
 
     debit = models.DecimalField(
         max_digits=18,

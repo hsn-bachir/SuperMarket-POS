@@ -67,7 +67,7 @@ class AccountingPeriodService:
 
 
     @staticmethod
-    def validate_transaction_date(transaction_date) -> AccountingPeriod:
+    def validate_transaction_date(transaction_date, allow_closing_period=False) -> AccountingPeriod:
 
         period = (
             AccountingPeriodService
@@ -79,7 +79,7 @@ class AccountingPeriodService:
                 f'Accounting period "{period.name}" is closed.'
             )
 
-        if period.status == PeriodStatus.CLOSING:
+        if period.status == PeriodStatus.CLOSING and not allow_closing_period:
             raise ValidationError(
                 f'Accounting period "{period.name}" is currently closing.'
             )

@@ -19,7 +19,7 @@ class LedgerService:
         # Base query
         queryset = (
             JournalLine.objects
-            .filter(account=account)
+            .filter(account=account, journal_entry__status="POSTED")
             .select_related(
                 "journal_entry",
                 "account",

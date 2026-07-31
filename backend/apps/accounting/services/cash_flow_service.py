@@ -36,7 +36,7 @@ class CashFlowService:
         )
 
 
-        lines = JournalLine.objects.all()
+        lines = JournalLine.objects.filter(journal_entry__status="POSTED")
 
 
         if start_date:

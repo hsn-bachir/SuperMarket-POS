@@ -1,4 +1,7 @@
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from apps.accounts.permissions import IsAdminOrManager
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -19,6 +22,7 @@ class ExpenseCategoryViewSet(ModelViewSet):
 
     queryset = ExpenseCategory.objects.all()
     serializer_class = ExpenseCategorySerializer
+    permission_classes = [IsAdminOrManager]
 
 
 class ExpenseViewSet(ModelViewSet):
@@ -33,6 +37,7 @@ class ExpenseViewSet(ModelViewSet):
     )
 
     serializer_class = ExpenseSerializer
+    permission_classes = [IsAdminOrManager]
 
     def perform_create(self, serializer):
 
@@ -72,6 +77,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
     )
 
     serializer_class = PaymentSerializer
+    permission_classes = [IsAdminOrManager]
 
     @action(
         detail=True,
@@ -119,6 +125,7 @@ from apps.reports.exporters import export_response
 
 
 class AccountLedgerView(APIView):
+    permission_classes = [IsAdminOrManager]
 
     def get(
         self,
@@ -153,6 +160,7 @@ class AccountLedgerView(APIView):
 ##trail balance
 from apps.accounting.services.trial_balance_service import TrialBalanceService
 class TrialBalanceView(APIView):
+    permission_classes = [IsAdminOrManager]
 
     def get(self, request):
 
@@ -193,6 +201,7 @@ from apps.accounting.services.income_statement_service import (
 )
 
 class IncomeStatementView(APIView):
+    permission_classes = [IsAdminOrManager]
 
     def get(self, request):
 
@@ -301,6 +310,7 @@ from apps.accounting.services.balance_sheet_service import (
 )
 
 class BalanceSheetView(APIView):
+    permission_classes = [IsAdminOrManager]
 
     def get(self, request):
 
@@ -431,6 +441,7 @@ from apps.accounting.serializers import (
 
 
 class CashFlowView(APIView):
+    permission_classes = [IsAdminOrManager]
 
     def get(self, request):
 
@@ -564,6 +575,7 @@ from apps.accounting.services.closing_service import (
 class AccountingPeriodViewSet(
     ReadOnlyModelViewSet
 ):
+    permission_classes = [IsAdminOrManager]
 
     queryset = (
         AccountingPeriod.objects

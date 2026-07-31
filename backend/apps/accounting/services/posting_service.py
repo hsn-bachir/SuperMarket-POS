@@ -1,5 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 
+from django.conf import settings
+
 from apps.accounting.models import Account
 from apps.accounting.services.journal_service import JournalService
 from apps.common.enums import JournalType,PaymentMethod,PaymentType
@@ -30,15 +32,24 @@ class AccountingPostingService:
 
     @staticmethod
     def get_accounts():
+        account_code_map = getattr(
+            settings,
+            "ACCOUNTING_ACCOUNT_CODES",
+            {
+                "cash": "1110",
+                "bank": "1120",
+                "receivable": "1130",
+                "inventory": "1141",
+                "payable": "2110",
+                "sales": "4100",
+                "cogs": "5100",
+            },
+        )
+
         return {
-        "cash": Account.objects.get(code="1110"),
-        "bank": Account.objects.get(code="1120"),
-        "receivable": Account.objects.get(code="1130"),
-        "inventory": Account.objects.get(code="1141"),
-        "payable": Account.objects.get(code="2110"),
-        "sales": Account.objects.get(code="4100"),
-        "cogs": Account.objects.get(code="5100"),
-    }
+            key: Account.objects.get(code=code)
+            for key, code in account_code_map.items()
+        }
 
     @staticmethod
     def calculate_sale_cogs(sale):

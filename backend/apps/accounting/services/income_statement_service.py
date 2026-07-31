@@ -34,7 +34,7 @@ class IncomeStatementService:
             .order_by("code")
         )
 
-        journal_lines = JournalLine.objects.all()
+        journal_lines = JournalLine.objects.filter(journal_entry__status="POSTED")
 
         if start_date:
             journal_lines = journal_lines.filter(

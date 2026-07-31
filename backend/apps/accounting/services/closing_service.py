@@ -243,6 +243,7 @@ class ClosingService:
             description="Close revenue accounts",
             created_by=user,
             lines=lines,
+            allow_closing_period=True,
         )
 
 
@@ -326,6 +327,7 @@ class ClosingService:
                 description="Close expense accounts",
                 created_by=user,
                 lines=lines,
+                allow_closing_period=True,
             )
 
 

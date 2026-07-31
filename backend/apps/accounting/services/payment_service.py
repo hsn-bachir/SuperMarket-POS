@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
+from django.db.models import F
 
 from apps.accounting.models import Expense, Payment
 from apps.accounting.services.posting_service import AccountingPostingService
@@ -79,6 +80,9 @@ class PaymentService:
         description="",
     ):
 
+        if not created_by or not getattr(created_by, "has_perm", lambda *args, **kwargs: False)("accounting.add_payment"):
+            raise ValidationError("User does not have permission to create payments.")
+
         if amount <= 0:
             raise ValidationError(
                 {
@@ -101,7 +105,23 @@ class PaymentService:
                 }
             )
 
-        payment = Payment.objects.create(
+        with transaction.atomic():
+            locked_reference = (
+                PaymentService._lock_reference(reference)
+            )
+            outstanding_balance = PaymentService.get_outstanding_balance(
+                locked_reference,
+            )
+            if amount > outstanding_balance:
+                raise ValidationError(
+                    {
+                        "amount": (
+                            "Payment exceeds the outstanding balance."
+                        )
+                    }
+                )
+
+            payment = Payment.objects.create(
             number=PaymentService.generate_number(),
             date=date,
             payment_type=payment_type,
@@ -114,20 +134,30 @@ class PaymentService:
             created_by=created_by,
         )
 
-        AccountingPostingService.post_payment(
-            payment,
-            created_by,
-        )
+            AccountingPostingService.post_payment(
+                payment,
+                created_by,
+            )
 
-        payment.status = PaymentStatus.POSTED
+            payment.status = PaymentStatus.POSTED
 
-        payment.save(
-            update_fields=[
-                "status",
-            ]
-        )
+            payment.save(
+                update_fields=[
+                    "status",
+                ]
+            )
 
         return payment
+
+    @staticmethod
+    def _lock_reference(reference):
+        if isinstance(reference, Purchase):
+            return Purchase.objects.select_for_update().get(pk=reference.pk)
+        if isinstance(reference, Sale):
+            return Sale.objects.select_for_update().get(pk=reference.pk)
+        if isinstance(reference, Expense):
+            return Expense.objects.select_for_update().get(pk=reference.pk)
+        return reference
 
 
     @staticmethod

@@ -40,6 +40,9 @@ class ExpenseService:
         description="",
     ):
 
+        if not created_by or not getattr(created_by, "has_perm", lambda *args, **kwargs: False)("accounting.add_expense"):
+            raise ValidationError("User does not have permission to create expenses.")
+
         if amount <= 0:
             raise ValidationError(
                 {
@@ -57,6 +60,9 @@ class ExpenseService:
                     )
                 }
             )
+
+        if Expense.objects.filter(reference=reference, status=ExpenseStatus.POSTED).exists():
+            raise ValidationError("An expense posting already exists for this reference.")
 
         expense = Expense.objects.create(
             number=ExpenseService.generate_number(),

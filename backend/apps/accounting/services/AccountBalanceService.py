@@ -57,6 +57,7 @@ class AccountBalanceService:
                 "journal_entry",
                 "journal_entry__period",
             )
+            .filter(journal_entry__status="POSTED")
         )
 
 

@@ -11,6 +11,7 @@ from apps.accounting.models import (
 from apps.accounting.services.accounting_period_service import (
     AccountingPeriodService,
 )
+from apps.common.enums import EntryStatus
 
 
 class JournalService:
@@ -25,12 +26,19 @@ class JournalService:
         created_by,
         lines,
         reference=None,
+        allow_closing_period=False,
     ):
         # Validate accounting period
-        period = AccountingPeriodService.validate_transaction_date(date)
+        period = AccountingPeriodService.validate_transaction_date(
+            date,
+            allow_closing_period=allow_closing_period,
+        )
 
         # Validate journal lines before saving anything
         JournalService.validate_lines(lines)
+
+        if reference and JournalService._has_existing_posting(reference, journal_type, description):
+            raise ValidationError("A posting already exists for this document.")
 
         # Create journal header
         entry = JournalEntry.objects.create(
@@ -39,6 +47,8 @@ class JournalService:
             journal_type=journal_type,
             description=description,
             created_by=created_by,
+            status=EntryStatus.POSTED,
+            updated_by=created_by,
         )
 
         # Attach generic reference if provided
@@ -56,12 +66,35 @@ class JournalService:
                     debit=line.get("debit", Decimal("0.00")),
                     credit=line.get("credit", Decimal("0.00")),
                     description=line.get("description", ""),
+                    created_by=created_by,
+                    updated_by=created_by,
                 )
                 for line in lines
             ]
         )
 
+        entry.updated_by = created_by
+        entry.save(update_fields=["updated_by", "updated_at"])
+
         return entry
+
+    @staticmethod
+    def _has_existing_posting(reference, journal_type, description=None):
+        if not reference:
+            return False
+
+        content_type = ContentType.objects.get_for_model(reference)
+        queryset = JournalEntry.objects.filter(
+            content_type=content_type,
+            object_id=reference.pk,
+            journal_type=journal_type,
+            status=EntryStatus.POSTED,
+        )
+
+        if description and str(description).lower().startswith("reverse"):
+            return False
+
+        return queryset.exists()
 
     @staticmethod
     def validate_lines(lines):
@@ -82,6 +115,11 @@ class JournalService:
 
             debit = line.get("debit", Decimal("0.00"))
             credit = line.get("credit", Decimal("0.00"))
+
+            if not account.is_active:
+                raise ValidationError(
+                    f"Account '{account.code}' is inactive."
+                )
 
             if not account.is_postable:
                 raise ValidationError(
