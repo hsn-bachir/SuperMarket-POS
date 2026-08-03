@@ -108,7 +108,6 @@ export default function ProductForm({
           name="is_active"
           checked={form.is_active}
           onChange={handleChange}
-          required
         />
       </FormSection>
 
