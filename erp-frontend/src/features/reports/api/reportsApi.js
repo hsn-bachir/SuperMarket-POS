@@ -32,3 +32,19 @@ export const getProfitLoss = (params) =>
 
 export const getCogs = (params) =>
     api.get("/reports/cogs/", { params });
+
+// Accounting Reports
+export const getAccountLedger = (code, params) =>
+  api.get(`/accounting/ledger/${code}/`, { params });
+
+export const getTrialBalance = (params) =>
+  api.get("/accounting/trial-balance/", { params });
+
+export const getIncomeStatement = (params) =>
+  api.get("/accounting/income-statement/", { params });
+
+export const getBalanceSheet = (params) =>
+  api.get("/accounting/balance-sheet/", { params });
+
+export const getCashFlow = (params) =>
+  api.get("/accounting/cash-flow/", { params });

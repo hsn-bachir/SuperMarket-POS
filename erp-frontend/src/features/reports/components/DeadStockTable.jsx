@@ -2,7 +2,13 @@ import { useMemo, useState } from "react";
 import TableHeader from "./TableHeader";
 import Pagination from "@/components/ui/Pagination";
 
-export default function DeadStockTable({ data, count, page, setPage }) {
+export default function DeadStockTable({
+  data,
+  count,
+  page,
+  setPage,
+  filters,
+}) {
   const [search, setSearch] = useState("");
 
   const rows = useMemo(() => {
@@ -19,6 +25,7 @@ export default function DeadStockTable({ data, count, page, setPage }) {
         search={search}
         setSearch={setSearch}
         exportName="/reports/dead-stock/"
+        filters={filters}
       />
 
       <div>

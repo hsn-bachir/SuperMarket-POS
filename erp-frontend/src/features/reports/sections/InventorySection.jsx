@@ -98,6 +98,7 @@ export default function InventorySection({ filters }) {
             stockAging: page,
           }))
         }
+        filters={filters}
       />
 
       <DeadStockTable
@@ -110,6 +111,7 @@ export default function InventorySection({ filters }) {
             deadStock: page,
           }))
         }
+        filters={filters}
       />
 
       <InventoryValuationTable

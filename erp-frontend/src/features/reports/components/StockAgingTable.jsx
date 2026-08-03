@@ -4,7 +4,13 @@ import StockStatusBadge from "./StockStatusBadge";
 import Pagination from "@/components/ui/Pagination";
 import TableHeader from "./TableHeader";
 
-export default function StockAgingTable({ data, count, page, setPage }) {
+export default function StockAgingTable({
+  data,
+  count,
+  page,
+  setPage,
+  filters,
+}) {
   const [search, setSearch] = useState("");
 
   const rows = useMemo(() => {
@@ -21,6 +27,7 @@ export default function StockAgingTable({ data, count, page, setPage }) {
         search={search}
         setSearch={setSearch}
         exportName="/reports/stock-aging/"
+        filters={filters}
       />
 
       <div className="max-h-[600px]">
