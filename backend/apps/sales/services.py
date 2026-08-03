@@ -86,7 +86,7 @@ def delete_sale(*, sale, user):
             reference_id=sale.id,
             user=user,
         )
-        AccountingPostingService.reverse_sale(
+    AccountingPostingService.reverse_sale(
     sale=sale,
     user=user,
 )

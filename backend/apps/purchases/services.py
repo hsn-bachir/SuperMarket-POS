@@ -88,7 +88,7 @@ def create_purchase(*,supplier,currency,exchange_rate=None,payment_method,purcha
             user=user,
         )
 
-        AccountingPostingService.post_purchase(
+    AccountingPostingService.post_purchase(
     purchase=purchase,
     user=user,
 )
@@ -126,7 +126,7 @@ def delete_purchase(*, purchase, user):
             user=user,
         )
 
-        AccountingPostingService.reverse_purchase(
+    AccountingPostingService.reverse_purchase(
     purchase=purchase,
     user=user,
 )
