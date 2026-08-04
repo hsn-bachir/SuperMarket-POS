@@ -138,6 +138,10 @@ export default function PaymentSection({ cart }) {
               value: "CARD",
               label: "Card",
             },
+            {
+              value: "CREDIT",
+              label: "Credit",
+            },
           ]}
         />
 

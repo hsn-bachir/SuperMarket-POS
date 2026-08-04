@@ -19,6 +19,7 @@ class InventoryMovementSerializer(serializers.ModelSerializer):
             "quantity",
             "reference_type",
             "reference_id",
+            "reason",
             "created_at",
         )
 

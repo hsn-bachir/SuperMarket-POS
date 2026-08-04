@@ -182,6 +182,10 @@ export default function PurchaseForm({
                 value: "CARD",
                 label: "Card",
               },
+              {
+                value: "CREDIT",
+                label: "Credit",
+              },
             ]}
             required
           />

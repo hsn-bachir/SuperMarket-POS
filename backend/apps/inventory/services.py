@@ -3,7 +3,16 @@ from apps.inventory.models import InventoryMovement
 from apps.common.enums import MovementType
 
 
-def create_inventory_movement(*,product,movement_type,quantity,reference_type,reference_id,user):
+def create_inventory_movement(
+    *,
+    product,
+    movement_type,
+    quantity,
+    reference_type,
+    reference_id,
+    reason="",
+    user,
+):
     if not user.has_perm("inventory.add_inventorymovement"):
         raise PermissionError("Not allowed")
 
@@ -14,6 +23,7 @@ def create_inventory_movement(*,product,movement_type,quantity,reference_type,re
         product=product,
         movement_type=movement_type,
         quantity=quantity,
+        reason=reason,
         reference_type=reference_type,
         reference_id=reference_id,
     )
@@ -29,6 +39,7 @@ def add_purchase_stock(*, product, quantity, purchase_item, user):
         quantity=quantity,
         reference_type="PURCHASE",
         reference_id=purchase_item.id,
+        reason="Stock added from purchase",
         user=user,
     )
 
@@ -42,6 +53,7 @@ def remove_purchase_stock(*, product, quantity, purchase_item, user):
         quantity=-quantity,
         reference_type="PURCHASE_DELETE",
         reference_id=purchase_item.id,
+        reason="Stock removed due to purchase deletion",
         user=user,
     )
 
@@ -55,6 +67,7 @@ def remove_sale_stock(*, product, quantity, sale_item, user):
         quantity=-quantity,
         reference_type="SALE",
         reference_id=sale_item.id,
+        reason="Stock decreased due to sale",
         user=user,
     )
 

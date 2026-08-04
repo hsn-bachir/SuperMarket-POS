@@ -15,30 +15,36 @@ from .services import create_adjustment
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from datetime import timedelta
+from django.utils import timezone
+from rest_framework import generics
+from rest_framework.filters import SearchFilter
+
 class InventoryMovementListView(generics.ListAPIView):
     permission_classes = [
         IsAuthenticated,
         DjangoModelPermissions,
     ]
-    queryset = (
-        InventoryMovement.objects
-        .select_related("product")
-        .order_by("-created_at")
-    )
 
-    serializer_class = (
-        InventoryMovementSerializer
-    )
+    serializer_class = InventoryMovementSerializer
 
-    filter_backends = [
-        SearchFilter
-    ]
+    filter_backends = [SearchFilter]
 
     search_fields = [
         "product__name",
         "product__barcode",
         "movement_type",
     ]
+
+    def get_queryset(self):
+        one_month_ago = timezone.now() - timedelta(days=30)
+
+        return (
+            InventoryMovement.objects
+            .select_related("product")
+            .filter(created_at__gte=one_month_ago)
+            .order_by("-created_at")
+        )
 
 class InventoryAdjustmentView(APIView):
 

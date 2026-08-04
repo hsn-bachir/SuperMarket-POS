@@ -2,6 +2,7 @@ import DataTable from "@/components/ui/DataTable";
 import MovementBadge from "./MovementBadge";
 
 export default function InventoryTable({ movements }) {
+  console.log("movements", movements);
   const columns = [
     {
       key: "product",
@@ -33,8 +34,9 @@ export default function InventoryTable({ movements }) {
     },
 
     {
-      key: "reference_type",
+      key: "reason",
       title: "Reason",
+      render: (row) => row.reason,
     },
 
     {

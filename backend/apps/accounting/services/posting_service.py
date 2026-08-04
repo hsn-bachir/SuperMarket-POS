@@ -4,7 +4,7 @@ from django.conf import settings
 
 from apps.accounting.models import Account
 from apps.accounting.services.journal_service import JournalService
-from apps.common.enums import JournalType,PaymentMethod,PaymentType
+from apps.common.enums import JournalType,PaymentMethod, PaymentStatus,PaymentType
 
 
 def money(value):
@@ -368,6 +368,9 @@ class AccountingPostingService:
 
         else:
             raise ValueError("Invalid payment type.")
+
+        payment.status = PaymentStatus.POSTED
+        payment.save()
 
         return JournalService.create_entry(
         date=payment.date,

@@ -39,14 +39,28 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = "__all__"
-        read_only_fields = (
-            "number",
-            "status",
-            "created_by",
-            "created_at",
-            "updated_at",
-        )
+        fields = [
+    "id",
+    "number",
+    "date",
+    "payment_type",
+    "payment_method",
+    "amount",
+    "content_type",
+    "object_id",
+    "external_reference",
+    "description",
+    "status",
+    "created_at",
+    "updated_at",
+]
+        read_only_fields = [
+    "number",
+    "status",
+    "created_by",
+    "created_at",
+    "updated_at",
+]
 
     def create(self, validated_data):
 
