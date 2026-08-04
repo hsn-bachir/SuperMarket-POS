@@ -509,14 +509,6 @@ class Expense(TimeStampedModel):
         related_name="expenses",
     )
 
-    supplier = models.ForeignKey(
-        Supplier,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="expenses",
-    )
-
     payment_method = models.CharField(
         max_length=20,
         choices=PaymentMethod.choices,

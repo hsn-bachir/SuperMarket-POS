@@ -2,7 +2,7 @@ import ReportHeader from "./ReportHeader";
 
 export default function BalanceSheetCard({ data, filters }) {
   return (
-    <div className="overflow-visible rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+    <div className="overflow-hidden rounded-3xl border border-gray-700 bg-gray-900 shadow-2xl">
       <ReportHeader
         title="Balance Sheet"
         description="Assets, liabilities, and equity position."
@@ -10,7 +10,7 @@ export default function BalanceSheetCard({ data, filters }) {
         filters={filters}
       />
 
-      <div className="p-6">
+      <div className="p-8">
         <div className="grid gap-6 xl:grid-cols-3">
           <Section
             title="Assets"
@@ -31,15 +31,16 @@ export default function BalanceSheetCard({ data, filters }) {
           />
         </div>
 
-        <div className="mt-6 text-center">
+        {/* Balance Status */}
+        <div className="mt-8 flex justify-center">
           {data.balance_check ? (
-            <span className="font-semibold text-green-500">
+            <div className="rounded-full border border-green-500/30 bg-green-500/10 px-6 py-3 text-sm font-semibold text-green-400 shadow-lg">
               ✓ Balance Sheet Balanced
-            </span>
+            </div>
           ) : (
-            <span className="font-semibold text-red-500">
+            <div className="rounded-full border border-red-500/30 bg-red-500/10 px-6 py-3 text-sm font-semibold text-red-400 shadow-lg">
               ✗ Balance Sheet Out of Balance
-            </span>
+            </div>
           )}
         </div>
       </div>
@@ -49,20 +50,47 @@ export default function BalanceSheetCard({ data, filters }) {
 
 function Section({ title, rows, total }) {
   return (
-    <div className="rounded-xl bg-gray-800 p-4">
-      <h3 className="mb-3 font-semibold text-gray-100">{title}</h3>
+    <div className="overflow-hidden rounded-2xl border border-gray-700 bg-gray-800 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-2xl">
+      {/* Header */}
+      <div className="border-b border-gray-700 bg-gray-800/90 px-6 py-5">
+        <h3 className="text-xl font-bold tracking-wide text-white">{title}</h3>
+      </div>
 
-      {rows.map((row) => (
-        <div key={row.account_id} className="flex justify-between py-1">
-          <span className="text-gray-300">{row.name}</span>
+      {/* Accounts */}
+      <div className="space-y-2 px-5 py-5">
+        {rows.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-700 py-8 text-center text-sm text-gray-500">
+            No accounts found
+          </div>
+        ) : (
+          rows.map((row) => (
+            <div
+              key={row.account_id}
+              className="flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 hover:bg-gray-700/50"
+            >
+              <span className="text-sm font-medium text-gray-300">
+                {row.name}
+              </span>
 
-          <span className="font-medium text-gray-100">{row.amount}</span>
+              <span className="font-semibold tabular-nums text-white">
+                {row.amount}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Total */}
+      <div className="border-t border-blue-500/20 bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-900 px-6 py-5">
+        <div className="flex items-center justify-between">
+          <span className="text-base font-semibold tracking-wide text-blue-100">
+            Total {title}
+          </span>
+
+          <span className="rounded-xl border border-blue-400/20 bg-white/10 px-4 py-2 text-xl font-bold tabular-nums text-white shadow-md backdrop-blur-sm">
+            {total}
+          </span>
         </div>
-      ))}
-
-      <div className="mt-3 flex justify-between border-t border-gray-700 pt-3 font-bold">
-        <span>Total</span>
-        <span>{total}</span>
       </div>
     </div>
   );

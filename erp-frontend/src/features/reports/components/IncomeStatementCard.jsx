@@ -1,8 +1,10 @@
 import ReportHeader from "./ReportHeader";
 
 export default function IncomeStatementCard({ data, filters }) {
+  const isProfit = Number(data.net_profit) >= 0;
+
   return (
-    <div className="overflow-visible rounded-3xl border border-gray-700 bg-gray-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+    <div className="overflow-hidden rounded-3xl border border-gray-700 bg-gray-900 shadow-2xl">
       <ReportHeader
         title="Income Statement"
         description="Revenue, expenses, and profitability overview."
@@ -10,13 +12,14 @@ export default function IncomeStatementCard({ data, filters }) {
         filters={filters}
       />
 
-      <div className="p-6">
+      <div className="p-8">
         <div className="grid gap-6 lg:grid-cols-2">
           <StatementSection
             title="Revenue"
             rows={data.revenue}
             totalLabel="Total Revenue"
             total={data.total_revenue}
+            color="green"
           />
 
           <StatementSection
@@ -24,14 +27,34 @@ export default function IncomeStatementCard({ data, filters }) {
             rows={data.expenses}
             totalLabel="Total Expenses"
             total={data.total_expenses}
+            color="red"
           />
         </div>
 
-        <div className="mt-6 rounded-xl bg-gray-800 p-5 text-center">
-          <div className="text-sm text-gray-400">Net Profit</div>
+        {/* Net Profit */}
+        <div
+          className={`mt-8 rounded-2xl border p-6 shadow-lg ${
+            isProfit
+              ? "border-emerald-500/20 bg-gradient-to-r from-emerald-900 via-teal-900 to-emerald-900"
+              : "border-red-500/20 bg-gradient-to-r from-red-900 via-rose-900 to-red-900"
+          }`}
+        >
+          <div className="text-center">
+            <p
+              className={`text-sm font-medium uppercase tracking-wider ${
+                isProfit ? "text-emerald-200" : "text-red-200"
+              }`}
+            >
+              Net {isProfit ? "Profit" : "Loss"}
+            </p>
 
-          <div className="mt-1 text-3xl font-bold text-green-500">
-            {data.net_profit}
+            <p
+              className={`mt-2 text-4xl font-bold tabular-nums ${
+                isProfit ? "text-emerald-300" : "text-red-300"
+              }`}
+            >
+              {data.net_profit}
+            </p>
           </div>
         </div>
       </div>
@@ -39,50 +62,72 @@ export default function IncomeStatementCard({ data, filters }) {
   );
 }
 
-function StatementSection({ title, rows, totalLabel, total }) {
+function StatementSection({ title, rows, totalLabel, total, color = "blue" }) {
+  const footerStyles =
+    color === "green"
+      ? {
+          bg: "bg-gradient-to-r from-emerald-900 via-green-900 to-emerald-900",
+          border: "border-emerald-500/20",
+          text: "text-emerald-100",
+        }
+      : color === "red"
+        ? {
+            bg: "bg-gradient-to-r from-red-900 via-rose-900 to-red-900",
+            border: "border-red-500/20",
+            text: "text-red-100",
+          }
+        : {
+            bg: "bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-900",
+            border: "border-blue-500/20",
+            text: "text-blue-100",
+          };
+
   return (
-    <div className="rounded-xl bg-gray-800 p-5">
-      <h3 className="mb-4 text-base font-semibold text-gray-100">{title}</h3>
-
-      <div className="space-y-1">
-        {rows.map((row) => (
-          <div
-            key={row.account_id}
-            className="
-              flex
-              justify-between
-              rounded-lg
-              px-2
-              py-2
-              text-sm
-              transition
-              hover:bg-gray-700/50
-            "
-          >
-            <span className="text-gray-300">
-              {row.code} - {row.name}
-            </span>
-
-            <span className="font-medium text-gray-100">{row.amount}</span>
-          </div>
-        ))}
+    <div className="overflow-hidden rounded-2xl border border-gray-700 bg-gray-800 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-2xl">
+      {/* Header */}
+      <div className="border-b border-gray-700 bg-gray-800/90 px-6 py-5">
+        <h3 className="text-xl font-bold tracking-wide text-white">{title}</h3>
       </div>
 
-      <div
-        className="
-          mt-4
-          flex
-          justify-between
-          border-t
-          border-gray-700
-          pt-4
-          font-bold
-          text-gray-100
-        "
-      >
-        <span>{totalLabel}</span>
+      {/* Accounts */}
+      <div className="space-y-2 px-5 py-5">
+        {rows.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-700 py-8 text-center text-sm text-gray-500">
+            No accounts found
+          </div>
+        ) : (
+          rows.map((row) => (
+            <div
+              key={row.account_id}
+              className="flex items-center justify-between rounded-xl px-4 py-3 transition-all duration-200 hover:bg-gray-700/50"
+            >
+              <span className="text-sm font-medium text-gray-300">
+                {row.code} - {row.name}
+              </span>
 
-        <span>{total}</span>
+              <span className="font-semibold tabular-nums text-white">
+                {row.amount}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Total */}
+      <div
+        className={`border-t px-6 py-5 ${footerStyles.bg} ${footerStyles.border}`}
+      >
+        <div className="flex items-center justify-between">
+          <span
+            className={`text-base font-semibold tracking-wide ${footerStyles.text}`}
+          >
+            {totalLabel}
+          </span>
+
+          <span className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-xl font-bold tabular-nums text-white shadow-md backdrop-blur-sm">
+            {total}
+          </span>
+        </div>
       </div>
     </div>
   );
