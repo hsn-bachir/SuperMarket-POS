@@ -36,6 +36,16 @@ import Users from "@/features/users/pages/Users";
 import AddUser from "@/features/users/pages/AddUser";
 import EditUser from "@/features/users/pages/EditUser";
 
+import ExpenseList from "@/features/accounting/pages/ExpenseList";
+import ExpenseCreate from "@/features/accounting/pages/ExpenseCreate";
+import ExpenseDetails from "@/features/accounting/pages/ExpenseDetails";
+
+import PaymentList from "@/features/accounting/pages/PaymentList";
+import CreatePayment from "@/features/accounting/pages/CreatePayment";
+import PaymentDetails from "@/features/accounting/pages/PaymentDetails";
+
+import AccountingPeriods from "@/features/accounting/pages/AccountingPeriods";
+
 function RootRedirect() {
   const { user } = useAuth();
   return <Navigate to={user ? "/" : "/login"} replace />;
@@ -79,6 +89,13 @@ export default function AppRouter() {
           <Route path="/users" element={<Users />} />
           <Route path="/users/new" element={<AddUser />} />
           <Route path="/users/:id/edit" element={<EditUser />} />
+          <Route path="/accounting/expenses" element={<ExpenseList />} />
+          <Route path="/accounting/expenses/new" element={<ExpenseCreate />} />
+          <Route path="/accounting/expenses/:id" element={<ExpenseDetails />} />
+          <Route path="/accounting/payments" element={<PaymentList />} />
+          <Route path="/accounting/payments/new" element={<CreatePayment />} />
+          <Route path="/accounting/payments/:id" element={<PaymentDetails />} />
+          <Route path="/accounting/periods" element={<AccountingPeriods />} />
         </Route>
         <Route path="/sales/:id/invoice" element={<Print />} />
 

@@ -16,9 +16,24 @@ class ExpenseCategorySerializer(serializers.ModelSerializer):
 class ExpenseSerializer(serializers.ModelSerializer):
 
     category_name = serializers.CharField(
-        source="category.name",
-        read_only=True,
-    )
+    source="category.name",
+    read_only=True,
+)
+
+    created_by_name = serializers.CharField(
+    source="created_by.username",
+    read_only=True,
+)
+
+    payment_method_display = serializers.CharField(
+    source="get_payment_method_display",
+    read_only=True,
+)
+
+    status_display = serializers.CharField(
+    source="get_status_display",
+    read_only=True,
+)
 
     class Meta:
         model = Expense
@@ -36,6 +51,21 @@ from apps.accounting.models import Payment
 from apps.accounting.services.payment_service import PaymentService
 
 class PaymentSerializer(serializers.ModelSerializer):
+
+    payment_type_display = serializers.CharField(
+    source="get_payment_type_display",
+    read_only=True,
+)
+
+    payment_method_display = serializers.CharField(
+    source="get_payment_method_display",
+    read_only=True,
+)
+
+    status_display = serializers.CharField(
+    source="get_status_display",
+    read_only=True,
+)
 
     class Meta:
         model = Payment
