@@ -1,3 +1,4 @@
+from django.db.migrations import serializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -31,7 +32,6 @@ class ExpenseViewSet(ModelViewSet):
         Expense.objects
         .select_related(
             "category",
-            "supplier",
             "created_by",
         )
     )
@@ -571,9 +571,18 @@ from apps.accounting.services.closing_service import (
     ClosingService,
 )
 
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import (
+    ListModelMixin,
+    RetrieveModelMixin,
+    CreateModelMixin,
+)
 
 class AccountingPeriodViewSet(
-    ReadOnlyModelViewSet
+    ListModelMixin,
+    RetrieveModelMixin,
+    CreateModelMixin,
+    GenericViewSet,
 ):
     permission_classes = [IsAdminOrManager]
 
@@ -583,7 +592,6 @@ class AccountingPeriodViewSet(
     )
 
     serializer_class = AccountingPeriodSerializer
-
 
     @action(
         detail=False,
@@ -602,10 +610,28 @@ class AccountingPeriodViewSet(
             period
         )
 
-        return Response(
-            serializer.data
-        )
+        return Response(serializer.data)
 
+    @action(
+    detail=False,
+    methods=["post"],
+    url_path="generate-next",
+)
+    def generate_next(self, request):
+
+        period = (
+        AccountingPeriodService
+        .generate_next_period()
+    )
+
+        serializer = self.get_serializer(
+        period
+    )
+
+        return Response(
+        serializer.data,
+        status=status.HTTP_201_CREATED,
+    )
 
     @action(
         detail=True,
@@ -619,23 +645,19 @@ class AccountingPeriodViewSet(
 
         period = self.get_object()
 
-
         ClosingService.close_period(
             period=period,
             user=request.user,
         )
 
-
         serializer = self.get_serializer(
             period
         )
-
 
         return Response(
             serializer.data,
             status=status.HTTP_200_OK,
         )
-
 
     @action(
         detail=True,
@@ -649,17 +671,14 @@ class AccountingPeriodViewSet(
 
         period = self.get_object()
 
-
         AccountingPeriodService.reopen_period(
             period=period,
             user=request.user,
         )
 
-
         serializer = self.get_serializer(
             period
         )
-
 
         return Response(
             serializer.data,

@@ -35,7 +35,6 @@ class ExpenseService:
         amount,
         payment_method,
         created_by,
-        supplier=None,
         reference="",
         description="",
     ):
@@ -68,7 +67,6 @@ class ExpenseService:
             number=ExpenseService.generate_number(),
             date=date,
             category=category,
-            supplier=supplier,
             payment_method=payment_method,
             amount=amount,
             reference=reference,

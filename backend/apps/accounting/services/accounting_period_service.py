@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta
+from calendar import monthrange
 
 from apps.common.enums import PeriodStatus
 from apps.accounting.models import AccountingPeriod
@@ -95,6 +97,52 @@ class AccountingPeriodService:
         )
 
         return True
+
+    @staticmethod
+    @transaction.atomic
+    def generate_next_period():
+
+        last_period = (
+        AccountingPeriod.objects
+        .order_by("-end_date")
+        .first()
+    )
+
+        if not last_period:
+            raise ValidationError(
+            "No accounting period exists. Create the first period manually."
+        )
+
+        start_date = last_period.end_date + timedelta(days=1)
+
+        year = start_date.year
+        month = start_date.month
+
+        last_day = monthrange(year, month)[1]
+
+        end_date = start_date.replace(
+        day=last_day
+    )
+
+        period_name = start_date.strftime(
+        "%B %Y"
+    )
+
+        if AccountingPeriod.objects.filter(
+        start_date=start_date,
+        end_date=end_date,
+    ).exists():
+            raise ValidationError(
+            "The next accounting period already exists."
+        )
+
+        period = AccountingPeriod.objects.create(
+        name=period_name,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+        return period
 
 
     @staticmethod

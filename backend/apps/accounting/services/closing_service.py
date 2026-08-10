@@ -28,29 +28,32 @@ class ClosingService:
     """
     Handles accounting period closing.
 
-    Process:
+    Closing flow:
 
         Revenue Accounts
-              |
-              v
-        Income Summary
-              |
-              v
+                |
+                v
+          Income Summary
+                ^
+                |
         Expense Accounts
-              |
-              v
-        Net Income
-              |
-              v
+                |
+                v
+          Net Income
+                |
+                v
         Retained Earnings
-              |
-              v
-        Close Period
+                |
+                v
+          Close Period
     """
 
     INCOME_SUMMARY_CODE = "3900"
     RETAINED_EARNINGS_CODE = "3200"
 
+    # =====================================================
+    # PUBLIC API
+    # =====================================================
 
     @staticmethod
     @transaction.atomic
@@ -59,62 +62,93 @@ class ClosingService:
         period,
         user,
     ):
+        """
+        Close an accounting period.
+
+        Process:
+
+        1. Validate period.
+        2. Move OPEN -> CLOSING.
+        3. Close revenue accounts.
+        4. Close expense accounts.
+        5. Transfer net income/loss to retained earnings.
+        6. Move CLOSING -> CLOSED.
+        """
 
         ClosingService._validate_period(
             period
         )
 
+        # -------------------------------------------------
+        # Lock period for closing
+        # -------------------------------------------------
 
-        # Lock period
         AccountingPeriodService.start_closing(
             period
         )
 
+        # -------------------------------------------------
+        # Close revenue accounts
+        # -------------------------------------------------
 
         ClosingService._close_revenue_accounts(
-            period,
-            user,
+            period=period,
+            user=user,
         )
 
+        # -------------------------------------------------
+        # Close expense accounts
+        # -------------------------------------------------
 
         ClosingService._close_expense_accounts(
-            period,
-            user,
+            period=period,
+            user=user,
         )
 
+        # -------------------------------------------------
+        # Transfer net income/loss
+        # -------------------------------------------------
 
         ClosingService._transfer_net_income(
-            period,
-            user,
+            period=period,
+            user=user,
         )
 
+        # -------------------------------------------------
+        # Mark period as CLOSED
+        # -------------------------------------------------
 
         AccountingPeriodService.close_period(
-            period,
-            user,
+            period=period,
+            user=user,
         )
-
 
         return period
 
-
+    # =====================================================
+    # VALIDATION
+    # =====================================================
 
     @staticmethod
     def _validate_period(period):
+        """
+        Validate that the period can be closed.
+        """
 
         if period.status == PeriodStatus.CLOSED:
             raise ValidationError(
                 "Period is already closed."
             )
 
-
         if period.status == PeriodStatus.CLOSING:
             raise ValidationError(
                 "Period is already being closed."
             )
 
+        # -------------------------------------------------
+        # Draft journals are not allowed
+        # -------------------------------------------------
 
-        # Ensure no draft journals
         draft_entries = (
             period
             .journal_entries
@@ -124,66 +158,90 @@ class ClosingService:
             .exists()
         )
 
-
         if draft_entries:
             raise ValidationError(
                 "Cannot close period with draft journal entries."
             )
 
-
+    # =====================================================
+    # SPECIAL ACCOUNTS
+    # =====================================================
 
     @staticmethod
     def _get_income_summary_account():
+        """
+        Return the Income Summary account.
+
+        Expected account code:
+            3900
+        """
 
         try:
             return Account.objects.get(
-                code=ClosingService.INCOME_SUMMARY_CODE
+                code=ClosingService.INCOME_SUMMARY_CODE,
+                is_active=True,
             )
 
         except Account.DoesNotExist:
-
             raise ValidationError(
-                "Income Summary account missing."
+                f'Income Summary account '
+                f'"{ClosingService.INCOME_SUMMARY_CODE}" '
+                f'is missing.'
             )
-
-
 
     @staticmethod
     def _get_retained_earnings_account():
+        """
+        Return the Retained Earnings account.
+
+        Expected account code:
+            3200
+        """
 
         try:
             return Account.objects.get(
-                code=ClosingService.RETAINED_EARNINGS_CODE
+                code=ClosingService.RETAINED_EARNINGS_CODE,
+                is_active=True,
             )
 
         except Account.DoesNotExist:
-
             raise ValidationError(
-                "Retained Earnings account missing."
+                f'Retained Earnings account '
+                f'"{ClosingService.RETAINED_EARNINGS_CODE}" '
+                f'is missing.'
             )
 
-
+    # =====================================================
+    # CLOSE REVENUE
+    # =====================================================
 
     @staticmethod
     def _close_revenue_accounts(
+        *,
         period,
         user,
     ):
+        """
+        Close all revenue accounts into Income Summary.
+
+        Example:
+
+            Dr Sales Revenue       10,000
+                Cr Income Summary       10,000
+        """
 
         revenues = (
             Account.objects
             .filter(
                 account_type=AccountType.REVENUE,
                 is_active=True,
+                is_postable=True,
             )
         )
 
-
         lines = []
 
-
         for account in revenues:
-
             balance = (
                 AccountBalanceService
                 .get_balance(
@@ -193,49 +251,41 @@ class ClosingService:
                 )
             )
 
-
             if balance == Decimal("0.00"):
                 continue
 
-
-            # Revenue normally has credit balance
+            # Revenue normally has a credit balance.
+            # Debit it to bring the balance to zero.
             lines.append(
                 {
                     "account": account,
                     "debit": balance,
                     "credit": Decimal("0.00"),
-                    "description": (
-                        "Close revenue account"
-                    ),
+                    "description": "Close revenue account",
                 }
             )
 
-
         if not lines:
             return
-
 
         income_summary = (
             ClosingService
             ._get_income_summary_account()
         )
 
-
-        total = sum(
+        total_revenue = sum(
             line["debit"]
             for line in lines
         )
-
 
         lines.append(
             {
                 "account": income_summary,
                 "debit": Decimal("0.00"),
-                "credit": total,
+                "credit": total_revenue,
                 "description": "Revenue closing",
             }
         )
-
 
         JournalService.create_entry(
             date=period.end_date,
@@ -246,31 +296,45 @@ class ClosingService:
             allow_closing_period=True,
         )
 
-
+    # =====================================================
+    # CLOSE EXPENSES
+    # =====================================================
 
     @staticmethod
     def _close_expense_accounts(
+        *,
         period,
         user,
     ):
+        """
+        Close all expense accounts into Income Summary.
+
+        Example:
+
+            Dr Income Summary       7,000
+                Cr Rent Expense          7,000
+
+            Dr Income Summary       3,000
+                Cr Utilities Expense     3,000
+        """
 
         expenses = (
             Account.objects
             .filter(
                 account_type=AccountType.EXPENSE,
                 is_active=True,
+                is_postable=True,
             )
         )
 
+        income_summary = (
+            ClosingService
+            ._get_income_summary_account()
+        )
 
         lines = []
 
-
-        total = Decimal("0.00")
-
-
         for account in expenses:
-
             balance = (
                 AccountBalanceService
                 .get_balance(
@@ -280,74 +344,72 @@ class ClosingService:
                 )
             )
 
-
             if balance == Decimal("0.00"):
                 continue
 
-
-            total += balance
-
-
             lines.append(
                 {
-                    "account": (
-                        ClosingService
-                        ._get_income_summary_account()
-                    ),
-
+                    "account": income_summary,
                     "debit": balance,
-
                     "credit": Decimal("0.00"),
-
-                    "description":
-                        "Expense closing",
+                    "description": "Expense closing",
                 }
             )
-
 
             lines.append(
                 {
                     "account": account,
-
                     "debit": Decimal("0.00"),
-
                     "credit": balance,
-
-                    "description":
-                        "Close expense account",
+                    "description": "Close expense account",
                 }
             )
 
+        if not lines:
+            return
 
-        if lines:
+        JournalService.create_entry(
+            date=period.end_date,
+            journal_type=JournalType.CLOSING,
+            description="Close expense accounts",
+            created_by=user,
+            lines=lines,
+            allow_closing_period=True,
+        )
 
-            JournalService.create_entry(
-                date=period.end_date,
-                journal_type=JournalType.CLOSING,
-                description="Close expense accounts",
-                created_by=user,
-                lines=lines,
-                allow_closing_period=True,
-            )
-
-
+    # =====================================================
+    # TRANSFER NET INCOME
+    # =====================================================
 
     @staticmethod
     def _transfer_net_income(
+        *,
         period,
         user,
     ):
+        """
+        Transfer the Income Summary balance to Retained Earnings.
+
+        Profit:
+
+            Dr Income Summary
+                Cr Retained Earnings
+
+        Loss:
+
+            Dr Retained Earnings
+                Cr Income Summary
+        """
 
         income_summary = (
             ClosingService
             ._get_income_summary_account()
         )
 
-        retained = (
+        retained_earnings = (
             ClosingService
             ._get_retained_earnings_account()
         )
-
 
         balance = (
             AccountBalanceService
@@ -358,45 +420,56 @@ class ClosingService:
             )
         )
 
-
         if balance == Decimal("0.00"):
             return
 
+        # -------------------------------------------------
+        # PROFIT
+        # -------------------------------------------------
 
-        if balance > 0:
-
+        if balance > Decimal("0.00"):
             lines = [
                 {
                     "account": income_summary,
                     "debit": balance,
                     "credit": Decimal("0.00"),
+                    "description": "Close Income Summary",
                 },
-
                 {
-                    "account": retained,
+                    "account": retained_earnings,
                     "debit": Decimal("0.00"),
                     "credit": balance,
+                    "description": "Transfer net income",
                 },
             ]
 
-        else:
+        # -------------------------------------------------
+        # LOSS
+        # -------------------------------------------------
 
+        else:
             amount = abs(balance)
 
             lines = [
                 {
-                    "account": retained,
+                    "account": retained_earnings,
                     "debit": amount,
                     "credit": Decimal("0.00"),
+                    "description": "Transfer net loss",
                 },
-
                 {
                     "account": income_summary,
                     "debit": Decimal("0.00"),
                     "credit": amount,
+                    "description": "Close Income Summary",
                 },
             ]
 
+        # IMPORTANT:
+        #
+        # The period is currently CLOSING.
+        # Therefore the closing journal must explicitly
+        # allow posting during a closing period.
 
         JournalService.create_entry(
             date=period.end_date,
@@ -404,4 +477,5 @@ class ClosingService:
             description="Transfer net income to retained earnings",
             created_by=user,
             lines=lines,
+            allow_closing_period=True,
         )

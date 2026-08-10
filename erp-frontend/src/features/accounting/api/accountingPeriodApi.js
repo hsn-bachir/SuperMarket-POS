@@ -6,6 +6,12 @@ export const getPeriods = () =>
 export const getCurrentPeriod = () =>
   api.get("/accounting/periods/current/");
 
+export const createPeriod = (data) =>
+  api.post("/accounting/periods/", data);
+
+export const generateNextPeriod = () =>
+  api.post("/accounting/periods/generate-next/");
+
 export const closePeriod = (id) =>
   api.post(`/accounting/periods/${id}/close/`);
 
