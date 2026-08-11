@@ -59,6 +59,7 @@ class ExpenseStatus(models.TextChoices):
     CANCELLED = "CANCELLED", "Cancelled"
 
 class PaymentStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
     DRAFT = "DRAFT", "Draft"
     POSTED = "POSTED", "Posted"
     CANCELLED = "CANCELLED", "Cancelled"

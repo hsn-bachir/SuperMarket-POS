@@ -1,6 +1,6 @@
+from decimal import Decimal
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
-from decimal import Decimal
 
 from apps.purchases.models import Purchase, PurchaseItem
 
@@ -38,7 +38,6 @@ def create_purchase(
     items,
     user,
 ):
-
     if not user.has_perm("purchases.add_purchase"):
         raise PermissionError("Not allowed")
 
@@ -53,13 +52,12 @@ def create_purchase(
     if exchange_rate is None:
         exchange_rate = get_exchange_rate()
 
-    exchange_rate = Decimal(exchange_rate)
+    exchange_rate = Decimal(str(exchange_rate))
 
     if exchange_rate <= 0:
         raise ValueError(
             "Exchange rate must be greater than zero"
         )
-
 
     purchase = Purchase.objects.create(
         supplier=supplier,
@@ -70,8 +68,10 @@ def create_purchase(
         exchange_rate=exchange_rate,
         payment_method=payment_method,
         purchase_date=purchase_date,
+        total_amount=Decimal("0"),
     )
 
+    total_amount = Decimal("0")
 
     for item in items:
 
@@ -82,9 +82,8 @@ def create_purchase(
                 "Product cannot be None"
             )
 
-
         cost_price = Decimal(
-            item["cost_price"]
+            str(item["cost_price"])
         )
 
         if cost_price <= 0:
@@ -92,10 +91,8 @@ def create_purchase(
                 "Cost price must be greater than zero"
             )
 
-
         if currency == Currency.LBP:
             cost_price /= exchange_rate
-
 
         quantity = item["quantity"]
 
@@ -104,35 +101,38 @@ def create_purchase(
                 "Quantity must be greater than zero"
             )
 
-
         current_stock = get_stock(product)
-
 
         current_inventory_value = (
             Decimal(current_stock)
-            *
-            product.cost_price
+            * product.cost_price
         )
-
 
         purchase_value = (
             Decimal(quantity)
-            *
-            cost_price
+            * cost_price
         )
 
+        total_amount += purchase_value
 
-        new_stock = current_stock + quantity
+        new_stock = (
+            current_stock
+            + quantity
+        )
 
+        if new_stock <= 0:
+            raise ValueError(
+                "Invalid stock calculation"
+            )
 
         new_average_cost = (
             current_inventory_value
-            +
-            purchase_value
+            + purchase_value
         ) / Decimal(new_stock)
 
-
-        product.cost_price = new_average_cost
+        product.cost_price = (
+            new_average_cost
+        )
 
         product.save(
             update_fields=[
@@ -140,14 +140,14 @@ def create_purchase(
             ]
         )
 
-
-        purchase_item = PurchaseItem.objects.create(
-            purchase=purchase,
-            product=product,
-            quantity=quantity,
-            cost_price=cost_price,
+        purchase_item = (
+            PurchaseItem.objects.create(
+                purchase=purchase,
+                product=product,
+                quantity=quantity,
+                cost_price=cost_price,
+            )
         )
-
 
         add_purchase_stock(
             product=product,
@@ -156,6 +156,12 @@ def create_purchase(
             user=user,
         )
 
+    purchase.total_amount = total_amount
+    purchase.save(
+        update_fields=[
+            "total_amount"
+        ]
+    )
 
     # Dr Inventory
     # Cr Accounts Payable
@@ -165,7 +171,6 @@ def create_purchase(
         user=user,
     )
 
-
     # Immediate supplier payment
     # CASH / CARD only
 
@@ -173,43 +178,54 @@ def create_purchase(
         PaymentMethod.CASH,
         PaymentMethod.CARD,
     ):
-
         payment = Payment.objects.create(
-
+            number=get_next_document_number(
+        "PAYMENT"
+    ),
             payment_type=PaymentType.SUPPLIER,
-
             amount=purchase.total_amount,
-
-            payment_method=purchase.payment_method,
-
-            date=purchase.purchase_date,
-
-            content_type=ContentType.objects.get_for_model(
-                Purchase
+            payment_method=(
+                purchase.payment_method
             ),
-
+            date=purchase.purchase_date,
+            content_type=(
+                ContentType.objects.get_for_model(
+                    Purchase
+                )
+            ),
             object_id=purchase.id,
-
             description=(
                 f"Payment for purchase "
                 f"#{purchase.invoice_number}"
             ),
-
             created_by=user,
         )
-
 
         AccountingPostingService.post_payment(
             payment=payment,
             user=user,
         )
 
+    elif purchase.payment_method == PaymentMethod.CREDIT:
+        payment = Payment.objects.create(
+        number=get_next_document_number("PAYMENT"),
+        payment_type=PaymentType.SUPPLIER,
+        amount=purchase.total_amount,
+        payment_method=PaymentMethod.CREDIT,
+        status=PaymentStatus.PENDING,
+        date=purchase.purchase_date,
+        content_type=ContentType.objects.get_for_model(
+            Purchase
+        ),
+        object_id=purchase.id,
+        description=(
+            f"Pending payment for purchase "
+            f"#{purchase.invoice_number}"
+        ),
+        created_by=user,
+    )
 
     return purchase
-
-
-
-
 
 @transaction.atomic
 def delete_purchase(

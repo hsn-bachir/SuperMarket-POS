@@ -60,6 +60,10 @@ class ExpenseViewSet(ModelViewSet):
         )
 
 ##payments
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from apps.accounting.models import Payment
 from apps.accounting.serializers import PaymentSerializer
 from apps.accounting.services.payment_service import PaymentService
@@ -78,6 +82,31 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
     serializer_class = PaymentSerializer
     permission_classes = [IsAdminOrManager]
+
+    @action(
+        detail=True,
+        methods=["post"],
+    )
+    def pay(self, request, pk=None):
+
+        payment = self.get_object()
+
+        payment_method = request.data.get(
+            "payment_method"
+        )
+
+        payment = PaymentService.pay_pending_payment(
+            payment=payment,
+            payment_method=payment_method,
+            user=request.user,
+        )
+
+        serializer = self.get_serializer(payment)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(
         detail=True,
@@ -105,7 +134,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return Response(
             status=status.HTTP_204_NO_CONTENT,
         )
-
+    
 ###ledgar
 from django.shortcuts import get_object_or_404
 

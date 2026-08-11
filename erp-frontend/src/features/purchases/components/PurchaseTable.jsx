@@ -34,6 +34,12 @@ export default function PurchaseTable({ purchases, onView, onDelete }) {
     },
 
     {
+      key: "total_amount",
+      title: "Total Amount",
+      render: (row) => `$${Number(row.total_amount).toFixed(2)}`,
+    },
+
+    {
       key: "actions",
       title: "Actions",
 

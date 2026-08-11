@@ -19,3 +19,15 @@ export const cancelPayment = (id) =>
 
 export const deletePayment = (id) =>
   api.delete(`/accounting/payments/${id}/`);
+
+export async function payPayment(
+    id,
+    paymentMethod
+) {
+    return api.post(
+        `/accounting/payments/${id}/pay/`,
+        {
+            payment_method: paymentMethod,
+        }
+    );
+}

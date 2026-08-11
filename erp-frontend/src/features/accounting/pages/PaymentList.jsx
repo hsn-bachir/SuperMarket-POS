@@ -12,21 +12,32 @@ import Pagination from "@/components/ui/Pagination";
 import PaymentToolbar from "../components/PaymentToolbar";
 import PaymentTable from "../components/PaymentTable";
 
-import { getPayments, deletePayment } from "../api/paymentApi";
+import { getPayments, deletePayment, payPayment } from "../api/paymentApi";
 
 export default function PaymentList() {
   const navigate = useNavigate();
 
   const [payments, setPayments] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
 
   const [page, setPage] = useState(1);
+
   const [count, setCount] = useState(0);
 
+  // Delete
   const [deleteId, setDeleteId] = useState(null);
+
   const [deleting, setDeleting] = useState(false);
+
+  // Pay
+  const [payingPayment, setPayingPayment] = useState(null);
+
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
+
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     loadPayments();
@@ -68,9 +79,45 @@ export default function PaymentList() {
     } catch (err) {
       console.error(err);
 
-      toast.error("Unable to delete payment.");
+      toast.error(err.response?.data?.detail || "Unable to delete payment.");
     } finally {
       setDeleting(false);
+    }
+  }
+
+  function handlePay(payment) {
+    setPayingPayment(payment);
+
+    // Default payment method
+    setPaymentMethod("CASH");
+  }
+
+  async function confirmPay() {
+    if (!payingPayment) {
+      return;
+    }
+
+    try {
+      setPaying(true);
+
+      const res = await payPayment(payingPayment.id, paymentMethod);
+
+      // Update the payment in the list
+      setPayments((prev) =>
+        prev.map((payment) =>
+          payment.id === payingPayment.id ? res.data : payment,
+        ),
+      );
+
+      toast.success("Payment completed successfully.");
+
+      setPayingPayment(null);
+    } catch (err) {
+      console.error(err);
+
+      toast.error(err.response?.data?.detail || "Unable to complete payment.");
+    } finally {
+      setPaying(false);
     }
   }
 
@@ -94,11 +141,29 @@ export default function PaymentList() {
         <PaymentTable
           payments={payments}
           onView={(id) => navigate(`/accounting/payments/${id}`)}
+          onPay={handlePay}
           onDelete={handleDelete}
         />
       )}
 
       <Pagination page={page} setPage={setPage} count={count} />
+
+      {/* Pay Dialog */}
+
+      <ConfirmDialog
+        open={payingPayment !== null}
+        title="Pay Payment"
+        description={
+          payingPayment
+            ? `Pay ${payingPayment.amount} for payment #${payingPayment.number}?`
+            : ""
+        }
+        onConfirm={confirmPay}
+        onCancel={() => setPayingPayment(null)}
+        loading={paying}
+      />
+
+      {/* Delete Dialog */}
 
       <ConfirmDialog
         open={deleteId !== null}

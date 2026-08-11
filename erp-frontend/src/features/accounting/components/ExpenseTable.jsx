@@ -23,12 +23,6 @@ export default function ExpenseTable({ expenses, onView, onDelete }) {
     },
 
     {
-      key: "supplier_name",
-      title: "Supplier",
-      render: (row) => row.supplier_name || "-",
-    },
-
-    {
       key: "payment_method",
       title: "Payment",
       render: (row) => row.payment_method_display ?? row.payment_method,

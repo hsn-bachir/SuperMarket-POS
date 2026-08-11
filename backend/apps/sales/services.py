@@ -171,43 +171,54 @@ def create_sale(
     # CASH / CARD only
 
     if payment_method in (
-        PaymentMethod.CASH,
-        PaymentMethod.CARD,
-    ):
-
-
+    PaymentMethod.CASH,
+    PaymentMethod.CARD,
+):
         payment = Payment.objects.create(
-
-            payment_type=PaymentType.CUSTOMER,
-
-            amount=sale.total,
-
-            payment_method=payment_method,
-
-            date=sale.sale_date,
-
-
-            content_type=ContentType.objects.get_for_model(
-                Sale
-            ),
-
-            object_id=sale.id,
-
-
-            description=(
-                f"Payment for sale "
-                f"#{sale.invoice_number}"
-            ),
-
-            created_by=user,
-        )
-
+        number=get_next_document_number(
+            "PAYMENT"
+        ),
+        payment_type=PaymentType.CUSTOMER,
+        amount=sale.total,
+        payment_method=payment_method,
+        status=PaymentStatus.POSTED,
+        date=sale.sale_date,
+        content_type=ContentType.objects.get_for_model(
+            Sale
+        ),
+        object_id=sale.id,
+        description=(
+            f"Payment for sale "
+            f"#{sale.invoice_number}"
+        ),
+        created_by=user,
+    )
 
         AccountingPostingService.post_payment(
-            payment=payment,
-            user=user,
-        )
+        payment=payment,
+        user=user,
+    )
 
+    elif payment_method == PaymentMethod.CREDIT:
+        payment = Payment.objects.create(
+        number=get_next_document_number(
+            "PAYMENT"
+        ),
+        payment_type=PaymentType.CUSTOMER,
+        amount=sale.total,
+        payment_method=PaymentMethod.CREDIT,
+        status=PaymentStatus.PENDING,
+        date=sale.sale_date,
+        content_type=ContentType.objects.get_for_model(
+            Sale
+        ),
+        object_id=sale.id,
+        description=(
+            f"Pending payment for sale "
+            f"#{sale.invoice_number}"
+        ),
+        created_by=user,
+    )
 
     return sale
 

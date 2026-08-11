@@ -22,6 +22,12 @@ class Purchase(models.Model):
         choices=Currency.choices,
     )
 
+    total_amount = models.DecimalField(
+        max_digits=18,
+        decimal_places=4,
+        default=0
+    )
+
     exchange_rate = models.DecimalField(
         max_digits=12,
         decimal_places=2,
