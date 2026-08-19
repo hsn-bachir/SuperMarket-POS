@@ -6,6 +6,13 @@ from apps.common.enums import PaymentMethod
 
 class Purchase(models.Model):
 
+    STATUS_ACTIVE = "ACTIVE"
+    STATUS_CANCELLED = "CANCELLED"
+    STATUS_CHOICES = (
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_CANCELLED, "Cancelled"),
+    )
+
     supplier = models.ForeignKey(
         "suppliers.Supplier",
         on_delete=models.PROTECT,
@@ -26,6 +33,12 @@ class Purchase(models.Model):
         max_digits=18,
         decimal_places=4,
         default=0
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIVE,
     )
 
     exchange_rate = models.DecimalField(

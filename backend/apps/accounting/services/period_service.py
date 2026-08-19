@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from apps.accounting.models import AccountingPeriod
+from apps.accounting.models.periodsModel import AccountingPeriod
 from apps.common.enums import (
     PeriodStatus
 )

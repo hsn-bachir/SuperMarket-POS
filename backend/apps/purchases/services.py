@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db import transaction
+from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 
 from apps.purchases.models import Purchase, PurchaseItem
@@ -21,10 +22,9 @@ from apps.common.enums import (
     PaymentType,
 )
 
-from apps.accounting.models import Payment
-from apps.accounting.services.posting_service import (
-    AccountingPostingService,
-)
+from apps.accounting.models.paymentModel import Payment
+from apps.accounting.services.posting.payment import PaymentPostingService
+from apps.accounting.services.posting.purchase import PurchasePostingService
 
 
 @transaction.atomic
@@ -166,7 +166,7 @@ def create_purchase(
     # Dr Inventory
     # Cr Accounts Payable
 
-    AccountingPostingService.post_purchase(
+    PurchasePostingService.post(
         purchase=purchase,
         user=user,
     )
@@ -201,7 +201,7 @@ def create_purchase(
             created_by=user,
         )
 
-        AccountingPostingService.post_payment(
+        PaymentPostingService.post(
             payment=payment,
             user=user,
         )
@@ -240,6 +240,9 @@ def delete_purchase(
         raise PermissionError(
             "Not allowed"
         )
+
+    if purchase.status == Purchase.STATUS_CANCELLED:
+        raise ValidationError("Purchase is already cancelled.")
 
 
     affected_products = set()
@@ -284,7 +287,7 @@ def delete_purchase(
 
     # Reverse purchase journal
 
-    AccountingPostingService.reverse_purchase(
+    PurchasePostingService.reverse(
         purchase=purchase,
         user=user,
     )
@@ -307,20 +310,19 @@ def delete_purchase(
 
 
     for payment in payments:
+        if payment.status == PaymentStatus.PENDING:
+            payment.status = PaymentStatus.CANCELLED
+            payment.save(update_fields=["status"])
+        elif payment.status == PaymentStatus.POSTED:
+            PaymentPostingService.reverse(
+                payment=payment,
+                user=user,
+            )
+            payment.status = PaymentStatus.CANCELLED
+            payment.save(update_fields=["status"])
 
-        AccountingPostingService.reverse_payment(
-            payment=payment,
-            user=user,
-        )
-
-        payment.status = PaymentStatus.CANCELLED
-        payment.save(
-            update_fields=["status"]
-        )
-
-
-
-    purchase.delete()
+    purchase.status = Purchase.STATUS_CANCELLED
+    purchase.save(update_fields=["status"])
 
 
 

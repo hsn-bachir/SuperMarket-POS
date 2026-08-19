@@ -3,9 +3,11 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
 
-from apps.accounting.models import Expense, Payment
-from apps.accounting.services.posting_service import (
-    AccountingPostingService,
+from apps.accounting.models.expensesModel import Expense
+from apps.accounting.models.paymentModel import Payment
+
+from apps.accounting.services.posting.payment import (
+    PaymentPostingService,
 )
 
 from apps.common.enums import (
@@ -176,7 +178,7 @@ class PaymentService:
         # Do NOT post a credit/pending payment.
         if status == PaymentStatus.DRAFT:
 
-            AccountingPostingService.post_payment(
+            PaymentPostingService.post(
                 payment,
                 created_by,
             )
@@ -275,7 +277,7 @@ class PaymentService:
         )
 
         # Create accounting entry.
-        AccountingPostingService.post_payment(
+        PaymentPostingService.post(
             payment,
             user,
         )
@@ -350,7 +352,7 @@ class PaymentService:
                 }
             )
 
-        AccountingPostingService.reverse_payment(
+        PaymentPostingService.reverse(
             payment,
             user,
         )

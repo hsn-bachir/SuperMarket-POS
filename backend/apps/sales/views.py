@@ -4,6 +4,7 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from apps.sales.services import delete_sale
 
@@ -32,6 +33,7 @@ class SaleListCreateView(generics.ListCreateAPIView):
         queryset = (
         Sale.objects
         .all()
+        .filter(status=Sale.STATUS_ACTIVE)
         .order_by("-sale_date", "-id")
     )
 
@@ -88,6 +90,10 @@ class SaleDetailUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def update(self, request, *args, **kwargs):
         sale = self.get_object()
+        if sale.status == Sale.STATUS_ACTIVE:
+            raise ValidationError(
+                "Posted sales cannot be edited. Cancel the sale and create a correction."
+            )
         serializer = SaleUpdateSerializer(
             sale,
             data=request.data,

@@ -83,6 +83,18 @@ def get_stock(product):
     return result["total"] or 0
 
 
+def get_stock_as_of(product, as_of_date):
+    if product is None:
+        raise ValueError("Product cannot be None")
+
+    result = (
+        InventoryMovement.objects
+        .filter(product=product, created_at__date__lte=as_of_date)
+        .aggregate(total=Sum("quantity"))
+    )
+    return result["total"] or 0
+
+
 def validate_stock(product, quantity):
     if quantity <= 0:
         raise ValueError("Quantity must be greater than zero")
@@ -124,13 +136,14 @@ def create_adjustment(product, quantity, reason, user):
 
 from decimal import Decimal
 
-from apps.purchases.models import PurchaseItem
+from apps.purchases.models import Purchase, PurchaseItem
 
 
 def recalculate_average_cost(product):
     purchase_items = (
         PurchaseItem.objects
         .filter(product=product)
+        .filter(purchase__status=Purchase.STATUS_ACTIVE)
         .select_related("purchase")
     )
 
@@ -153,3 +166,26 @@ def recalculate_average_cost(product):
         )
 
     product.save(update_fields=["cost_price"])
+
+
+def get_average_cost_as_of(product, as_of_date):
+    purchase_items = (
+        PurchaseItem.objects
+        .filter(
+            product=product,
+            purchase__status=Purchase.STATUS_ACTIVE,
+            purchase__purchase_date__lte=as_of_date,
+        )
+    )
+
+    total_quantity = 0
+    total_value = Decimal("0")
+
+    for item in purchase_items:
+        total_quantity += item.quantity
+        total_value += Decimal(item.quantity) * item.cost_price
+
+    if total_quantity == 0:
+        return Decimal("0")
+
+    return total_value / Decimal(total_quantity)

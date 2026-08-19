@@ -2,12 +2,12 @@ from decimal import Decimal
 
 from django.db.models import Sum
 
-from apps.accounting.models import (
-    Account,
-    JournalLine,
-)
+from apps.accounting.models.accountModel import Account 
+from apps.accounting.models.journalModel import JournalLine
+ 
 from apps.common.enums import (
     AccountType,
+    JournalType,
     NormalBalance,
 )
 
@@ -34,7 +34,11 @@ class IncomeStatementService:
             .order_by("code")
         )
 
-        journal_lines = JournalLine.objects.filter(journal_entry__status="POSTED")
+        journal_lines = (
+            JournalLine.objects
+            .filter(journal_entry__status="POSTED")
+            .exclude(journal_entry__journal_type=JournalType.CLOSING)
+        )
 
         if start_date:
             journal_lines = journal_lines.filter(

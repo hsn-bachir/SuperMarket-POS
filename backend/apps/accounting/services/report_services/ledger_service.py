@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.db.models import Sum
 
-from apps.accounting.models import JournalLine
+from apps.accounting.models.journalModel import JournalLine
 from apps.common.enums import NormalBalance
 
 

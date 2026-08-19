@@ -4,6 +4,13 @@ from apps.common.enums import PaymentMethod
 
 class Sale(models.Model):
 
+    STATUS_ACTIVE = "ACTIVE"
+    STATUS_CANCELLED = "CANCELLED"
+    STATUS_CHOICES = (
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_CANCELLED, "Cancelled"),
+    )
+
     class Meta:
         indexes = [
             models.Index(fields=["sale_date"]),
@@ -35,6 +42,12 @@ class Sale(models.Model):
     total = models.DecimalField(
         max_digits=12,
         decimal_places=2
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIVE,
     )
 
     created_at = models.DateTimeField(

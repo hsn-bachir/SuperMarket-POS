@@ -9,13 +9,13 @@ from apps.common.enums import (
     PeriodStatus,
 )
 
-from apps.accounting.models import Account
+from apps.accounting.models.accountModel import Account
 
 from apps.accounting.services.accounting_period_service import (
     AccountingPeriodService,
 )
 
-from apps.accounting.services.AccountBalanceService import (
+from apps.accounting.services.report_services.AccountBalanceService import (
     AccountBalanceService,
 )
 

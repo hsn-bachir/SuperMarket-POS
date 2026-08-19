@@ -52,11 +52,16 @@ class DashboardView(APIView):
         month_start = today.replace(day=1)
         total_products = Product.objects.count()
         total_suppliers = Supplier.objects.count()
-        total_sales = Sale.objects.count()
-        total_purchases = Purchase.objects.count()
+        total_sales = Sale.objects.filter(
+            status=Sale.STATUS_ACTIVE
+        ).count()
+        total_purchases = Purchase.objects.filter(
+            status=Purchase.STATUS_ACTIVE
+        ).count()
 
         today_sales = (
             Sale.objects.filter(
+                status=Sale.STATUS_ACTIVE,
                 sale_date=today
             ).aggregate(
                 total=Sum("total")
@@ -66,6 +71,7 @@ class DashboardView(APIView):
 
         month_sales = (
             Sale.objects.filter(
+                status=Sale.STATUS_ACTIVE,
                 sale_date__gte=month_start
             ).aggregate(
                 total=Sum("total")
@@ -84,7 +90,10 @@ class DashboardView(APIView):
             )
             latest_sale = (
                 SaleItem.objects
-                .filter(product=product)
+                .filter(
+                    product=product,
+                    sale__status=Sale.STATUS_ACTIVE,
+                )
                 .order_by("-sale__sale_date")
                 .first()
             )
@@ -94,6 +103,7 @@ class DashboardView(APIView):
                 dead_stock_count += 1
         best_product = (
             SaleItem.objects
+            .filter(sale__status=Sale.STATUS_ACTIVE)
             .values("product__name")
             .annotate(
                 qty=Sum("quantity")
@@ -103,6 +113,7 @@ class DashboardView(APIView):
         )
         top_profit = (
             SaleItem.objects
+            .filter(sale__status=Sale.STATUS_ACTIVE)
             .values("product__name")
             .annotate(
                 profit=Sum(
@@ -121,6 +132,7 @@ class DashboardView(APIView):
         )
         recent_sales = (
             Sale.objects
+            .filter(status=Sale.STATUS_ACTIVE)
             .order_by("-sale_date")[:5]
             .values(
                 "invoice_number",
@@ -130,6 +142,7 @@ class DashboardView(APIView):
         )
         recent_purchases = (
             Purchase.objects
+            .filter(status=Purchase.STATUS_ACTIVE)
             .order_by("-purchase_date")[:5]
             .values(
                 "invoice_number",
@@ -214,7 +227,10 @@ class DeadStockView(BaseReportView):
 
             sales = (
             SaleItem.objects
-            .filter(product=product)
+            .filter(
+                product=product,
+                sale__status=Sale.STATUS_ACTIVE,
+            )
             .select_related("sale")
         )
 
@@ -467,6 +483,9 @@ class TopProfitProductsView(BaseReportView):
         )
 
         queryset = SaleItem.objects.all()
+        queryset = queryset.filter(
+            sale__status=Sale.STATUS_ACTIVE
+        )
 
         if start_date:
             queryset = queryset.filter(
@@ -520,6 +539,7 @@ class ReorderSuggestionsView(BaseReportView):
         sales = (
             SaleItem.objects
             .filter(
+                sale__status=Sale.STATUS_ACTIVE,
                 sale__sale_date__gte=three_months_ago
             )
             .values("product")

@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand
 
-from apps.accounting.models import Account
+from backend.apps.accounting.models.accountModel import Account
 from apps.accounting.seeds import CHART_OF_ACCOUNTS
 from apps.common.enums import NormalBalance
+from apps.common.enums import CashFlowCategory
 
 
 class Command(BaseCommand):
@@ -45,6 +46,10 @@ class Command(BaseCommand):
                     "is_postable": is_postable,
                     "allow_manual_entries": is_postable,
                     "is_active": True,
+                    "cash_flow_category": data.get(
+                        "cash_flow_category",
+                        CashFlowCategory.NONE,
+                    ),
                 },
             )
 

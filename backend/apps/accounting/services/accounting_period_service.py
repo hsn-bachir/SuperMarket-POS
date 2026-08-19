@@ -5,7 +5,7 @@ from datetime import timedelta
 from calendar import monthrange
 
 from apps.common.enums import PeriodStatus
-from apps.accounting.models import AccountingPeriod
+from apps.accounting.models.periodsModel import AccountingPeriod
 
 
 class AccountingPeriodService:

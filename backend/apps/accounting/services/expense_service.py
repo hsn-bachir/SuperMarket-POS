@@ -1,8 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from apps.accounting.services.posting_service import AccountingPostingService
-from apps.accounting.models import Expense, ExpenseStatus
+from apps.accounting.services.posting.expense import ExpensePostingService
+from apps.accounting.models.expensesModel import Expense, ExpenseStatus
 
 
 class ExpenseService:
@@ -75,7 +75,7 @@ class ExpenseService:
             created_by=created_by,
         )
 
-        AccountingPostingService.post_expense(
+        ExpensePostingService.post(
             expense,
             created_by,
         )
@@ -107,7 +107,7 @@ class ExpenseService:
                 }
             )
 
-        AccountingPostingService.reverse_expense(
+        ExpensePostingService.reverse(
             expense,
             user,
         )

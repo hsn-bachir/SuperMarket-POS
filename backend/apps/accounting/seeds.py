@@ -1,5 +1,6 @@
 from apps.common.enums import (
     AccountType,
+    CashFlowCategory,
     NormalBalance,
 )
 
@@ -26,12 +27,14 @@ CHART_OF_ACCOUNTS = [
                         "code": "1110",
                         "name": "Cash On Hand",
                         "type": AccountType.ASSET,
+                        "cash_flow_category": CashFlowCategory.OPERATING,
                     },
 
                     {
                         "code": "1120",
                         "name": "Bank",
                         "type": AccountType.ASSET,
+                        "cash_flow_category": CashFlowCategory.OPERATING,
                     },
 
                     {

@@ -12,6 +12,7 @@ from apps.accounting.views import (
     CashFlowView,
     AccountingPeriodViewSet,
 )
+from apps.accounting.views.capitalViews import CapitalInvestmentView
 
 router = DefaultRouter()
 
@@ -42,27 +43,29 @@ urlpatterns = router.urls + [
         AccountLedgerView.as_view(),
         name="account-ledger",
     ),
-
     path(
         "trial-balance/",
         TrialBalanceView.as_view(),
+        name="trial-balance",
     ),
-
     path(
         "income-statement/",
         IncomeStatementView.as_view(),
         name="income-statement",
     ),
-
     path(
         "balance-sheet/",
         BalanceSheetView.as_view(),
         name="balance-sheet",
     ),
-
     path(
         "cash-flow/",
         CashFlowView.as_view(),
         name="cash-flow",
+    ),
+    path(
+        "capital-investments/",
+        CapitalInvestmentView.as_view(),
+        name="capital-investment",
     ),
 ]

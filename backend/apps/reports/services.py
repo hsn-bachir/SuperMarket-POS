@@ -13,7 +13,15 @@ from django.db.models.functions import Coalesce
 
 from apps.products.models import Product
 from apps.sales.models import Sale, SaleItem
-from apps.inventory.services import get_stock
+from apps.inventory.services import (
+    get_average_cost_as_of,
+    get_stock,
+    get_stock_as_of,
+)
+from apps.accounting.services.report_services.income_statement_service import (
+    IncomeStatementService,
+)
+from django.conf import settings
 
 
 # ----------------------------------------------------
@@ -21,6 +29,8 @@ from apps.inventory.services import get_stock
 # ----------------------------------------------------
 
 def apply_sale_filters(queryset, start_date=None, end_date=None):
+    queryset = queryset.filter(sale__status=Sale.STATUS_ACTIVE)
+
     if start_date:
         queryset = queryset.filter(
             sale__sale_date__gte=start_date
@@ -35,6 +45,8 @@ def apply_sale_filters(queryset, start_date=None, end_date=None):
 
 
 def apply_sales_filters(queryset, start_date=None, end_date=None):
+    queryset = queryset.filter(status=Sale.STATUS_ACTIVE)
+
     if start_date:
         queryset = queryset.filter(
             sale_date__gte=start_date
@@ -105,13 +117,16 @@ def get_inventory_valuation(start_date=None,
     for product in Product.objects.filter(
         is_active=True
     ):
+        as_of_date = end_date or start_date
 
-        stock = get_stock(product)
+        if as_of_date:
+            stock = get_stock_as_of(product, as_of_date)
+            cost_price = get_average_cost_as_of(product, as_of_date)
+        else:
+            stock = get_stock(product)
+            cost_price = product.cost_price
 
-        inventory_value = (
-            Decimal(stock)
-            * product.cost_price
-        )
+        inventory_value = Decimal(stock) * cost_price
 
         results.append({
             "product_id": product.id,
@@ -122,7 +137,7 @@ def get_inventory_valuation(start_date=None,
                 else None,
             "product_name": product.name,
             "stock": stock,
-            "cost_price": product.cost_price,
+            "cost_price": cost_price,
             "inventory_value": inventory_value,
         })
 
@@ -235,7 +250,21 @@ def get_profit_loss_report(
         end_date,
     )
 
-    operating_expenses = Decimal("0")
+    income_statement = IncomeStatementService.get_income_statement(
+        start_date=start_date,
+        end_date=end_date,
+    )
+    account_code_map = getattr(
+        settings,
+        "ACCOUNTING_ACCOUNT_CODES",
+        {"cogs": "5100"},
+    )
+    cogs_account_code = account_code_map.get("cogs", "5100")
+    operating_expenses = sum(
+        row["amount"]
+        for row in income_statement["expenses"]
+        if row["code"] != cogs_account_code
+    )
 
     net_profit = (
         cogs["gross_profit"]

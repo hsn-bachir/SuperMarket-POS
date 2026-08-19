@@ -4,15 +4,14 @@ from django.db.models import Sum
 from django.db.models.functions import Coalesce
 
 from apps.common.enums import (
-    AccountType,
     NormalBalance,
     PeriodStatus,
 )
 
-from apps.accounting.models import (
-    Account,
-    JournalLine,
-)
+from apps.accounting.models.accountModel import Account
+from apps.accounting.models.journalModel import JournalLine
+from apps.accounting.models.periodsModel import AccountingPeriod
+
 
 
 ZERO = Decimal("0.00")
@@ -80,18 +79,22 @@ class AccountBalanceService:
 
 
         if include_closed:
-            queryset = queryset.filter(
-                journal_entry__period__status__in=[
-                    PeriodStatus.OPEN,
-                    PeriodStatus.CLOSED,
-                ]
-            )
+            period_statuses = [
+                PeriodStatus.OPEN,
+                PeriodStatus.CLOSED,
+                PeriodStatus.CLOSING,
+            ]
 
         else:
-            queryset = queryset.filter(
-                journal_entry__period__status=
-                PeriodStatus.OPEN
+            period_statuses = [PeriodStatus.OPEN]
+
+        queryset = queryset.filter(
+            journal_entry__period_id__in=(
+                AccountingPeriod.objects
+                .filter(status__in=period_statuses)
+                .values("id")
             )
+        )
 
 
         return queryset

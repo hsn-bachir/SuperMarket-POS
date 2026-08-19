@@ -2,10 +2,8 @@ from decimal import Decimal
 
 from django.db.models import Sum
 
-from apps.accounting.models import (
-    Account,
-    JournalLine,
-)
+from apps.accounting.models.accountModel import Account
+from apps.accounting.models.journalModel import JournalLine
 
 from apps.common.enums import (
     AccountType,
@@ -31,6 +29,8 @@ class BalanceSheetService:
                     AccountType.ASSET,
                     AccountType.LIABILITY,
                     AccountType.EQUITY,
+                    AccountType.REVENUE,
+                    AccountType.EXPENSE,
                 ],
             )
             .order_by("code")
@@ -74,6 +74,7 @@ class BalanceSheetService:
         total_assets = Decimal("0.00")
         total_liabilities = Decimal("0.00")
         total_equity = Decimal("0.00")
+        current_earnings = Decimal("0.00")
 
 
         for account in accounts:
@@ -145,6 +146,17 @@ class BalanceSheetService:
                 equity.append(row)
 
                 total_equity += amount
+
+            elif account.account_type == AccountType.REVENUE:
+
+                current_earnings += balance
+
+            elif account.account_type == AccountType.EXPENSE:
+
+                current_earnings -= balance
+
+        if current_earnings:
+            total_equity += current_earnings
 
 
 

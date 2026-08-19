@@ -4,10 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from apps.accounting.models import (
-    JournalEntry,
-    JournalLine,
-)
+from apps.accounting.models.journalModel import JournalLine,JournalEntry
+
 from apps.accounting.services.accounting_period_service import (
     AccountingPeriodService,
 )
@@ -47,7 +45,7 @@ class JournalService:
             journal_type=journal_type,
             description=description,
             created_by=created_by,
-            status=EntryStatus.POSTED,
+            status=EntryStatus.DRAFT,
             updated_by=created_by,
         )
 
@@ -74,7 +72,8 @@ class JournalService:
         )
 
         entry.updated_by = created_by
-        entry.save(update_fields=["updated_by", "updated_at"])
+        entry.status = EntryStatus.POSTED
+        entry.save(update_fields=["status", "updated_by", "updated_at"])
 
         return entry
 

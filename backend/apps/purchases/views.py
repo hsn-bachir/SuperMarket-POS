@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -35,6 +36,7 @@ class PurchaseListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = (
             Purchase.objects
+            .filter(status=Purchase.STATUS_ACTIVE)
             .select_related("supplier")
             .prefetch_related(
                 "items",
@@ -118,6 +120,10 @@ class PurchaseUpdateView(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         purchase = self.get_object()
+        if purchase.status == Purchase.STATUS_ACTIVE:
+            raise ValidationError(
+                "Posted purchases cannot be edited. Cancel the purchase and create a correction."
+            )
 
         serializer = self.get_serializer(
             purchase,
