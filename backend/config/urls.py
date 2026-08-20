@@ -49,4 +49,9 @@ urlpatterns = [
         "api/config/",
         include("apps.configuration.urls"),
     ),
+
+    path(
+            "api/services/",
+            include("apps.services.urls"),
+        ),
 ]

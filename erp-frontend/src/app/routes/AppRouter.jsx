@@ -28,6 +28,11 @@ import SaleDetails from "@/features/sales/pages/SaleDetails";
 import EditSale from "@/features/sales/pages/EditSale";
 import Print from "@/features/sales/pages/InvoicePage";
 
+import ServicesList from "@/features/services/pages/ServicesList";
+import CreateService from "@/features/services/pages/CreateService";
+import EditService from "@/features/services/pages/EditService";
+import ServiceHistory from "@/features/services/pages/ServiceHistory.jsx";
+
 import Inventory from "@/features/inventory/pages/Inventory";
 
 import Reports from "@/features/reports/pages/Reports";
@@ -96,6 +101,10 @@ export default function AppRouter() {
           <Route path="/accounting/payments/new" element={<CreatePayment />} />
           <Route path="/accounting/payments/:id" element={<PaymentDetails />} />
           <Route path="/accounting/periods" element={<AccountingPeriods />} />
+          <Route path="/services" element={<ServicesList />} />
+          <Route path="/services/new" element={<CreateService />} />
+          <Route path="/services/:id/edit" element={<EditService />} />
+          <Route path="/services/history" element={<ServiceHistory />} />
         </Route>
         <Route path="/sales/:id/invoice" element={<Print />} />
 

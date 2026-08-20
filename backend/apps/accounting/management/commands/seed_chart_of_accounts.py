@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from backend.apps.accounting.models.accountModel import Account
+from apps.accounting.models.accountModel import Account
 from apps.accounting.seeds import CHART_OF_ACCOUNTS
 from apps.common.enums import NormalBalance
 from apps.common.enums import CashFlowCategory

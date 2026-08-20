@@ -1,14 +1,22 @@
 import EmptyState from "@/components/ui/EmptyState";
-
 import CartItem from "./CartItem";
 
 export default function CartTable({ cart, setCart }) {
-  function increase(id) {
+  function isSameItem(item, id, type) {
+    return item.id === id && item.type === type;
+  }
+
+  function increase(id, type) {
     setCart((prev) =>
       prev.map((item) => {
-        if (item.id !== id) return item;
+        if (!isSameItem(item, id, type)) {
+          return item;
+        }
 
-        if (item.quantity >= item.stock) return item;
+        // Services have no stock limit
+        if (item.type !== "service" && item.quantity >= item.stock) {
+          return item;
+        }
 
         return {
           ...item,
@@ -18,11 +26,13 @@ export default function CartTable({ cart, setCart }) {
     );
   }
 
-  function decrease(id) {
+  function decrease(id, type) {
     setCart((prev) =>
       prev
         .map((item) => {
-          if (item.id !== id) return item;
+          if (!isSameItem(item, id, type)) {
+            return item;
+          }
 
           return {
             ...item,
@@ -33,13 +43,17 @@ export default function CartTable({ cart, setCart }) {
     );
   }
 
-  function updateQuantity(id, quantity) {
+  function updateQuantity(id, type, quantity) {
     setCart((prev) =>
       prev
         .map((item) => {
-          if (item.id !== id) return item;
+          if (!isSameItem(item, id, type)) {
+            return item;
+          }
 
-          const newQuantity = Math.max(1, Math.min(quantity, item.stock));
+          const maxQuantity = item.type === "service" ? Infinity : item.stock;
+
+          const newQuantity = Math.max(1, Math.min(quantity, maxQuantity));
 
           return {
             ...item,
@@ -50,24 +64,24 @@ export default function CartTable({ cart, setCart }) {
     );
   }
 
-  function remove(id) {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  function remove(id, type) {
+    setCart((prev) => prev.filter((item) => !isSameItem(item, id, type)));
   }
 
   if (cart.length === 0) {
     return (
       <EmptyState
         title="Cart is Empty"
-        description="Scan a barcode or search for a product."
+        description="Add a product or service to get started."
       />
     );
   }
 
   return (
-    <div className="">
-      {cart.map((item) => (
+    <div className="divide-y divide-slate-200">
+      {cart.map((item, index) => (
         <CartItem
-          key={item.id}
+          key={`${item.type}-${item.id}-${item.price}-${index}`}
           item={item}
           increase={increase}
           decrease={decrease}

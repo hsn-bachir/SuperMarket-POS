@@ -147,7 +147,11 @@ CHART_OF_ACCOUNTS = [
                 "name": "Sales Revenue",
                 "type": AccountType.REVENUE,
             },
-
+            {
+                "code": "4200",
+                "name": "Service Revenue",
+                "type": AccountType.REVENUE,
+            },
         ],
     },
 

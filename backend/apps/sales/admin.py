@@ -29,14 +29,15 @@ class SaleAdmin(admin.ModelAdmin):
 @admin.register(SaleItem)
 class SaleItemAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
-        "sale",
-        "product",
-        "quantity",
-        "unit_price",
-        "cost_price",
-        "subtotal",
-    )
+    "id",
+    "sale",
+    "item_type",
+    "item_name",
+    "quantity",
+    "unit_price",
+    "cost_price",
+    "subtotal",
+)
 
     def has_change_permission(self, request, obj=None):
         if obj and obj.sale.status == Sale.STATUS_ACTIVE:

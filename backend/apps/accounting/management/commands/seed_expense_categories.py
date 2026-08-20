@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
-from backend.apps.accounting.models.accountModel import Account
-from backend.apps.accounting.models.expensesModel import ExpenseCategory
+from apps.accounting.models.accountModel import Account
+from apps.accounting.models.expensesModel import ExpenseCategory
 
 
 CATEGORIES = [

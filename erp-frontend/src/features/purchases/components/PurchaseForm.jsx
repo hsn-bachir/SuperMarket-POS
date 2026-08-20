@@ -31,7 +31,7 @@ export default function PurchaseForm({
       {
         product: "",
         quantity: 1,
-        cost_price: "",
+        total_cost: "",
       },
     ],
   });
@@ -84,7 +84,7 @@ export default function PurchaseForm({
         {
           product: "",
           quantity: 1,
-          cost_price: "",
+          total_cost: "",
         },
       ],
     });
@@ -111,7 +111,7 @@ export default function PurchaseForm({
       items: form.items.map((item) => ({
         product: Number(item.product),
         quantity: Number(item.quantity),
-        cost_price: Number(item.cost_price),
+        cost_price: Number(item.total_cost) / Number(item.quantity),
       })),
     });
   }
@@ -236,11 +236,11 @@ export default function PurchaseForm({
               />
 
               <FormInput
-                label="Cost Price"
+                label="Total Cost"
                 type="number"
-                value={item.cost_price}
+                value={item.total_cost}
                 onChange={(e) =>
-                  updateItem(index, "cost_price", e.target.value)
+                  updateItem(index, "total_cost", e.target.value)
                 }
                 required
               />

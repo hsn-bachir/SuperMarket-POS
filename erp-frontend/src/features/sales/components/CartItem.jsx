@@ -1,6 +1,4 @@
-import { Minus, Plus, Trash2 } from "lucide-react";
-
-import Button from "@/components/ui/Button";
+import { Package, Wrench, Trash2, Minus, Plus } from "lucide-react";
 
 export default function CartItem({
   item,
@@ -9,121 +7,87 @@ export default function CartItem({
   updateQuantity,
   remove,
 }) {
+  const isService = item.type === "service";
+
+  const Icon = isService ? Wrench : Package;
+
+  const lineTotal = Number(item.price) * Number(item.quantity);
+
   return (
-    <div
-      className="
-        flex
-        items-center
-        justify-between
-        gap-4
-        border-b
-        px-3
-        py-4
-        hover:bg-gray-50
-      "
-    >
-      {/* PRODUCT INFO */}
-      <div className="min-w-0 flex-1">
-        <h3 className="truncate font-semibold">{item.name}</h3>
+    <div className="px-3 py-3 transition hover:bg-slate-50">
+      <div className="flex items-center gap-3">
+        {/* TYPE ICON */}
+        <div
+          className={`
+            flex h-9 w-9 shrink-0 items-center justify-center rounded-lg
+            ${
+              isService
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-slate-100 text-slate-600"
+            }
+          `}
+        >
+          <Icon size={16} />
+        </div>
 
-        <p className="text-xs text-gray-500">{item.barcode}</p>
+        {/* NAME */}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-slate-800">
+            {item.name}
+          </p>
 
-        <p className="mt-1 text-sm text-gray-600">
-          ${item.price.toFixed(2)} each
-        </p>
-      </div>
+          <p className="mt-0.5 text-xs text-slate-400">
+            {isService ? "Service" : "Product"} · $
+            {Number(item.price).toFixed(2)}
+          </p>
+        </div>
 
-      {/* QUANTITY */}
-      {/* QUANTITY */}
-      <div className="flex items-center gap-2">
+        {/* QUANTITY */}
+        <div className="flex h-8 items-center rounded-lg border border-slate-300 bg-white">
+          <button
+            type="button"
+            onClick={() => decrease(item.id, item.type)}
+            className="flex h-full w-8 items-center justify-center text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          >
+            <Minus size={13} />
+          </button>
+
+          <input
+            type="number"
+            min="1"
+            value={item.quantity}
+            onChange={(e) =>
+              updateQuantity(item.id, item.type, Number(e.target.value))
+            }
+            className="h-full w-9 border-x border-slate-200 text-center text-xs font-medium outline-none"
+          />
+
+          <button
+            type="button"
+            onClick={() => increase(item.id, item.type)}
+            className="flex h-full w-8 items-center justify-center text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          >
+            <Plus size={13} />
+          </button>
+        </div>
+
+        {/* TOTAL */}
+        <div className="w-20 text-right">
+          <p className="text-sm font-semibold text-slate-900">
+            ${lineTotal.toFixed(2)}
+          </p>
+        </div>
+
+        {/* REMOVE */}
         <button
           type="button"
-          className="
-      flex
-      h-9
-      w-9
-      items-center
-      justify-center
-      rounded-lg
-      border
-      border-gray-300
-      bg-white
-      hover:bg-gray-100
-    "
-          onClick={() => decrease(item.id)}
+          onClick={() => remove(item.id, item.type)}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
+          title="Remove"
         >
-          <Minus size={16} />
-        </button>
-
-        <input
-          type="text"
-          inputMode="numeric"
-          value={item.quantity}
-          onFocus={(e) => e.target.select()}
-          onChange={(e) => updateQuantity(item.id, Number(e.target.value) || 1)}
-          className="
-      h-9
-      w-12
-      rounded-lg
-      border
-      border-gray-300
-      text-center
-      font-semibold
-      outline-none
-      focus:border-[var(--primary)]
-    "
-        />
-
-        <button
-          type="button"
-          className="
-      flex
-      h-9
-      w-9
-      items-center
-      justify-center
-      rounded-lg
-      border
-      border-gray-300
-      bg-white
-      hover:bg-gray-100
-      disabled:cursor-not-allowed
-      disabled:opacity-50
-    "
-          onClick={() => increase(item.id)}
-          disabled={item.quantity >= item.stock}
-        >
-          <Plus size={16} />
+          <Trash2 size={15} />
         </button>
       </div>
-
-      {/* TOTAL */}
-      <div className="w-24 text-right">
-        <p className="font-semibold">
-          ${(item.quantity * item.price).toFixed(2)}
-        </p>
-
-        <p className="text-xs text-gray-500">Stock {item.stock}</p>
-      </div>
-
-      {/* REMOVE */}
-      <button
-        type="button"
-        className="
-    flex
-    h-9
-    w-9
-    items-center
-    justify-center
-    rounded-lg
-    bg-red-500
-    text-white
-    hover:bg-red-600
-  "
-        onClick={() => remove(item.id)}
-      >
-        <Trash2 size={16} />
-      </button>
     </div>
   );
 }

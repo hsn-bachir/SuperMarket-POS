@@ -69,16 +69,19 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
+      {/* Navigation */}
       <nav
         className="
-          flex-1
-          min-h-0
-          p-3
-          space-y-2
-          overflow-y-auto
-          overflow-x-hidden
-          scrollbar-thin
-        "
+    flex-1
+    min-h-0
+    p-3
+    space-y-2
+    overflow-y-auto
+    overflow-x-hidden
+    [scrollbar-width:none]
+    [-ms-overflow-style:none]
+    [&::-webkit-scrollbar]:hidden
+  "
       >
         {filteredNav.map((item) => (
           <SidebarItem key={item.title} {...item} />

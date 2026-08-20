@@ -33,6 +33,7 @@ class BasePostingService:
                 "inventory": "1141",
                 "payable": "2110",
                 "sales": "4100",
+                "service_revenue": "4200",
                 "cogs": "5100",
             },
         )

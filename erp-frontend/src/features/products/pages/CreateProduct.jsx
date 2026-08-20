@@ -2,10 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
-
 import ProductForm from "../components/ProductForm";
 
 import { createProduct } from "../api/productsApi";
+
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function CreateProduct() {
   const navigate = useNavigate();
@@ -18,9 +19,13 @@ export default function CreateProduct() {
 
       navigate("/products");
     } catch (err) {
-      console.error(err);
+      console.error("Create product error:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message,
+      });
 
-      toast.error("Unable to create product.");
+      toast.error(getErrorMessage(err));
     }
   }
 

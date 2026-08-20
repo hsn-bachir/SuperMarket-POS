@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
 import { getListProducts, deleteProduct } from "../api/productsApi";
 
 import PageHeader from "@/components/ui/PageHeader";
@@ -11,16 +12,22 @@ import ProductToolbar from "../components/ProductToolbar";
 import ProductTable from "../components/ProductTable";
 import Pagination from "@/components/ui/Pagination";
 
+import getErrorMessage from "@/utils/getErrorMessage";
+
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState("");
+
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
+
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,19 +40,21 @@ export default function Products() {
 
       const res = await getListProducts({
         page,
-
         search,
-
         category,
-
         is_active: status,
       });
 
       setProducts(res.data.results);
-
       setCount(res.data.count);
     } catch (err) {
-      console.error(err);
+      console.error("Load products error:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message,
+      });
+
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -62,12 +71,22 @@ export default function Products() {
   async function confirmDelete() {
     try {
       setDeleting(true);
+
       await deleteProduct(deleteId);
+
       setProducts((prev) => prev.filter((product) => product.id !== deleteId));
+
       toast.success("Product deleted successfully.");
+
       setDeleteId(null);
     } catch (err) {
-      toast.error("Unable to delete product.");
+      console.error("Delete product error:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message,
+      });
+
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }
@@ -100,7 +119,9 @@ export default function Products() {
           onEdit={handleEdit}
         />
       )}
+
       <Pagination page={page} setPage={setPage} count={count} />
+
       <ConfirmDialog
         open={deleteId !== null}
         title="Delete Product"
