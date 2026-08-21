@@ -1,12 +1,13 @@
 from decimal import Decimal
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Sum
-from apps.accounting.models.accountModel import Account
+from django.db.models import Q, Sum
 
+from apps.accounting.models.accountModel import Account
 from apps.common.enums import (
     EntryStatus,
     JournalType,
@@ -15,20 +16,28 @@ from apps.common.enums import (
 
 class JournalEntryQuerySet(models.QuerySet):
 
-    def delete(self):
-        if self.filter(status=EntryStatus.POSTED).exists():
+    def delete(self, *args, **kwargs):
+        if self.filter(
+            status=EntryStatus.POSTED
+        ).exists():
             raise ValidationError(
                 "Posted journal entries cannot be deleted."
             )
 
-        return super().delete()
+        return super().delete(*args, **kwargs)
 
 
-class JournalEntryManager(models.Manager.from_queryset(JournalEntryQuerySet)):
+class JournalEntryManager(
+    models.Manager.from_queryset(JournalEntryQuerySet)
+):
     pass
 
 
 class JournalEntry(models.Model):
+
+    # =============================================================
+    # IDENTIFICATION
+    # =============================================================
 
     sequence = models.PositiveIntegerField(
         db_index=True,
@@ -40,6 +49,10 @@ class JournalEntry(models.Model):
         unique=True,
         editable=False,
     )
+
+    # =============================================================
+    # JOURNAL INFORMATION
+    # =============================================================
 
     date = models.DateField()
 
@@ -55,8 +68,22 @@ class JournalEntry(models.Model):
     status = models.CharField(
         max_length=20,
         choices=EntryStatus.choices,
-        default=EntryStatus.POSTED,
+        default=EntryStatus.DRAFT,
     )
+
+    # =============================================================
+    # ACCOUNTING PERIOD
+    # =============================================================
+
+    period = models.ForeignKey(
+        "accounting.AccountingPeriod",
+        on_delete=models.PROTECT,
+        related_name="journal_entries",
+    )
+
+    # =============================================================
+    # DOCUMENT REFERENCE
+    # =============================================================
 
     content_type = models.ForeignKey(
         ContentType,
@@ -75,24 +102,21 @@ class JournalEntry(models.Model):
         "object_id",
     )
 
-    def clean(self):
-        super().clean()
+    # =============================================================
+    # REVERSAL RELATIONSHIP
+    # =============================================================
 
-        if self.period_id and self.date:
-            if not (
-                self.period.start_date
-                <= self.date
-                <= self.period.end_date
-            ):
-                raise ValidationError(
-                    "Journal date must fall within its accounting period."
-                )
-
-    period = models.ForeignKey(
-        "accounting.AccountingPeriod",
+    reversal_of = models.OneToOneField(
+        "self",
         on_delete=models.PROTECT,
-        related_name="journal_entries",
+        null=True,
+        blank=True,
+        related_name="reversal",
     )
+
+    # =============================================================
+    # AUDIT
+    # =============================================================
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -116,6 +140,7 @@ class JournalEntry(models.Model):
         auto_now=True,
     )
 
+    objects = JournalEntryManager()
 
     class Meta:
         ordering = [
@@ -123,39 +148,177 @@ class JournalEntry(models.Model):
             "-sequence",
         ]
 
+    # =============================================================
+    # STRING REPRESENTATION
+    # =============================================================
 
     def __str__(self):
         return self.number
 
+    # =============================================================
+    # MODEL VALIDATION
+    # =============================================================
+
+    def clean(self):
+        super().clean()
+
+        # ---------------------------------------------------------
+        # PERIOD VALIDATION
+        # ---------------------------------------------------------
+
+        if self.period_id and self.date:
+
+            if not (
+                self.period.start_date
+                <= self.date
+                <= self.period.end_date
+            ):
+                raise ValidationError(
+                    "Journal date must fall within "
+                    "its accounting period."
+                )
+
+        # ---------------------------------------------------------
+        # REVERSAL VALIDATION
+        # ---------------------------------------------------------
+
+        if self.reversal_of_id:
+
+            if self.reversal_of_id == self.pk:
+                raise ValidationError(
+                    "A journal entry cannot reverse itself."
+                )
+
+            if self.reversal_of.status != EntryStatus.POSTED:
+                raise ValidationError(
+                    "Only posted journal entries can be reversed."
+                )
+
+    # =============================================================
+    # SAVE
+    # =============================================================
 
     def save(self, *args, **kwargs):
 
-        if self.status == EntryStatus.POSTED and self.pk:
+        # =========================================================
+        # EXISTING JOURNAL
+        # =========================================================
+
+        if self.pk:
+
+            original = (
+                JournalEntry.objects
+                .filter(pk=self.pk)
+                .values(
+                    "status",
+                    "date",
+                    "journal_type",
+                    "description",
+                    "period_id",
+                    "content_type_id",
+                    "object_id",
+                    "created_by_id",
+                    "reversal_of_id",
+                )
+                .first()
+            )
+
+            if original:
+
+                # -------------------------------------------------
+                # POSTED JOURNAL IMMUTABILITY
+                # -------------------------------------------------
+
+                if original["status"] == EntryStatus.POSTED:
+
+                    protected_fields = [
+                        "date",
+                        "journal_type",
+                        "description",
+                        "period_id",
+                        "content_type_id",
+                        "object_id",
+                        "created_by_id",
+                        "status",
+                        "reversal_of_id",
+                    ]
+
+                    current_values = {
+                        "date": self.date,
+                        "journal_type": self.journal_type,
+                        "description": self.description,
+                        "period_id": self.period_id,
+                        "content_type_id": self.content_type_id,
+                        "object_id": self.object_id,
+                        "created_by_id": self.created_by_id,
+                        "status": self.status,
+                        "reversal_of_id": self.reversal_of_id,
+                    }
+
+                    changed_fields = [
+                        field
+                        for field in protected_fields
+                        if current_values[field]
+                        != original[field]
+                    ]
+
+                    if changed_fields:
+                        raise ValidationError(
+                            "Posted journal entries are immutable. "
+                            "Create a reversal entry instead."
+                        )
+
+        # =========================================================
+        # POSTED JOURNAL VALIDATION
+        # =========================================================
+
+        if self.status == EntryStatus.POSTED:
+
+            # A brand-new journal must not bypass the
+            # DRAFT → POSTED lifecycle.
+            if not self.pk:
+                raise ValidationError(
+                    "A journal entry must be created as draft "
+                    "before posting."
+                )
+
             lines = self.lines.all()
+
+            if lines.count() < 2:
+                raise ValidationError(
+                    "A posted journal entry must contain "
+                    "at least two lines."
+                )
+
             totals = lines.aggregate(
                 debit=Sum("debit"),
                 credit=Sum("credit"),
             )
 
-            if lines.count() < 2:
+            total_debit = (
+                totals["debit"]
+                or Decimal("0.00")
+            )
+
+            total_credit = (
+                totals["credit"]
+                or Decimal("0.00")
+            )
+
+            if total_debit <= 0 or total_credit <= 0:
                 raise ValidationError(
-                    "A posted journal entry must contain at least two lines."
+                    "A posted journal entry must contain "
+                    "debit and credit amounts."
                 )
 
-            if not totals["debit"] or not totals["credit"]:
-                raise ValidationError(
-                    "A posted journal entry must contain debit and credit lines."
-                )
-
-            if totals["debit"] != totals["credit"]:
+            if total_debit != total_credit:
                 raise ValidationError(
                     "A posted journal entry must be balanced."
                 )
 
-        if self.status == EntryStatus.POSTED and not self.pk:
-            raise ValidationError(
-                "A journal entry must be created as draft before posting."
-            )
+        # =========================================================
+        # SEQUENCE
+        # =========================================================
 
         if not self.sequence:
 
@@ -171,14 +334,29 @@ class JournalEntry(models.Model):
                 else 1
             )
 
+        # =========================================================
+        # JOURNAL NUMBER
+        # =========================================================
 
         if not self.number:
-            self.number = f"JE-{self.sequence:06d}"
+            self.number = (
+                f"JE-{self.sequence:06d}"
+            )
 
+        # =========================================================
+        # VALIDATE
+        # =========================================================
+
+        self.full_clean()
 
         super().save(*args, **kwargs)
 
+    # =============================================================
+    # DELETE
+    # =============================================================
+
     def delete(self, *args, **kwargs):
+
         if self.status == EntryStatus.POSTED:
             raise ValidationError(
                 "Posted journal entries cannot be deleted."
@@ -187,9 +365,11 @@ class JournalEntry(models.Model):
         return super().delete(*args, **kwargs)
 
 
-from django.db.models import Q
-
 class JournalLine(models.Model):
+
+    # =============================================================
+    # RELATIONSHIPS
+    # =============================================================
 
     journal_entry = models.ForeignKey(
         JournalEntry,
@@ -203,10 +383,18 @@ class JournalLine(models.Model):
         related_name="lines",
     )
 
+    # =============================================================
+    # DESCRIPTION
+    # =============================================================
+
     description = models.CharField(
         max_length=255,
         blank=True,
     )
+
+    # =============================================================
+    # AUDIT
+    # =============================================================
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -232,6 +420,10 @@ class JournalLine(models.Model):
         auto_now=True,
     )
 
+    # =============================================================
+    # AMOUNTS
+    # =============================================================
+
     debit = models.DecimalField(
         max_digits=18,
         decimal_places=2,
@@ -244,60 +436,134 @@ class JournalLine(models.Model):
         default=Decimal("0.00"),
     )
 
+    # =============================================================
+    # META
+    # =============================================================
+
     class Meta:
-        ordering=["id"]
+        ordering = ["id"]
 
         constraints = [
+            # No negative amounts.
             models.CheckConstraint(
                 check=(
-                    Q(debit__gte=0) &
-                    Q(credit__gte=0) &
+                    Q(debit__gte=0)
+                    & Q(credit__gte=0)
+                ),
+                name="journal_line_non_negative",
+            ),
+
+            # Exactly one side must contain a value.
+            models.CheckConstraint(
+                check=(
                     (
-                        Q(debit__gt=0) |
-                        Q(credit__gt=0)
+                        Q(debit__gt=0)
+                        & Q(credit=0)
+                    )
+                    |
+                    (
+                        Q(debit=0)
+                        & Q(credit__gt=0)
                     )
                 ),
-                name="valid_debit_credit"
-            )
+                name="journal_line_exactly_one_side",
+            ),
         ]
 
-    def __str__(self):
+    # =============================================================
+    # STRING REPRESENTATION
+    # =============================================================
 
+    def __str__(self):
         return (
             f"{self.account.code} - "
             f"{self.account.name}"
         )
 
+    # =============================================================
+    # VALIDATION
+    # =============================================================
 
     def clean(self):
-
         super().clean()
 
+        # ---------------------------------------------------------
+        # AMOUNT VALIDATION
+        # ---------------------------------------------------------
 
         if self.debit < 0 or self.credit < 0:
             raise ValidationError(
                 "Debit and credit cannot be negative."
             )
 
-
         if self.debit > 0 and self.credit > 0:
             raise ValidationError(
                 "A line cannot have both debit and credit."
             )
-
 
         if self.debit == 0 and self.credit == 0:
             raise ValidationError(
                 "Debit or credit must have value."
             )
 
+        # ---------------------------------------------------------
+        # ACCOUNT VALIDATION
+        # ---------------------------------------------------------
+
+        if not self.account.is_active:
+            raise ValidationError(
+                "Cannot post to an inactive account."
+            )
 
         if not self.account.is_postable:
             raise ValidationError(
                 "Cannot post to a parent account."
             )
 
+    # =============================================================
+    # SAVE
+    # =============================================================
 
-    def save(self,*args,**kwargs):
+    def save(self, *args, **kwargs):
+
+        # ---------------------------------------------------------
+        # PROTECT POSTED JOURNAL LINES
+        # ---------------------------------------------------------
+
+        if self.pk:
+
+            original = (
+                JournalLine.objects
+                .filter(pk=self.pk)
+                .select_related("journal_entry")
+                .first()
+            )
+
+            if original:
+
+                if (
+                    original.journal_entry.status
+                    == EntryStatus.POSTED
+                ):
+                    raise ValidationError(
+                        "Journal lines belonging to a posted "
+                        "journal entry cannot be modified."
+                    )
+
         self.full_clean()
-        super().save(*args,**kwargs)
+
+        super().save(*args, **kwargs)
+
+    # =============================================================
+    # DELETE
+    # =============================================================
+
+    def delete(self, *args, **kwargs):
+
+        if self.journal_entry.status == EntryStatus.POSTED:
+            raise ValidationError(
+                "Journal lines belonging to a posted "
+                "journal entry cannot be deleted."
+            )
+
+        return super().delete(*args, **kwargs)

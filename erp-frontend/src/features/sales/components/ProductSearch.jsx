@@ -92,11 +92,18 @@ export default function ProductSearch({ cart, setCart }) {
   function addProduct(product) {
     if (product.stock <= 0) return;
 
-    const exists = cart.find(
+    const existingItem = cart.find(
       (item) => item.id === product.id && item.type !== "service",
     );
 
-    if (exists) {
+    const currentQuantity = existingItem?.quantity ?? 0;
+
+    // Don't allow selling more than available stock
+    if (currentQuantity >= product.stock) {
+      return;
+    }
+
+    if (existingItem) {
       setCart(
         cart.map((item) =>
           item.id === product.id && item.type !== "service"
@@ -133,7 +140,6 @@ export default function ProductSearch({ cart, setCart }) {
       });
     }, 0);
   }
-
   // ==========================================
   // Limit displayed products
   // ==========================================
@@ -255,7 +261,15 @@ export default function ProductSearch({ cart, setCart }) {
             </div>
           ) : (
             filteredProducts.map((product, index) => {
-              const outOfStock = product.stock <= 0;
+              const cartItem = cart.find(
+                (item) => item.id === product.id && item.type !== "service",
+              );
+
+              const cartQuantity = cartItem?.quantity ?? 0;
+
+              const remainingStock = Math.max(product.stock - cartQuantity, 0);
+
+              const outOfStock = remainingStock <= 0;
 
               return (
                 <button
@@ -325,8 +339,8 @@ export default function ProductSearch({ cart, setCart }) {
                           }
                         `}
                       >
-                        {product.stock > 0
-                          ? `Stock: ${product.stock}`
+                        {remainingStock > 0
+                          ? `Stock: ${remainingStock}`
                           : "Out of stock"}
                       </p>
                     </div>
