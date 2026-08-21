@@ -7,6 +7,7 @@ import FormInput from "@/components/forms/FormInput";
 import FormSelect from "@/components/forms/FormSelect";
 import FormSearchSelect from "@/components/forms/FormSearchSelect";
 
+import getErrorMessage from "@/utils/getErrorMessage";
 import { getExpenseCategories } from "../api/expenseApi";
 
 export default function ExpenseForm({
@@ -18,17 +19,14 @@ export default function ExpenseForm({
 
   const [form, setForm] = useState({
     date: initialValues.date ?? new Date().toISOString().slice(0, 10),
-
     category: initialValues.category || "",
-
     payment_method: initialValues.payment_method || "CASH",
-
     amount: initialValues.amount || "",
-
     reference: initialValues.reference || "",
-
     description: initialValues.description || "",
   });
+
+  const [error, setError] = useState("");
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -37,26 +35,37 @@ export default function ExpenseForm({
       ...prev,
       [name]: value,
     }));
+
+    setError("");
   }
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
+    setError("");
 
-    onSubmit({
-      ...form,
-
-      category: Number(form.category),
-
-      amount: Number(form.amount),
-    });
+    try {
+      await onSubmit({
+        ...form,
+        category: Number(form.category),
+        amount: Number(form.amount),
+      });
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   return (
     <form onSubmit={submit} className="space-y-8">
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-6">Expense Information</h2>
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
 
-        <div className="grid md:grid-cols-2 gap-5">
+      <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <h2 className="mb-6 text-lg font-semibold">Expense Information</h2>
+
+        <div className="grid gap-5 md:grid-cols-2">
           <FormInput
             label="Expense Date"
             type="date"
@@ -64,17 +73,20 @@ export default function ExpenseForm({
             value={form.date}
             onChange={handleChange}
             required
+            disabled={loading}
           />
 
           <FormSearchSelect
             label="Expense Category"
             value={form.category}
-            onChange={(e) =>
+            disabled={loading}
+            onChange={(e) => {
               setForm((prev) => ({
                 ...prev,
                 category: e.target.value,
-              }))
-            }
+              }));
+              setError("");
+            }}
             loadOptions={async (search) => {
               const res = await getExpenseCategories();
 
@@ -94,19 +106,11 @@ export default function ExpenseForm({
             name="payment_method"
             value={form.payment_method}
             onChange={handleChange}
+            disabled={loading}
             options={[
-              {
-                value: "CASH",
-                label: "Cash",
-              },
-              {
-                value: "CARD",
-                label: "Card",
-              },
-              {
-                value: "CREDIT",
-                label: "Credit",
-              },
+              { value: "CASH", label: "Cash" },
+              { value: "CARD", label: "Card" },
+              { value: "CREDIT", label: "Credit" },
             ]}
             required
           />
@@ -118,6 +122,7 @@ export default function ExpenseForm({
             name="amount"
             value={form.amount}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -126,6 +131,7 @@ export default function ExpenseForm({
             name="reference"
             value={form.reference}
             onChange={handleChange}
+            disabled={loading}
           />
         </div>
 
@@ -135,6 +141,7 @@ export default function ExpenseForm({
             name="description"
             value={form.description}
             onChange={handleChange}
+            disabled={loading}
           />
         </div>
       </div>
@@ -144,11 +151,14 @@ export default function ExpenseForm({
           type="button"
           variant="secondary"
           onClick={() => navigate("/accounting/expenses")}
+          disabled={loading}
         >
           Cancel
         </Button>
 
-        <Button type="submit">{loading ? "Saving..." : "Save Expense"}</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Saving..." : "Save Expense"}
+        </Button>
       </div>
     </form>
   );

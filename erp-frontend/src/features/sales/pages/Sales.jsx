@@ -10,6 +10,7 @@ import SalesToolbar from "../components/SalesToolbar";
 import SalesTable from "../components/SalesTable";
 import Pagination from "@/components/ui/Pagination";
 import { getSales, deleteSale } from "../api/salesApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function Sales() {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ export default function Sales() {
 
       setCount(res.data.count);
     } catch (err) {
-      toast.error("Unable to load sales.");
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -68,8 +69,8 @@ export default function Sales() {
       toast.success("Sale deleted.");
 
       setDeleteId(null);
-    } catch {
-      toast.error("Unable to delete sale.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }

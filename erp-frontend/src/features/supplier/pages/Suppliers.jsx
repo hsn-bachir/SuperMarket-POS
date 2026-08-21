@@ -10,6 +10,7 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import SupplierToolbar from "../components/SupplierToolbar";
 import SupplierTable from "../components/SupplierTable";
 import Pagination from "@/components/ui/Pagination";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function Suppliers() {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ export default function Suppliers() {
       setCount(res.data.count);
     } catch (err) {
       console.error(err);
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -60,7 +62,7 @@ export default function Suppliers() {
       toast.success("Supplier deleted successfully.");
       setDeleteId(null);
     } catch (err) {
-      toast.error("Unable to delete supplier.");
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }

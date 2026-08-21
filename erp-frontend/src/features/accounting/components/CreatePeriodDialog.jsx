@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, CheckCircle2, ChevronRight, X } from "lucide-react";
 
 import Button from "@/components/ui/Button";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 const initialForm = {
   name: "",
@@ -95,11 +96,15 @@ export default function CreatePeriodDialog({
       return;
     }
 
-    await onSubmit({
-      name: form.name.trim(),
-      start_date: form.start_date,
-      end_date: form.end_date,
-    });
+    try {
+      await onSubmit({
+        name: form.name.trim(),
+        start_date: form.start_date,
+        end_date: form.end_date,
+      });
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   return (

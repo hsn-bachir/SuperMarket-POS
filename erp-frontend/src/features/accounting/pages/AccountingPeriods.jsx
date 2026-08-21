@@ -25,6 +25,7 @@ import {
   closePeriod,
   reopenPeriod,
 } from "../api/accountingPeriodApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function AccountingPeriods() {
   const [current, setCurrent] = useState(null);
@@ -57,7 +58,7 @@ export default function AccountingPeriods() {
       setPeriods(periodsRes.data.results ?? periodsRes.data);
     } catch (err) {
       console.error(err);
-      toast.error("Unable to load accounting periods.");
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -98,7 +99,7 @@ export default function AccountingPeriods() {
     } catch (err) {
       console.error(err);
 
-      toast.error(err?.response?.data?.detail || "Operation failed.");
+      toast.error(getErrorMessage(err));
     } finally {
       setProcessing(false);
     }
@@ -118,9 +119,7 @@ export default function AccountingPeriods() {
     } catch (err) {
       console.error(err);
 
-      toast.error(
-        err?.response?.data?.detail || "Unable to create accounting period.",
-      );
+      toast.error(getErrorMessage(err));
     } finally {
       setCreateLoading(false);
     }
@@ -138,9 +137,7 @@ export default function AccountingPeriods() {
     } catch (err) {
       console.error(err);
 
-      toast.error(
-        err?.response?.data?.detail || "Unable to generate the next period.",
-      );
+      toast.error(getErrorMessage(err));
     } finally {
       setProcessing(false);
     }

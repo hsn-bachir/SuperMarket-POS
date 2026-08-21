@@ -10,6 +10,7 @@ import LoadingSpinner from "@/components/ui/Loader";
 import ServiceTable from "../components/ServiceTable";
 import ServiceToolbar from "../components/ServiceToolbar";
 import Pagination from "@/components/ui/Pagination";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function ServicesList() {
   const [services, setServices] = useState([]);
@@ -36,7 +37,7 @@ export default function ServicesList() {
       setServices(Array.isArray(data) ? data : []);
       setCount(res.data?.count ?? (Array.isArray(data) ? data.length : 0));
     } catch (err) {
-      toast.error("Failed to load services.");
+      toast.error(getErrorMessage(err));
       setServices([]);
       setCount(0);
     } finally {
@@ -60,7 +61,7 @@ export default function ServicesList() {
       await loadServices();
       setDeleteId(null);
     } catch (err) {
-      toast.error("Unable to delete service.");
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }

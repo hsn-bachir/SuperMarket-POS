@@ -31,16 +31,13 @@ export const deleteService = (id) =>
 // Service Price History
 // ==========================================
 
-export const getServicePriceHistories = (
+export const getServiceHistory = (
   page = 1,
-  search = "",
+  search = ""
 ) =>
-  api.get("/services/price-history/", {
+  api.get("/sales/service-history/", {
     params: {
       page,
       search,
     },
   });
-
-export const getServicePriceHistory = (id) =>
-  api.get(`/services/price-history/${id}/`);

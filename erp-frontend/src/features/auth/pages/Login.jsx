@@ -10,6 +10,7 @@ import {
 
 import { useAuth } from "@/features/auth/authContext";
 import { loginUser } from "../services/authService";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -44,8 +45,8 @@ export default function Login() {
       } else {
         navigate("/pos");
       }
-    } catch {
-      setError("Invalid username or password.");
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

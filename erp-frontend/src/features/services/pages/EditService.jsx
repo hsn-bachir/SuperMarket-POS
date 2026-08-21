@@ -6,6 +6,7 @@ import { getService, updateService } from "../api/serviceApi";
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
 import ServiceForm from "../components/ServiceForm";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function EditService() {
   const { id } = useParams();
@@ -22,7 +23,7 @@ export default function EditService() {
       const res = await getService(id);
       setService(res.data);
     } catch (err) {
-      toast.error("Unable to load service.");
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -34,7 +35,7 @@ export default function EditService() {
       toast.success("Service updated successfully.");
       navigate("/services");
     } catch (err) {
-      toast.error("Unable to update service.");
+      toast.error(getErrorMessage(err));
     }
   }
 

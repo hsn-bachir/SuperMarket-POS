@@ -6,6 +6,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import ExpenseForm from "../components/ExpenseForm";
 
 import { createExpense } from "../api/expenseApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function CreateExpense() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function CreateExpense() {
     } catch (err) {
       console.error(err);
 
-      toast.error("Unable to create expense.");
+      toast.error(getErrorMessage(err));
     }
   }
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
@@ -10,6 +11,7 @@ import InventoryTable from "../components/InventoryTable";
 import AdjustmentDialog from "../components/AdjustmentDialog";
 
 import { getInventory } from "../api/inventoryApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function Inventory() {
   const [movements, setMovements] = useState([]);
@@ -41,6 +43,9 @@ export default function Inventory() {
 
       setMovements(res.data.results);
       setCount(res.data.count);
+    } catch (err) {
+      console.error(err);
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

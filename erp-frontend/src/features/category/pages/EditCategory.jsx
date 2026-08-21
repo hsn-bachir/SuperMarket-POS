@@ -6,6 +6,7 @@ import { getCategory, updateCategory } from "../api/categoryApi";
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
 import CategoryForm from "../components/CategoryForm";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function EditCategory() {
   const { id } = useParams();
@@ -22,7 +23,7 @@ export default function EditCategory() {
       const res = await getCategory(id);
       setCategory(res.data);
     } catch (err) {
-      toast.error("Unable to load category.");
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -34,7 +35,7 @@ export default function EditCategory() {
       toast.success("Category updated successfully.");
       navigate("/category");
     } catch (err) {
-      toast.error("Unable to update category.");
+      toast.error(getErrorMessage(err));
     }
   }
 

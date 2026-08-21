@@ -11,19 +11,16 @@ import CategoryTable from "../components/CategoryTable";
 import CategoryToolbar from "../components/CategoryToolbar";
 import Pagination from "@/components/ui/Pagination";
 
+import getErrorMessage from "@/utils/getErrorMessage";
+
 export default function Category() {
   const [categories, setCategories] = useState([]);
-
   const [search, setSearch] = useState("");
-
   const [page, setPage] = useState(1);
-
   const [count, setCount] = useState(0);
 
   const [deleteId, setDeleteId] = useState(null);
-
   const [deleting, setDeleting] = useState(false);
-
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -41,7 +38,7 @@ export default function Category() {
       setCategories(res.data.results);
       setCount(res.data.count);
     } catch (err) {
-      toast.error("Failed to load categories.");
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -67,7 +64,7 @@ export default function Category() {
 
       setDeleteId(null);
     } catch (err) {
-      toast.error("Unable to delete category.");
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }

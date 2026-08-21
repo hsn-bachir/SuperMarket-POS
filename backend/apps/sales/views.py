@@ -9,12 +9,13 @@ from rest_framework.response import Response
 
 from apps.sales.services import delete_sale
 
-from .models import Sale
+from .models import Sale,SaleItem
 from .serializers import (
     InvoiceSerializer,
     SaleCreateSerializer,
     SaleSerializer,
     SaleUpdateSerializer,
+    ServiceSaleHistorySerializer
 )
 
 
@@ -180,3 +181,24 @@ class SaleInvoiceView(
     )
 
     serializer_class = InvoiceSerializer
+
+class ServiceHistoryView(generics.ListAPIView):
+    serializer_class = ServiceSaleHistorySerializer
+
+    filter_backends = [SearchFilter]
+
+    search_fields = [
+        "service__name",
+        "sale__invoice_number",
+    ]
+
+    def get_queryset(self):
+        return (
+            SaleItem.objects
+            .filter(service__isnull=False)
+            .select_related(
+                "service",
+                "sale",
+            )
+            .order_by("-sale__sale_date")
+        )

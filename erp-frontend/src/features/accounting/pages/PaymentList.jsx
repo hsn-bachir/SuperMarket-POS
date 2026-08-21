@@ -13,6 +13,7 @@ import PaymentToolbar from "../components/PaymentToolbar";
 import PaymentTable from "../components/PaymentTable";
 
 import { getPayments, deletePayment, payPayment } from "../api/paymentApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function PaymentList() {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export default function PaymentList() {
     } catch (err) {
       console.error(err);
 
-      toast.error("Unable to load payments.");
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -79,7 +80,7 @@ export default function PaymentList() {
     } catch (err) {
       console.error(err);
 
-      toast.error(err.response?.data?.detail || "Unable to delete payment.");
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }
@@ -115,7 +116,7 @@ export default function PaymentList() {
     } catch (err) {
       console.error(err);
 
-      toast.error(err.response?.data?.detail || "Unable to complete payment.");
+      toast.error(getErrorMessage(err));
     } finally {
       setPaying(false);
     }

@@ -140,3 +140,38 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "total",
             "items",
         )
+
+
+class ServiceSaleHistorySerializer(serializers.ModelSerializer):
+    invoice_number = serializers.CharField(
+        source="sale.invoice_number",
+        read_only=True,
+    )
+
+    sale_date = serializers.DateField(
+        source="sale.sale_date",
+        read_only=True,
+    )
+
+    service_name = serializers.CharField(
+        source="service.name",
+        read_only=True,
+    )
+
+    total = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SaleItem
+
+        fields = [
+            "id",
+            "invoice_number",
+            "sale_date",
+            "service_name",
+            "quantity",
+            "unit_price",
+            "total",
+        ]
+
+    def get_total(self, obj):
+        return obj.quantity * obj.unit_price

@@ -4,6 +4,7 @@ from .views import (
     SaleListCreateView,
     SaleDetailUpdateDestroyView,
     SaleInvoiceView,
+    ServiceHistoryView,
 )
 
 urlpatterns = [
@@ -24,4 +25,9 @@ urlpatterns = [
         SaleInvoiceView.as_view(),
         name="sale-invoice "
     ),
+
+    path(
+        "service-history/",
+        ServiceHistoryView.as_view(),
+    )
 ]

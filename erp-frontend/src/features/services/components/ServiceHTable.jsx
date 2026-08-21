@@ -1,54 +1,64 @@
-import { Tag, DollarSign, Calendar } from "lucide-react";
+import { FileText, Wrench, Hash, DollarSign, Calendar } from "lucide-react";
+
+import DataTable from "@/components/ui/DataTable";
 
 export default function ServiceTable({ history }) {
-  return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
-      <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-        <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-800 dark:text-gray-400">
-          <tr>
-            <th scope="col" className="px-6 py-3">
-              <span className="flex items-center gap-1.5">
-                <Tag className="h-4 w-4" />
-                Service
-              </span>
-            </th>
-            <th scope="col" className="px-6 py-3">
-              <span className="flex items-center gap-1.5">
-                <DollarSign className="h-4 w-4" />
-                Price
-              </span>
-            </th>
-            <th scope="col" className="px-6 py-3">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4" />
-                Date
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900">
-          {history.map((row) => (
-            <tr
-              key={row.id}
-              className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
-            >
-              <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                {row.service_name || row.service || "N/A"}
-              </td>
-              <td className="px-6 py-4 font-semibold text-emerald-600 dark:text-emerald-400">
-                ${Number(row.price).toFixed(2)}
-              </td>
-              <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
-                {row.created_at || row.effective_from
-                  ? new Date(
-                      row.created_at || row.effective_from,
-                    ).toLocaleString()
-                  : "N/A"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  const columns = [
+    {
+      key: "invoice_number",
+      title: "Invoice",
+      render: (row) => (
+        <span className="font-medium text-gray-900">
+          {row.invoice_number || "N/A"}
+        </span>
+      ),
+    },
+
+    {
+      key: "service_name",
+      title: "Service",
+      render: (row) => (
+        <span className="flex items-center gap-2">
+          <Wrench size={16} className="text-gray-400" />
+          {row.service_name || "N/A"}
+        </span>
+      ),
+    },
+
+    {
+      key: "quantity",
+      title: "Quantity",
+      render: (row) => <span>{Number(row.quantity).toLocaleString()}</span>,
+    },
+
+    {
+      key: "unit_price",
+      title: "Unit Price",
+      render: (row) => (
+        <span className="font-medium">{Number(row.unit_price).toFixed(2)}</span>
+      ),
+    },
+
+    {
+      key: "total",
+      title: "Total",
+      render: (row) => (
+        <span className="font-semibold text-emerald-600">
+          {Number(row.total).toFixed(2)}
+        </span>
+      ),
+    },
+
+    {
+      key: "sale_date",
+      title: "Date",
+      render: (row) => (
+        <span className="text-gray-600">
+          {row.sale_date ? new Date(row.sale_date).toLocaleDateString() : "N/A"}
+        </span>
+      ),
+    },
+  ];
+
+  return <DataTable columns={columns} data={history} />;
 }

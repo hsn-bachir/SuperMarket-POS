@@ -3,6 +3,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import { useAuth } from "@/features/auth/authContext";
 
 import MainLayout from "@/app/layouts/MainLayout";
+import POSLayout from "../layouts/POSLayout";
+
 import Login from "@/features/auth/pages/Login";
 import Dashboard from "@/features/dashboard/pages/Dashboard";
 
@@ -88,7 +90,6 @@ export default function AppRouter() {
           <Route path="sales" element={<Sales />} />
           <Route path="sales/:id" element={<SaleDetails />} />
           <Route path="sales/:id/edit" element={<EditSale />} />
-          <Route path="pos" element={<POS />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/users" element={<Users />} />
@@ -105,6 +106,9 @@ export default function AppRouter() {
           <Route path="/services/new" element={<CreateService />} />
           <Route path="/services/:id/edit" element={<EditService />} />
           <Route path="/services/history" element={<ServiceHistory />} />
+        </Route>
+        <Route element={<POSLayout />}>
+          <Route path="/pos" element={<POS />} />
         </Route>
         <Route path="/sales/:id/invoice" element={<Print />} />
 

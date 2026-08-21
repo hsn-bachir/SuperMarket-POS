@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import LoadingSpinner from "@/components/ui/Loader";
 
 import { loadInventoryReports } from "../services/inventoryReports";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 import InventorySummaryCards from "../components/InventorySummaryCards";
 import StockAgingTable from "../components/StockAgingTable";
@@ -47,6 +51,11 @@ export default function InventorySection({ filters }) {
         if (active) {
           setData(res);
         }
+      } catch (err) {
+        if (active) {
+          console.error(err);
+          toast.error(getErrorMessage(err));
+        }
       } finally {
         if (active) {
           setLoading(false);
@@ -67,21 +76,8 @@ export default function InventorySection({ filters }) {
     pages.reorder,
   ]);
 
-  if (!data) {
-    return (
-      <div
-        className="
-        rounded-3xl
-        border
-        border-gray-700
-        bg-gray-900
-        p-8
-        text-gray-300
-      "
-      >
-        Loading inventory reports...
-      </div>
-    );
+  if (loading || !data) {
+    return <LoadingSpinner />;
   }
 
   return (

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import {
   CalendarDays,
   CreditCard,
@@ -7,12 +6,12 @@ import {
   Loader2,
   Receipt,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import Button from "@/components/ui/Button";
-
 import { createSale, getDefault } from "../api/salesApi";
 
-export default function PaymentSection({ cart }) {
+export default function PaymentSection({ cart, onSuccess }) {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -63,20 +62,29 @@ export default function PaymentSection({ cart }) {
         exchange_rate: form.exchange_rate,
         payment_method: form.payment_method,
         sale_date: form.sale_date,
+
         items: cart.map((item) => ({
           product: item.type === "product" ? item.id : null,
+
           service: item.type === "service" ? item.id : null,
+
           quantity: item.quantity,
           unit_price: item.price,
           cost_price: item.cost_price || 0,
         })),
       };
 
-      await createSale(payload);
+      const res = await createSale(payload);
 
-      toast.success("Sale completed successfully.");
-
-      window.location.reload();
+      /*
+       * Do NOT reload the page.
+       *
+       * Pass the created sale back to POS so POS can:
+       * - show the success toast
+       * - clear the cart
+       * - optionally navigate to invoice later
+       */
+      onSuccess?.(res.data);
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Failed to complete sale.");
     } finally {

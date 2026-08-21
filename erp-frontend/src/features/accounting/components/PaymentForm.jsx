@@ -6,6 +6,8 @@ import Button from "@/components/ui/Button";
 import FormInput from "@/components/forms/FormInput";
 import FormSelect from "@/components/forms/FormSelect";
 
+import getErrorMessage from "@/utils/getErrorMessage";
+
 export default function PaymentForm({
   initialValues = {},
   onSubmit,
@@ -15,21 +17,16 @@ export default function PaymentForm({
 
   const [form, setForm] = useState({
     date: initialValues.date || new Date().toISOString().slice(0, 10),
-
     payment_type: initialValues.payment_type || "SUPPLIER",
-
     payment_method: initialValues.payment_method || "CASH",
-
     content_type: initialValues.content_type || "",
-
     object_id: initialValues.object_id || "",
-
     amount: initialValues.amount || "",
-
     external_reference: initialValues.external_reference || "",
-
     description: initialValues.description || "",
   });
+
+  const [error, setError] = useState("");
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -38,30 +35,44 @@ export default function PaymentForm({
       ...prev,
       [name]: value,
     }));
+
+    setError("");
   }
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
+    setError("");
 
-    onSubmit({
-      ...form,
-      amount: Number(form.amount),
-      object_id: Number(form.object_id),
-    });
+    try {
+      await onSubmit({
+        ...form,
+        amount: Number(form.amount),
+        object_id: Number(form.object_id),
+      });
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   return (
     <form onSubmit={submit} className="space-y-8">
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
+
       <div className="rounded-xl border bg-white p-6 shadow-sm">
         <h2 className="mb-6 text-lg font-semibold">Payment Information</h2>
 
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid gap-5 md:grid-cols-2">
           <FormInput
             label="Date"
             type="date"
             name="date"
             value={form.date}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -70,19 +81,11 @@ export default function PaymentForm({
             name="payment_type"
             value={form.payment_type}
             onChange={handleChange}
+            disabled={loading}
             options={[
-              {
-                value: "CUSTOMER",
-                label: "Customer",
-              },
-              {
-                value: "SUPPLIER",
-                label: "Supplier",
-              },
-              {
-                value: "EXPENSE",
-                label: "Expense",
-              },
+              { value: "CUSTOMER", label: "Customer" },
+              { value: "SUPPLIER", label: "Supplier" },
+              { value: "EXPENSE", label: "Expense" },
             ]}
             required
           />
@@ -92,6 +95,7 @@ export default function PaymentForm({
             name="content_type"
             value={form.content_type}
             onChange={handleChange}
+            disabled={loading}
           />
 
           <FormInput
@@ -99,6 +103,7 @@ export default function PaymentForm({
             name="object_id"
             value={form.object_id}
             onChange={handleChange}
+            disabled={loading}
           />
 
           <FormSelect
@@ -106,28 +111,22 @@ export default function PaymentForm({
             name="payment_method"
             value={form.payment_method}
             onChange={handleChange}
+            disabled={loading}
             options={[
-              {
-                value: "CASH",
-                label: "Cash",
-              },
-              {
-                value: "CARD",
-                label: "Card",
-              },
-              {
-                value: "BANK",
-                label: "Bank",
-              },
+              { value: "CASH", label: "Cash" },
+              { value: "CARD", label: "Card" },
+              { value: "BANK", label: "Bank" },
             ]}
           />
 
           <FormInput
             label="Amount"
             type="number"
+            step="0.01"
             name="amount"
             value={form.amount}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -136,6 +135,7 @@ export default function PaymentForm({
             name="external_reference"
             value={form.external_reference}
             onChange={handleChange}
+            disabled={loading}
           />
         </div>
 
@@ -145,6 +145,7 @@ export default function PaymentForm({
             name="description"
             value={form.description}
             onChange={handleChange}
+            disabled={loading}
           />
         </div>
       </div>
@@ -154,11 +155,14 @@ export default function PaymentForm({
           type="button"
           variant="secondary"
           onClick={() => navigate("/accounting/payments")}
+          disabled={loading}
         >
           Cancel
         </Button>
 
-        <Button type="submit">{loading ? "Saving..." : "Save Payment"}</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Saving..." : "Save Payment"}
+        </Button>
       </div>
     </form>
   );

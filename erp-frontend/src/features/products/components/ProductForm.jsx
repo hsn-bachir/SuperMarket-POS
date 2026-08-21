@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { getCategories } from "../../category/api/categoryApi";
 
@@ -8,6 +8,8 @@ import FormCheckbox from "@/components/forms/FormCheckbox";
 import FormSection from "@/components/forms/FormSection";
 import FormActions from "@/components/forms/FormActions";
 import BarcodeInput from "@/components/forms/BarcodeInput";
+
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function ProductForm({
   initialValues = {},
@@ -24,6 +26,8 @@ export default function ProductForm({
     is_active: initialValues.is_active ?? true,
   });
 
+  const [error, setError] = useState("");
+
   function handleChange(e) {
     const { name, value, checked, type } = e.target;
 
@@ -31,28 +35,42 @@ export default function ProductForm({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    setError("");
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setError("");
 
-    onSubmit({
-      ...form,
-      category: form.category ? Number(form.category) : null,
-      selling_price:
-        form.selling_price === "" ? null : Number(form.selling_price),
-      minimum_stock: Number(form.minimum_stock),
-    });
+    try {
+      await onSubmit({
+        ...form,
+        category: form.category ? Number(form.category) : null,
+        selling_price:
+          form.selling_price === "" ? null : Number(form.selling_price),
+        minimum_stock: Number(form.minimum_stock),
+      });
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
+
       <FormSection title="General Information">
         <div className="grid gap-5 md:grid-cols-2">
           <BarcodeInput
             label="Barcode"
             value={form.barcode}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -61,18 +79,21 @@ export default function ProductForm({
             name="name"
             value={form.name}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
           <FormSearchSelect
             label="Category"
             value={form.category}
-            onChange={(e) =>
+            disabled={loading}
+            onChange={(e) => {
               setForm((prev) => ({
                 ...prev,
                 category: e.target.value,
-              }))
-            }
+              }));
+              setError("");
+            }}
             loadOptions={async (search) => {
               const res = await getCategories(1, search);
 
@@ -89,6 +110,7 @@ export default function ProductForm({
             type="number"
             value={form.selling_price}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -98,6 +120,7 @@ export default function ProductForm({
             type="number"
             value={form.minimum_stock}
             onChange={handleChange}
+            disabled={loading}
             required
           />
         </div>
@@ -108,6 +131,7 @@ export default function ProductForm({
           name="is_active"
           checked={form.is_active}
           onChange={handleChange}
+          disabled={loading}
         />
       </FormSection>
 

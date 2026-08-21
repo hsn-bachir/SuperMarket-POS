@@ -9,6 +9,7 @@ import FormInput from "@/components/forms/FormInput";
 import ProductCombobox from "@/components/forms/ProductCombobox";
 
 import { createAdjustment } from "../api/inventoryApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 const initialForm = {
   product_id: "",
@@ -45,8 +46,8 @@ export default function AdjustmentDialog({ open, onClose, onSuccess }) {
 
       onSuccess?.();
       onClose();
-    } catch {
-      toast.error("Unable to adjust inventory.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

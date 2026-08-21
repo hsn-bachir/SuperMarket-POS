@@ -139,7 +139,7 @@ def create_sale(
                 quantity=item["quantity"],
                 sale_item=sale_item,
                 user=user,
-            )
+            )            
 
     #
     # Accounting

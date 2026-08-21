@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import LoadingSpinner from "@/components/ui/Loader";
 
 import { loadAccountingReports } from "../services/accountingReports";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 import TrialBalanceTable from "../components/TrialBalanceTable";
 import IncomeStatementCard from "../components/IncomeStatementCard";
@@ -9,7 +13,6 @@ import CashFlowCard from "../components/CashFlowCard";
 
 export default function AccountingSection({ filters }) {
   const [data, setData] = useState(null);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,13 +26,16 @@ export default function AccountingSection({ filters }) {
       const result = await loadAccountingReports(filters);
 
       setData(result);
+    } catch (err) {
+      console.error(err);
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
   }
 
   if (loading || !data) {
-    return <div className="py-20 text-center">Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (

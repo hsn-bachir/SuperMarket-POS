@@ -1,22 +1,23 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-import Button from "@/components/ui/Button";
 
 import FormInput from "@/components/forms/FormInput";
+import FormSection from "@/components/forms/FormSection";
+import FormActions from "@/components/forms/FormActions";
+
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function SupplierForm({
   initialValues = {},
   onSubmit,
   loading = false,
 }) {
-  const navigate = useNavigate();
-
   const [form, setForm] = useState({
     name: initialValues.name || "",
     phone: initialValues.phone || "",
     address: initialValues.address || "",
   });
+
+  const [error, setError] = useState("");
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -25,24 +26,37 @@ export default function SupplierForm({
       ...prev,
       [name]: value,
     }));
+
+    setError("");
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    onSubmit(form);
+    setError("");
+
+    try {
+      await onSubmit(form);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <h2 className="mb-6 text-lg font-semibold">Supplier Information</h2>
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
 
+      <FormSection title="Supplier Information">
         <div className="grid gap-5 md:grid-cols-2">
           <FormInput
             label="Company Name"
             name="name"
             value={form.name}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -51,6 +65,7 @@ export default function SupplierForm({
             name="phone"
             value={form.phone}
             onChange={handleChange}
+            disabled={loading}
           />
 
           <div className="md:col-span-2">
@@ -59,22 +74,17 @@ export default function SupplierForm({
               name="address"
               value={form.address}
               onChange={handleChange}
+              disabled={loading}
             />
           </div>
         </div>
-      </div>
+      </FormSection>
 
-      <div className="flex justify-end gap-3">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => navigate("/suppliers")}
-        >
-          Cancel
-        </Button>
-
-        <Button type="submit">{loading ? "Saving..." : "Save Supplier"}</Button>
-      </div>
+      <FormActions
+        cancelTo="/suppliers"
+        loading={loading}
+        submitText="Save Supplier"
+      />
     </form>
   );
 }

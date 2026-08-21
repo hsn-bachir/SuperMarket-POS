@@ -12,6 +12,7 @@ import FormSelect from "@/components/forms/FormSelect";
 import FormInput from "@/components/forms/FormInput";
 
 import { getSale, updateSale } from "../api/salesApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function EditSale() {
   const { id } = useParams();
@@ -43,6 +44,8 @@ export default function EditSale() {
         payment_method: res.data.payment_method,
         sale_date: res.data.sale_date,
       });
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -66,8 +69,8 @@ export default function EditSale() {
       toast.success("Sale updated.");
 
       navigate(`/sales/${id}`);
-    } catch {
-      toast.error("Unable to update sale.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -128,7 +131,7 @@ export default function EditSale() {
           <Button
             type="button"
             variant="secondary"
-            onClick={() => navigate(`/sales/${id}`)}
+            onClick={() => navigate(`/sales`)}
           >
             Cancel
           </Button>

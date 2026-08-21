@@ -6,6 +6,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import PaymentForm from "../components/PaymentForm";
 
 import { createPayment } from "../api/paymentApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function CreatePayment() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function CreatePayment() {
     } catch (err) {
       console.error(err);
 
-      toast.error("Unable to create payment.");
+      toast.error(getErrorMessage(err));
     }
   }
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ShoppingCart, Package, Wrench } from "lucide-react";
+import { toast } from "sonner";
 
 import CartTable from "../components/CartTable";
 import CartTotals from "../components/CartTotals";
@@ -10,40 +11,59 @@ import ServiceSearch from "../components/ServiceSearch";
 export default function POS() {
   const [cart, setCart] = useState([]);
 
+  function handleSaleSuccess(sale) {
+    toast.success("Sale completed successfully.", {
+      description: sale?.invoice_number
+        ? `Invoice #${sale.invoice_number} has been created.`
+        : "The sale has been recorded successfully.",
+    });
+
+    setCart([]);
+  }
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-slate-100 text-slate-900">
       {/* HEADER */}
-      <header className="shrink-0 border-b border-slate-300 bg-white shadow-sm">
-        <div className="flex h-[72px] items-center justify-evenly px-6">
+      <header className="sticky top-0 z-50 shrink-0 border-b border-slate-300 bg-white shadow-sm">
+        <div className="flex h-[72px] items-center justify-between px-6">
           {/* BRAND */}
-          <div className="flex shrink-0 items-center gap-3 w-10%">
+          <div className="flex shrink-0 items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-white">
               <ShoppingCart size={17} />
             </div>
+
             <h1 className="text-base font-semibold tracking-tight">POS</h1>
           </div>
 
           {/* TOTALS + PAYMENT */}
-          <div className="flex w-90% flex-1 items-center justify-end ">
+          <div className="flex items-center justify-end gap-4">
             <CartTotals cart={cart} />
+
             <div className="h-8 w-px bg-slate-300" />
-            <PaymentSection cart={cart} />
+
+            <PaymentSection cart={cart} onSuccess={handleSaleSuccess} />
           </div>
         </div>
       </header>
 
       {/* WORKSPACE */}
-      <main className="min-h-0 flex-1 p-4">
+      <main className="min-h-0 flex-1 overflow-hidden p-4">
         <div className="grid h-full grid-cols-12 gap-4">
           {/* PRODUCTS */}
           <section className="col-span-12 flex min-h-0 flex-col overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm lg:col-span-3">
             <div className="flex h-12 shrink-0 items-center gap-2.5 border-b border-slate-300 px-4">
               <Package size={16} className="text-slate-600" />
-
               <h2 className="text-sm font-semibold">Products</h2>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto p-3">
+            <div
+              className="
+              min-h-0 flex-1 overflow-y-auto p-3
+              [scrollbar-width:none]
+              [-ms-overflow-style:none]
+              [&::-webkit-scrollbar]:hidden
+            "
+            >
               <ProductSearch cart={cart} setCart={setCart} />
             </div>
           </section>
@@ -52,11 +72,17 @@ export default function POS() {
           <section className="col-span-12 flex min-h-0 flex-col overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm lg:col-span-3">
             <div className="flex h-12 shrink-0 items-center gap-2.5 border-b border-slate-300 px-4">
               <Wrench size={16} className="text-emerald-600" />
-
               <h2 className="text-sm font-semibold">Services</h2>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto p-3">
+            <div
+              className="
+              min-h-0 flex-1 overflow-y-auto p-3
+              [scrollbar-width:none]
+              [-ms-overflow-style:none]
+              [&::-webkit-scrollbar]:hidden
+            "
+            >
               <ServiceSearch cart={cart} setCart={setCart} />
             </div>
           </section>
@@ -81,7 +107,14 @@ export default function POS() {
               )}
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div
+              className="
+              min-h-0 flex-1 overflow-y-auto
+              [scrollbar-width:none]
+              [-ms-overflow-style:none]
+              [&::-webkit-scrollbar]:hidden
+            "
+            >
               {cart.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center text-center">
                   <ShoppingCart

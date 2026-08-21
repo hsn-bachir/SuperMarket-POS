@@ -7,6 +7,7 @@ import FormInput from "@/components/forms/FormInput";
 import FormSelect from "@/components/forms/FormSelect";
 import FormSearchSelect from "@/components/forms/FormSearchSelect";
 
+import getErrorMessage from "@/utils/getErrorMessage";
 import { getSuppliers } from "@/features/supplier/api/supplierApi";
 import { getProducts } from "@/features/products/api/productsApi";
 import { getDefault } from "@/features/purchases/api/purchasesApi";
@@ -18,6 +19,7 @@ export default function PurchaseForm({
 }) {
   const navigate = useNavigate();
   const [defaults, setDefaults] = useState(null);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     supplier: initialValues.supplier || "",
@@ -52,7 +54,7 @@ export default function PurchaseForm({
         exchange_rate: defaultRes.data.exchange_rate,
       }));
     } catch (err) {
-      console.error(err);
+      setError(getErrorMessage(err));
     }
   }
 
@@ -63,6 +65,8 @@ export default function PurchaseForm({
       ...prev,
       [name]: value,
     }));
+
+    setError("");
   }
 
   function updateItem(index, field, value) {
@@ -70,67 +74,83 @@ export default function PurchaseForm({
 
     items[index][field] = value;
 
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       items,
-    });
+    }));
+
+    setError("");
   }
 
   function addItem() {
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       items: [
-        ...form.items,
+        ...prev.items,
         {
           product: "",
           quantity: 1,
           total_cost: "",
         },
       ],
-    });
+    }));
+
+    setError("");
   }
 
   function removeItem(index) {
-    setForm({
-      ...form,
-      items: form.items.filter((_, i) => i !== index),
-    });
+    setForm((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }));
+
+    setError("");
   }
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
+    setError("");
 
-    onSubmit({
-      ...form,
-
-      supplier: Number(form.supplier),
-      payment_method: form.payment_method,
-
-      exchange_rate: Number(form.exchange_rate),
-
-      items: form.items.map((item) => ({
-        product: Number(item.product),
-        quantity: Number(item.quantity),
-        cost_price: Number(item.total_cost) / Number(item.quantity),
-      })),
-    });
+    try {
+      await onSubmit({
+        ...form,
+        supplier: Number(form.supplier),
+        payment_method: form.payment_method,
+        exchange_rate: Number(form.exchange_rate),
+        items: form.items.map((item) => ({
+          product: Number(item.product),
+          quantity: Number(item.quantity),
+          cost_price: Number(item.total_cost) / Number(item.quantity),
+        })),
+      });
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   return (
     <form onSubmit={submit} className="space-y-8">
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-6">Purchase Information</h2>
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
 
-        <div className="grid md:grid-cols-2 gap-5">
+      <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <h2 className="mb-6 text-lg font-semibold">Purchase Information</h2>
+
+        <div className="grid gap-5 md:grid-cols-2">
           <FormSearchSelect
             label="Supplier"
             value={form.supplier}
-            onChange={(e) =>
+            disabled={loading}
+            onChange={(e) => {
               setForm((prev) => ({
                 ...prev,
                 supplier: e.target.value,
-              }))
-            }
+              }));
+              setError("");
+            }}
             loadOptions={async (search) => {
               const res = await getSuppliers(1, search);
 
@@ -146,15 +166,10 @@ export default function PurchaseForm({
             name="currency"
             value={form.currency}
             onChange={handleChange}
+            disabled={loading}
             options={[
-              {
-                value: "USD",
-                label: "USD",
-              },
-              {
-                value: "LBP",
-                label: "LBP",
-              },
+              { value: "USD", label: "USD" },
+              { value: "LBP", label: "LBP" },
             ]}
             required
           />
@@ -165,6 +180,7 @@ export default function PurchaseForm({
             name="exchange_rate"
             value={form.exchange_rate}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -173,19 +189,11 @@ export default function PurchaseForm({
             name="payment_method"
             value={form.payment_method}
             onChange={handleChange}
+            disabled={loading}
             options={[
-              {
-                value: "CASH",
-                label: "Cash",
-              },
-              {
-                value: "CARD",
-                label: "Card",
-              },
-              {
-                value: "CREDIT",
-                label: "Credit",
-              },
+              { value: "CASH", label: "Cash" },
+              { value: "CARD", label: "Card" },
+              { value: "CREDIT", label: "Credit" },
             ]}
             required
           />
@@ -196,26 +204,28 @@ export default function PurchaseForm({
             name="purchase_date"
             value={form.purchase_date}
             onChange={handleChange}
+            disabled={loading}
             required
           />
         </div>
       </div>
 
       <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <div className="flex justify-between items-center mb-5">
-          <h2 className="font-semibold text-lg">Purchase Items</h2>
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Purchase Items</h2>
 
-          <Button type="button" onClick={addItem}>
+          <Button type="button" onClick={addItem} disabled={loading}>
             Add Item
           </Button>
         </div>
 
         <div className="space-y-5">
           {form.items.map((item, index) => (
-            <div key={index} className="grid grid-cols-4 gap-4 items-end">
+            <div key={index} className="grid grid-cols-4 items-end gap-4">
               <FormSearchSelect
                 label="Product"
                 value={item.product}
+                disabled={loading}
                 onChange={(e) => updateItem(index, "product", e.target.value)}
                 loadOptions={async (search) => {
                   const res = await getProducts(1, search);
@@ -232,6 +242,7 @@ export default function PurchaseForm({
                 type="number"
                 value={item.quantity}
                 onChange={(e) => updateItem(index, "quantity", e.target.value)}
+                disabled={loading}
                 required
               />
 
@@ -242,6 +253,7 @@ export default function PurchaseForm({
                 onChange={(e) =>
                   updateItem(index, "total_cost", e.target.value)
                 }
+                disabled={loading}
                 required
               />
 
@@ -249,6 +261,7 @@ export default function PurchaseForm({
                 type="button"
                 variant="danger"
                 onClick={() => removeItem(index)}
+                disabled={loading || form.items.length === 1}
               >
                 Remove
               </Button>
@@ -262,11 +275,14 @@ export default function PurchaseForm({
           type="button"
           variant="secondary"
           onClick={() => navigate("/purchases")}
+          disabled={loading}
         >
           Cancel
         </Button>
 
-        <Button type="submit">{loading ? "Saving..." : "Save Purchase"}</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Saving..." : "Save Purchase"}
+        </Button>
       </div>
     </form>
   );

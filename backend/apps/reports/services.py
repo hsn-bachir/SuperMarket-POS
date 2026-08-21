@@ -69,7 +69,6 @@ def get_sales_aggregation(
     start_date=None,
     end_date=None,
 ):
-
     qs = SaleItem.objects.all()
 
     qs = apply_sale_filters(
@@ -87,11 +86,14 @@ def get_sales_aggregation(
         .annotate(
             quantity_sold=Coalesce(
                 Sum("quantity"),
-                Value(0),
+                Value(Decimal("0")),
+                output_field=DecimalField(
+                    max_digits=14,
+                    decimal_places=2,
+                ),
             )
         )
     )
-
 
 # ----------------------------------------------------
 # Stock

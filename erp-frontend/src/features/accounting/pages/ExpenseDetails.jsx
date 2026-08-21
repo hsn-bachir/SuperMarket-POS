@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
 import SectionCard from "@/components/ui/SectionCard";
 
 import { getExpense } from "../api/expenseApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function ExpenseDetails() {
   const { id } = useParams();
@@ -14,12 +16,18 @@ export default function ExpenseDetails() {
 
   useEffect(() => {
     loadExpense();
-  }, []);
+  }, [id]);
 
   async function loadExpense() {
-    const res = await getExpense(id);
+    try {
+      const res = await getExpense(id);
 
-    setExpense(res.data);
+      setExpense(res.data);
+    } catch (err) {
+      console.error(err);
+
+      toast.error(getErrorMessage(err));
+    }
   }
 
   if (!expense) {

@@ -83,6 +83,8 @@ REST_FRAMEWORK = {
         "rest_framework.pagination.PageNumberPagination",
 
     "PAGE_SIZE": 10,
+
+    'EXCEPTION_HANDLER': 'apps.common.exceptions.custom_exception_handler',
 }
 
 MIDDLEWARE = [

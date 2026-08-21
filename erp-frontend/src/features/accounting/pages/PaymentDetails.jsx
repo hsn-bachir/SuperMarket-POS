@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
 import SectionCard from "@/components/ui/SectionCard";
 
 import { getPayment } from "../api/paymentApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function PaymentDetails() {
   const { id } = useParams();
@@ -14,12 +16,18 @@ export default function PaymentDetails() {
 
   useEffect(() => {
     loadPayment();
-  }, []);
+  }, [id]);
 
   async function loadPayment() {
-    const res = await getPayment(id);
+    try {
+      const res = await getPayment(id);
 
-    setPayment(res.data);
+      setPayment(res.data);
+    } catch (err) {
+      console.error(err);
+
+      toast.error(getErrorMessage(err));
+    }
   }
 
   if (!payment) {

@@ -9,6 +9,7 @@ import LoadingSpinner from "@/components/ui/Loader";
 import SupplierForm from "../components/SupplierForm";
 
 import { getSupplier, updateSupplier } from "../api/supplierApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function EditSupplier() {
   const { id } = useParams();
@@ -29,7 +30,7 @@ export default function EditSupplier() {
 
       setSupplier(res.data);
     } catch (err) {
-      toast.error("Unable to load supplier.");
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -43,7 +44,7 @@ export default function EditSupplier() {
 
       navigate("/suppliers");
     } catch (err) {
-      toast.error("Unable to update supplier.");
+      toast.error(getErrorMessage(err));
     }
   }
 

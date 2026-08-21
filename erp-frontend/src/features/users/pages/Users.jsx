@@ -13,6 +13,7 @@ import UserToolbar from "../components/UserToolbar";
 import UserTable from "../components/UserTable";
 
 import { getUsers, deleteUser } from "../api/usersApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function Users() {
   const navigate = useNavigate();
@@ -50,8 +51,8 @@ export default function Users() {
 
       setUsers(res.data.results);
       setCount(res.data.count);
-    } catch {
-      toast.error("Unable to load users.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -76,8 +77,8 @@ export default function Users() {
       loadUsers();
 
       setDeleteId(null);
-    } catch {
-      toast.error("Unable to delete user.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }

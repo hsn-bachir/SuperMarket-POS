@@ -6,8 +6,12 @@ export default function getErrorMessage(error) {
     return error?.message || "Something went wrong.";
   }
 
-  // Backend returned a plain string
+  // Backend returned a string (check for raw HTML debug pages)
   if (typeof data === "string") {
+    const isHtml = data.trim().toLowerCase().startsWith("<!doctype html") || data.trim().toLowerCase().startsWith("<html");
+    if (isHtml) {
+      return "A server error occurred. Please try again or contact support.";
+    }
     return data;
   }
 

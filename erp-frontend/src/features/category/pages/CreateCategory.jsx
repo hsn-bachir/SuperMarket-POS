@@ -4,6 +4,7 @@ import { createCategory } from "../api/categoryApi";
 
 import PageHeader from "@/components/ui/PageHeader";
 import CategoryForm from "../components/CategoryForm";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function CreateCategory() {
   const navigate = useNavigate();
@@ -14,8 +15,7 @@ export default function CreateCategory() {
       toast.success("Category created successfully.");
       navigate("/category");
     } catch (err) {
-      console.error(err);
-      toast.error("Unable to create category.");
+      toast.error(getErrorMessage(err));
     }
   }
 

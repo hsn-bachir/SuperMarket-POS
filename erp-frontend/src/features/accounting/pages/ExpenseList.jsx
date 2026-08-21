@@ -13,6 +13,7 @@ import ExpenseToolbar from "../components/ExpenseToolbar";
 import ExpenseTable from "../components/ExpenseTable";
 
 import { getExpenses, deleteExpense } from "../api/expenseApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function ExpenseList() {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ export default function ExpenseList() {
     } catch (err) {
       console.error(err);
 
-      toast.error("Unable to load expenses.");
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,7 @@ export default function ExpenseList() {
     } catch (err) {
       console.error(err);
 
-      toast.error("Unable to delete expense.");
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }

@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import LoadingSpinner from "@/components/ui/Loader";
 
 import { loadSalesReports } from "../services/salesReports";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 import SalesKPIs from "../components/SalesKPIs";
-
 import RevenueVsCogsChart from "../components/charts/RevenueVsCogsChart";
 import ProfitMarginChart from "../components/charts/ProfitMarginChart";
 import TopProfitChart from "../components/charts/TopProfitChart";
@@ -12,7 +15,6 @@ import SlowMovingChart from "../components/charts/SlowMovingChart";
 
 export default function SalesSection({ filters }) {
   const [data, setData] = useState(null);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,13 +28,16 @@ export default function SalesSection({ filters }) {
       const result = await loadSalesReports(filters);
 
       setData(result);
+    } catch (err) {
+      console.error(err);
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
   }
 
   if (loading || !data) {
-    return <div className="py-20 text-center">Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (

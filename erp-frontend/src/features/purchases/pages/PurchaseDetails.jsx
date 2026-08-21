@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
 import LoadingSpinner from "@/components/ui/Loader";
@@ -7,6 +8,7 @@ import SectionCard from "@/components/ui/SectionCard";
 import DataTable from "@/components/ui/DataTable";
 
 import { getPurchase } from "../api/purchasesApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function PurchaseDetails() {
   const { id } = useParams();
@@ -18,8 +20,12 @@ export default function PurchaseDetails() {
   }, []);
 
   async function loadPurchase() {
-    const res = await getPurchase(id);
-    setPurchase(res.data);
+    try {
+      const res = await getPurchase(id);
+      setPurchase(res.data);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
   }
 
   if (!purchase) {

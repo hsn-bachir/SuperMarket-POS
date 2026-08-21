@@ -6,6 +6,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import SupplierForm from "../components/SupplierForm";
 
 import { createSupplier } from "../api/supplierApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function CreateSupplier() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function CreateSupplier() {
     } catch (err) {
       console.error(err);
 
-      toast.error("Unable to create supplier.");
+      toast.error(getErrorMessage(err));
     }
   }
 

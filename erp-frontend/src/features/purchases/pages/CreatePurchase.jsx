@@ -6,6 +6,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import PurchaseForm from "../components/PurchaseForm";
 
 import { createPurchase } from "../api/purchasesApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function CreatePurchase() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function CreatePurchase() {
     } catch (err) {
       console.error(err);
 
-      toast.error("Unable to create purchase.");
+      toast.error(getErrorMessage(err));
     }
   }
 

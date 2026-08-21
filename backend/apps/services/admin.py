@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Service, ServicePriceHistory
+from .models import Service
 
 
 @admin.register(Service)
@@ -28,30 +28,4 @@ class ServiceAdmin(admin.ModelAdmin):
 
     ordering = (
         "name",
-    )
-
-
-@admin.register(ServicePriceHistory)
-class ServicePriceHistoryAdmin(admin.ModelAdmin):
-    list_display = (
-        "service",
-        "price",
-        "effective_from",
-    )
-
-    list_filter = (
-        "service",
-        "effective_from",
-    )
-
-    search_fields = (
-        "service__name",
-    )
-
-    readonly_fields = (
-        "effective_from",
-    )
-
-    ordering = (
-        "-effective_from",
     )

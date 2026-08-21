@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import FormInput from "@/components/forms/FormInput";
+import FormCheckbox from "@/components/forms/FormCheckbox";
 import FormSection from "@/components/forms/FormSection";
 import FormActions from "@/components/forms/FormActions";
+
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function ServiceForm({
   initialValues = {},
@@ -16,6 +18,8 @@ export default function ServiceForm({
     is_active: initialValues.is_active ?? true,
   });
 
+  const [error, setError] = useState("");
+
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
 
@@ -23,15 +27,29 @@ export default function ServiceForm({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    setError("");
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    onSubmit(form);
+    setError("");
+
+    try {
+      await onSubmit(form);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
+
       <FormSection title="General Information">
         <div className="grid gap-5 md:grid-cols-2">
           <FormInput
@@ -39,6 +57,7 @@ export default function ServiceForm({
             name="name"
             value={form.name}
             onChange={handleChange}
+            disabled={loading}
             required
           />
 
@@ -48,25 +67,18 @@ export default function ServiceForm({
               name="description"
               value={form.description}
               onChange={handleChange}
+              disabled={loading}
             />
           </div>
 
-          <div className="flex items-center gap-2 md:col-span-2">
-            <input
-              type="checkbox"
-              id="is_active"
-              name="is_active"
-              checked={form.is_active}
-              onChange={handleChange}
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-            />
-            <label
-              htmlFor="is_active"
-              className="text-sm font-medium text-gray-700"
-            >
-              Active Service
-            </label>
-          </div>
+          <FormCheckbox
+            className="md:col-span-2"
+            label="Active Service"
+            name="is_active"
+            checked={form.is_active}
+            onChange={handleChange}
+            disabled={loading}
+          />
         </div>
       </FormSection>
 

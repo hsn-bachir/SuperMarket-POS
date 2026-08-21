@@ -11,6 +11,7 @@ import PurchaseToolbar from "../components/PurchaseToolbar";
 import PurchaseTable from "../components/PurchaseTable";
 import Pagination from "@/components/ui/Pagination";
 import { getPurchases, deletePurchase } from "../api/purchasesApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function Purchases() {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function Purchases() {
       setCount(res.data.count);
     } catch (err) {
       console.error(err);
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -61,11 +63,11 @@ export default function Purchases() {
       await deletePurchase(deleteId);
 
       await loadPurchases();
-      toast.success("Purcahse deleted.");
+      toast.success("Purchase deleted.");
 
       setDeleteId(null);
-    } catch {
-      toast.error("Unable to delete purchase.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setDeleting(false);
     }
@@ -99,7 +101,7 @@ export default function Purchases() {
       )}
       <ConfirmDialog
         open={deleteId !== null}
-        title="Delete Sale"
+        title="Delete Purchase"
         description="Deleting this purchase will restore inventory stock."
         loading={deleting}
         onConfirm={confirmDelete}

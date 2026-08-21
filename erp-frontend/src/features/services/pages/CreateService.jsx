@@ -4,6 +4,7 @@ import { createService } from "../api/serviceApi";
 
 import PageHeader from "@/components/ui/PageHeader";
 import ServiceForm from "../components/ServiceForm";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 export default function CreateService() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function CreateService() {
       navigate("/services");
     } catch (err) {
       console.error(err);
-      toast.error("Unable to create service.");
+      toast.error(getErrorMessage(err));
     }
   }
 

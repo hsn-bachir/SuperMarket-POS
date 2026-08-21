@@ -10,6 +10,7 @@ import FormSelect from "@/components/forms/FormSelect";
 import FormCheckbox from "@/components/forms/FormCheckbox";
 
 import { createUser, updateUser, getUser, getGroups } from "../api/usersApi";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 const initialState = {
   username: "",
@@ -46,8 +47,8 @@ export default function UserForm({ id }) {
       const res = await getGroups();
 
       setGroups(res.data.results ?? res.data);
-    } catch {
-      toast.error("Unable to load roles.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     }
   }
 
@@ -59,8 +60,8 @@ export default function UserForm({ id }) {
         ...res.data,
         password: "",
       });
-    } catch {
-      toast.error("Unable to load user.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setPageLoading(false);
     }
@@ -101,8 +102,8 @@ export default function UserForm({ id }) {
       }
 
       navigate("/users");
-    } catch {
-      toast.error("Unable to save user.");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
